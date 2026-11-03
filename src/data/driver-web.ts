@@ -43,7 +43,11 @@ export async function openWebDb(name: string): Promise<Db> {
     database.exec('PRAGMA foreign_keys = ON');
   };
   const db = createDb(sqljsDriver(database), { persist });
-  // Si se cierra la pestaña antes del debounce, guardar igual
-  addEventListener('pagehide', () => void persist());
+  // Si se cierra o se oculta la pestaña antes del debounce, guardar igual (en la cola,
+  // para no exportar a mitad de una transacción)
+  addEventListener('pagehide', () => void db.flush());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') void db.flush();
+  });
   return db;
 }

@@ -83,6 +83,23 @@ function toInbox(r: Row): InboxItem {
 const placeholders = (n: number) => Array(n).fill('?').join(', ');
 const LIVE = 'deleted_at IS NULL';
 
+// LIKE literal: % y _ en lo que escribe el usuario no son comodines
+const ESCAPE = "ESCAPE '\\'";
+const contains = (text: string) => `%${text.replace(/[\\%_]/g, '\\$&')}%`;
+
+// Columnas que maneja el repositorio: un patch nunca las pisa, aunque la UI le pase el libro completo
+const INTERNAL = new Set(['id', 'added_at', 'updated_at', 'deleted_at', 'position', 'search_text']);
+
+/** Deja solo los campos editables y descarta los undefined (no borran lo guardado) */
+function editable(patch: BookPatch): BookPatch {
+  return Object.fromEntries(
+    Object.entries(patch).filter(
+      ([k, v]) =>
+        v !== undefined && !INTERNAL.has(k) && (BOOK_COLUMNS as readonly string[]).includes(k),
+    ),
+  );
+}
+
 export interface ListOptions {
   status?: Status;
   /** Busca en título, autores, saga y etiquetas, sin importar tildes ni mayúsculas */
@@ -123,8 +140,8 @@ export class Library {
     for (const word of normalize(query ?? '')
       .split(' ')
       .filter(Boolean)) {
-      where.push("search_text LIKE ? ESCAPE '\\'");
-      params.push(`%${word.replace(/[\\%_]/g, '\\$&')}%`);
+      where.push(`search_text LIKE ? ${ESCAPE}`);
+      params.push(contains(word));
     }
     const rows = await this.db.all(
       `SELECT * FROM books WHERE ${where.join(' AND ')} ORDER BY position, added_at`,
@@ -149,9 +166,10 @@ export class Library {
     }
     const title = normalize(c.title);
     const author = normalize(c.authors[0] ?? '');
-    const rows = await db.all(`SELECT * FROM books WHERE ${LIVE} AND search_text LIKE ?`, [
-      `%${title}%`,
-    ]);
+    const rows = await db.all(
+      `SELECT * FROM books WHERE ${LIVE} AND search_text LIKE ? ${ESCAPE}`,
+      [contains(title)],
+    );
     return rows
       .map(toBook)
       .find((b) => normalize(b.title) === title && normalize(b.authors[0] ?? '') === author);
@@ -206,7 +224,7 @@ export class Library {
       if (!row) throw new Error(`No existe el libro ${id}`);
       const before = toBook(row);
       const t = now();
-      const next: Book = { ...before, ...patch, updated_at: t };
+      const next: Book = { ...before, ...editable(patch), updated_at: t };
 
       if (patch.status && patch.status !== before.status) {
         next.position = await this.endPosition(tx, patch.status);

@@ -47,7 +47,9 @@ export function DevScreen({ lib }: { lib: Library }) {
     if (!file) return;
     try {
       const r = await importJson(lib, JSON.parse(await file.text()));
-      setMessage(`Importado: ${r.added} nuevos, ${r.updated} actualizados, ${r.skipped} iguales`);
+      setMessage(
+        `Importado: ${r.added} nuevos, ${r.updated} actualizados, ${r.skipped} iguales, ${r.invalid} inválidos`,
+      );
     } catch (error) {
       setMessage(String(error));
     }

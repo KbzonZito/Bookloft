@@ -162,3 +162,28 @@ describe('Library', () => {
     expect(await lib.getSetting('theme', 'auto')).toBe('dark');
   });
 });
+
+describe('updateBook con datos inesperados', () => {
+  it('un campo undefined no borra lo guardado', async () => {
+    const lib = await openTestLibrary();
+    const { book } = await lib.addBook(candidate('Dune', 'Frank Herbert'), { note: 'nota' });
+    await lib.updateBook(book.id, { note: undefined, rating: 4 });
+    expect((await lib.getBook(book.id))?.note).toBe('nota');
+  });
+
+  it('pasarle el libro completo no cambia su id ni sus fechas internas', async () => {
+    const lib = await openTestLibrary();
+    const { book } = await lib.addBook(candidate('Dune', 'Frank Herbert'));
+    const tampered = { ...book, id: 'otro', added_at: '2000-01-01', title: 'Dune Messiah' };
+    await lib.updateBook(book.id, tampered);
+    const list = await lib.listBooks();
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ id: book.id, added_at: book.added_at, title: 'Dune Messiah' });
+  });
+
+  it('un título con % o _ no se trata como comodín al buscar', async () => {
+    const lib = await openTestLibrary();
+    await lib.addBook(candidate('Cien por ciento', 'A'));
+    expect(await lib.listBooks({ query: '_ien' })).toHaveLength(0);
+  });
+});

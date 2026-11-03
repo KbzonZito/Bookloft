@@ -85,3 +85,39 @@ describe('respaldo JSON', () => {
     expect(() => parseBackup({ format: 'biblioteca', version: 2 })).toThrow(/Versión/);
   });
 });
+
+describe('importar respaldos con datos malos', () => {
+  it('un libro que rompe el esquema se salta y el resto se importa', async () => {
+    const source = await openTestLibrary();
+    await source.addBook(candidate('Bueno'));
+    await source.addBook(candidate('Malo'));
+    const backup = await exportJson(source);
+    backup.books[1].rating = 7;
+    backup.books[1].priority = 9;
+
+    const target = await openTestLibrary();
+    expect(await importJson(target, backup)).toMatchObject({ added: 1, invalid: 1 });
+    expect((await target.listBooks()).map((b) => b.title)).toEqual(['Bueno']);
+  });
+
+  it('un archivo de un libro que no viene en el respaldo se importa sin libro', async () => {
+    const source = await openTestLibrary();
+    const { book } = await source.addBook(candidate('Con archivo'));
+    await source.addFile({
+      book_id: book.id,
+      path: 'v/1.epub',
+      filename: '1.epub',
+      size: 1,
+      sha256: 'h1',
+      format: 'epub',
+      meta_title: null,
+      meta_author: null,
+    });
+    const backup = await exportJson(source);
+    backup.books = [];
+
+    const target = await openTestLibrary();
+    expect(await importJson(target, backup)).toMatchObject({ added: 1, invalid: 0 });
+    expect((await target.listFiles())[0].book_id).toBeNull();
+  });
+});

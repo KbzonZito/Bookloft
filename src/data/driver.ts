@@ -20,6 +20,8 @@ export interface Db {
   run(sql: string, params?: Value[]): Promise<number>;
   /** Todo lo que se haga con `tx` se confirma junto o no se confirma */
   transaction<T>(fn: (tx: Db) => Promise<T>): Promise<T>;
+  /** Guarda ya, sin esperar el debounce, pero después de lo que esté en curso */
+  flush(): Promise<void>;
   close(): Promise<void>;
 }
 
@@ -55,6 +57,7 @@ export function createDb(raw: RawDriver, { persist }: Options = {}): Db {
       ((await inner.all(sql, params))[0] as T | undefined) ?? undefined,
     run: (sql, params) => inner.run(sql, params),
     transaction: (fn) => fn(scoped(inner)),
+    flush: () => Promise.reject(new Error('No se puede guardar dentro de una transacción')),
     close: () => Promise.reject(new Error('No se puede cerrar dentro de una transacción')),
   });
 
@@ -76,6 +79,10 @@ export function createDb(raw: RawDriver, { persist }: Options = {}): Db {
           throw error;
         }
       }).finally(wrote),
+    flush: async () => {
+      clearTimeout(saveTimer);
+      if (persist) await enqueue(persist);
+    },
     close: async () => {
       clearTimeout(saveTimer);
       await enqueue(async () => {

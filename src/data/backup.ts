@@ -1,4 +1,5 @@
 // Respaldo JSON v1: el mismo formato sirve para exportar, restaurar y migrar desde Cloudflare
+import type { Db } from './driver';
 import { BOOK_COLUMNS, toBook, type Library } from './library';
 import { now } from './ids';
 import { STATUSES, type Book, type VaultFile } from './types';
@@ -75,6 +76,23 @@ function validFile(f: unknown): f is VaultFile {
   );
 }
 
+/**
+ * Escribe una fila dentro de un SAVEPOINT: si rompe el esquema (calificación fuera de rango,
+ * clave foránea, etc.) se deshace solo esa fila y la importación sigue con las demás.
+ */
+async function tryRow(tx: Db, write: () => Promise<void>): Promise<boolean> {
+  await tx.exec('SAVEPOINT import_row');
+  try {
+    await write();
+    await tx.exec('RELEASE import_row');
+    return true;
+  } catch {
+    await tx.exec('ROLLBACK TO import_row');
+    await tx.exec('RELEASE import_row');
+    return false;
+  }
+}
+
 export function parseBackup(data: unknown): BackupV1 {
   const d = data as Partial<BackupV1> | null;
   if (!d || d.format !== 'biblioteca') throw new Error('No es un respaldo de la biblioteca');
@@ -113,8 +131,11 @@ export async function importJson(lib: Library, data: unknown): Promise<ImportRes
       const book = Object.fromEntries(
         BOOK_COLUMNS.map((c) => [c, (incoming as unknown as Record<string, unknown>)[c] ?? null]),
       ) as unknown as Book;
-      await lib.writeBook(tx, { ...book, priority: book.priority ?? 0 });
-      result[current ? 'updated' : 'added']++;
+      if (await tryRow(tx, () => lib.writeBook(tx, { ...book, priority: book.priority ?? 0 }))) {
+        result[current ? 'updated' : 'added']++;
+      } else {
+        result.invalid++;
+      }
     }
 
     for (const incoming of backup.files) {
@@ -131,8 +152,20 @@ export async function importJson(lib: Library, data: unknown): Promise<ImportRes
         result.skipped++;
         continue;
       }
-      await lib.writeFile(tx, { ...incoming, added_at: incoming.added_at ?? incoming.updated_at });
-      result[current ? 'updated' : 'added']++;
+      // Si su libro no está (no venía en el respaldo o era inválido), el archivo queda sin libro
+      const bookExists =
+        incoming.book_id != null &&
+        (await tx.get('SELECT 1 FROM books WHERE id = ?', [incoming.book_id])) !== undefined;
+      const file: VaultFile = {
+        ...incoming,
+        book_id: bookExists ? incoming.book_id : null,
+        added_at: incoming.added_at ?? incoming.updated_at,
+      };
+      if (await tryRow(tx, () => lib.writeFile(tx, file))) {
+        result[current ? 'updated' : 'added']++;
+      } else {
+        result.invalid++;
+      }
     }
 
     for (const s of backup.settings) {
