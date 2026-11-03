@@ -1,0 +1,8 @@
+node_modules/
+dist/
+builds/
+.DS_Store
+.env*
+*.jks
+*.keystore
+*.p12

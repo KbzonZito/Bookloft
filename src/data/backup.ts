@@ -1,0 +1,151 @@
+// Respaldo JSON v1: el mismo formato sirve para exportar, restaurar y migrar desde Cloudflare
+import { BOOK_COLUMNS, toBook, type Library } from './library';
+import { now } from './ids';
+import { STATUSES, type Book, type VaultFile } from './types';
+
+export interface BackupSetting {
+  key: string;
+  value: unknown;
+  updated_at: string;
+}
+
+export interface BackupV1 {
+  format: 'biblioteca';
+  version: 1;
+  app_version: string;
+  exported_at: string;
+  books: Book[];
+  files: VaultFile[];
+  settings: BackupSetting[];
+}
+
+export interface ImportResult {
+  added: number;
+  updated: number;
+  skipped: number;
+  invalid: number;
+}
+
+/** Incluye los borrados: así un libro eliminado en un equipo se elimina también al fusionar */
+export async function exportJson(lib: Library, appVersion = 'dev'): Promise<BackupV1> {
+  const books = (await lib.db.all('SELECT * FROM books ORDER BY added_at')).map(toBook);
+  const files = await lib.db.all<VaultFile>('SELECT * FROM files ORDER BY added_at');
+  const settings = (
+    await lib.db.all<{ key: string; value: string; updated_at: string }>('SELECT * FROM settings')
+  ).map((s) => ({ ...s, value: JSON.parse(s.value) }));
+  return {
+    format: 'biblioteca',
+    version: 1,
+    app_version: appVersion,
+    exported_at: now(),
+    books,
+    files,
+    settings,
+  };
+}
+
+const isString = (v: unknown): v is string => typeof v === 'string';
+const isStringArray = (v: unknown) => Array.isArray(v) && v.every(isString);
+
+function validBook(b: unknown): b is Book {
+  if (!b || typeof b !== 'object') return false;
+  const r = b as Record<string, unknown>;
+  return (
+    isString(r.id) &&
+    isString(r.title) &&
+    r.title.trim() !== '' &&
+    isStringArray(r.authors) &&
+    isStringArray(r.tags) &&
+    STATUSES.includes(r.status as Book['status']) &&
+    isString(r.added_at) &&
+    isString(r.updated_at)
+  );
+}
+
+function validFile(f: unknown): f is VaultFile {
+  if (!f || typeof f !== 'object') return false;
+  const r = f as Record<string, unknown>;
+  return (
+    isString(r.id) &&
+    isString(r.path) &&
+    isString(r.filename) &&
+    isString(r.sha256) &&
+    typeof r.size === 'number' &&
+    isString(r.updated_at)
+  );
+}
+
+export function parseBackup(data: unknown): BackupV1 {
+  const d = data as Partial<BackupV1> | null;
+  if (!d || d.format !== 'biblioteca') throw new Error('No es un respaldo de la biblioteca');
+  if (d.version !== 1) throw new Error(`Versión de respaldo no soportada: ${String(d.version)}`);
+  return {
+    ...(d as BackupV1),
+    books: Array.isArray(d.books) ? d.books : [],
+    files: Array.isArray(d.files) ? d.files : [],
+    settings: Array.isArray(d.settings) ? d.settings : [],
+  };
+}
+
+/**
+ * Fusiona un respaldo con lo que ya hay, fila por fila según su UUID:
+ * gana la versión con `updated_at` más nuevo. Nunca borra filas; los borrados viajan como `deleted_at`.
+ */
+export async function importJson(lib: Library, data: unknown): Promise<ImportResult> {
+  const backup = parseBackup(data);
+  const result: ImportResult = { added: 0, updated: 0, skipped: 0, invalid: 0 };
+
+  await lib.db.transaction(async (tx) => {
+    for (const incoming of backup.books) {
+      if (!validBook(incoming)) {
+        result.invalid++;
+        continue;
+      }
+      const current = await tx.get<{ updated_at: string }>(
+        'SELECT updated_at FROM books WHERE id = ?',
+        [incoming.id],
+      );
+      if (current && current.updated_at >= incoming.updated_at) {
+        result.skipped++;
+        continue;
+      }
+      // Completa con null lo que falte (respaldos de versiones con menos columnas)
+      const book = Object.fromEntries(
+        BOOK_COLUMNS.map((c) => [c, (incoming as unknown as Record<string, unknown>)[c] ?? null]),
+      ) as unknown as Book;
+      await lib.writeBook(tx, { ...book, priority: book.priority ?? 0 });
+      result[current ? 'updated' : 'added']++;
+    }
+
+    for (const incoming of backup.files) {
+      if (!validFile(incoming)) {
+        result.invalid++;
+        continue;
+      }
+      const current = await tx.get<{ id: string; updated_at: string }>(
+        'SELECT id, updated_at FROM files WHERE id = ? OR sha256 = ?',
+        [incoming.id, incoming.sha256],
+      );
+      // El mismo archivo con otro ID (se agregó en los dos equipos): se queda el que ya estaba
+      if (current && (current.id !== incoming.id || current.updated_at >= incoming.updated_at)) {
+        result.skipped++;
+        continue;
+      }
+      await lib.writeFile(tx, { ...incoming, added_at: incoming.added_at ?? incoming.updated_at });
+      result[current ? 'updated' : 'added']++;
+    }
+
+    for (const s of backup.settings) {
+      if (!isString(s?.key) || !isString(s.updated_at)) continue;
+      await tx.run(
+        `INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+         ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+         WHERE excluded.updated_at > settings.updated_at`,
+        [s.key, JSON.stringify(s.value), s.updated_at],
+      );
+    }
+  });
+
+  lib.notify();
+  return result;
+}

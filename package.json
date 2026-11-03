@@ -1,0 +1,39 @@
+{
+  "name": "biblioteca",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "android:sync": "npm run build && cap sync android",
+    "android:live": "scripts/android-live.sh",
+    "emulators": "scripts/setup-emulators.sh",
+    "test": "vitest run",
+    "lint": "oxlint",
+    "format": "prettier --write src scripts",
+    "format:check": "prettier --check src scripts",
+    "check": "tsc --noEmit && npm run lint && npm run format:check && npm test"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sql.js": "^1.15.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/sql.js": "^1.4.11",
+    "@vitejs/plugin-react": "^6.2.1",
+    "oxlint": "^1.91.0",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
