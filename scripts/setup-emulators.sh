@@ -22,6 +22,9 @@ create() {
   else
     echo no | "$AVDMANAGER" create avd --name "$name" --package "$IMAGE" --device "$device"
   fi
+  # avdmanager crea los emuladores sin GPU: el WebView dibujaría por CPU y todo se vería trabado
+  local config="$HOME/.android/avd/$name.avd/config.ini"
+  sed -i '' 's/^hw.gpu.enabled=.*/hw.gpu.enabled=yes/; s/^hw.gpu.mode=.*/hw.gpu.mode=host/' "$config"
 }
 create Telefono pixel_9
 create Tablet pixel_tablet

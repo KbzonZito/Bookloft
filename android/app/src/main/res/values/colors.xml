@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mismo papel que la variable paper de src/ui/theme.css: se ve detrás de las barras del sistema
+         cuando el WebView es anterior a Chromium 140 y Capacitor lo deja con márgenes -->
+    <color name="paper">#ECEEEA</color>
+    <color name="colorPrimary">#8C2B3A</color>
+    <color name="colorPrimaryDark">#ECEEEA</color>
+    <color name="colorAccent">#8C2B3A</color>
+</resources>

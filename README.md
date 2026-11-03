@@ -30,6 +30,16 @@ npm run android:live -- --phone   # tu teléfono por USB o depuración Wi-Fi
 
 Cada cambio guardado aparece al instante en el emulador. Solo hay que volver a correr el comando al agregar un plugin nativo.
 
+Los emuladores usan la GPU del Mac (`-gpu host`). Si se ven trabados, revisa que `hw.gpu.enabled=yes` esté en `~/.android/avd/<nombre>.avd/config.ini`: sin GPU, el WebView dibuja por CPU. Con la ventana del emulador oculta, macOS también le baja el ritmo.
+
+### Diseñar con datos reales
+
+```bash
+npm run seed           # convierte ~/dev/book_app/seed a seed/biblioteca-dev.json (no se sube: el repo es público)
+```
+
+Después, en la app: Ajustes → Desarrollo → «Cargar biblioteca de ejemplo».
+
 ## Datos
 
 - `src/data/`: capa de datos. La UI solo usa `Library` (`src/data/library.ts`).

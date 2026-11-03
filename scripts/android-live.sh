@@ -29,7 +29,8 @@ else
   HOST=10.0.2.2 # el Mac visto desde el emulador
   if ! adb devices | grep -q '^emulator'; then
     echo "Abriendo el emulador $AVD…"
-    emulator -avd "$AVD" -no-snapshot-save >/dev/null 2>&1 &
+    # -gpu host: usa la GPU del Mac. Sin esto puede caer en SwiftShader (CPU) y todo se ve trabado
+    emulator -avd "$AVD" -gpu host -no-snapshot-save >/dev/null 2>&1 &
     adb wait-for-device
     until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; do sleep 2; done
   fi

@@ -97,6 +97,19 @@ Configuración de la key: pantalla "Conectar IA" con un paso a paso para sacar l
 
 **Dirección (2026-11-03): minimalista y cálido, con animaciones excelentes.** Menos adornos que `book_app`: las portadas son el color de la app.
 
+**Sistema elegido (Fase 2):**
+
+| Token | Día: sala de lectura | Noche: noche con velas |
+|---|---|---|
+| Papel | `#ECEEEA` gris verdoso de biblioteca | `#15120F` madera oscura |
+| Tinta | `#1C1F1D` | `#EDE6DA` |
+| Acento | `#8C2B3A` cinta de marcapáginas | `#E0A75E` vela |
+
+- Tipografía: **Newsreader** (títulos de libros y estantes, con tamaño óptico) + **Instrument Sans** (interfaz). Van empaquetadas en la app, funcionan sin internet.
+- Lo memorable, en un solo lugar: los estantes son tipografía grande y el activo lo marca una **cinta de marcapáginas** que se desliza con resorte; la **portada vuela** a la ficha y la ficha se tiñe con el color de esa portada.
+- Portadas con lomo (esquinas rectas a la izquierda y un pliegue fino); las que no tienen imagen son "tela de encuadernación" con el título.
+- Código: `src/ui/theme.css` (tokens), `src/ui/app.css` (estructura), `src/ui/motion.ts` (resortes compartidos).
+
 - **Minimalismo:** mucho aire, una sola familia tipográfica para la interfaz + serif solo en títulos de libros, paleta casi neutra (papel / tinta) con un único acento cálido. Sin texturas, sin bordes donde baste el espacio, íconos finos. El modo noche sigue siendo cálido ("noche con velas"), no gris.
 - **Animaciones fluidas** (la firma de la app):
   - **Elemento compartido:** la portada vuela de la estantería a la ficha y vuelve (View Transitions API + Motion `layoutId`).
@@ -134,7 +147,7 @@ Niveles de pensamiento (esfuerzo sugerido para Claude):
 |---|---|---|---|
 | 0 | Base: Vite + React + TS + Capacitor, estructura, lint/format/tests (como Printer Hub), emuladores teléfono y tablet, `android:live`, scrcpy | 🟡 | 🟡 Falta scrcpy y el script de APK |
 | 1 | **Datos locales**: SQLite nativo y WASM, esquema con UUID, migraciones, repositorio, respaldo JSON, tests | 🔴 | ✅ |
-| 2 | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche | 🟠 | ⏳ |
+| 2 | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche | 🟠 | ✅ Falta reordenar arrastrando |
 | 3 | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia | 🟠 | ⏳ |
 | 4 | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir | 🟡 | ⏳ |
 | 5 | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión | 🟠 | ⏳ |

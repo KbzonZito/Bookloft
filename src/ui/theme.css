@@ -1,0 +1,257 @@
+/* Sala de lectura de día, noche con velas. Las portadas ponen el color; la interfaz se calla. */
+@import '@fontsource-variable/newsreader/opsz.css';
+@import '@fontsource-variable/newsreader/opsz-italic.css';
+@import '@fontsource-variable/instrument-sans/wght.css';
+
+:root {
+  /* Día: paredes gris verdoso de biblioteca, tinta casi negra, cinta de marcapáginas burdeo */
+  --paper: #eceeea;
+  --surface: #f7f8f5;
+  --surface-2: #e3e6e0;
+  --ink: #1c1f1d;
+  --ink-2: #5f645f;
+  --ink-3: #959a94;
+  --line: #d6dad3;
+  --accent: #8c2b3a; /* cinta */
+  --accent-ink: #f7f8f5;
+  --scrim: rgba(28, 31, 29, 0.32);
+  --cover-shadow: 0 1px 1px rgba(28, 31, 29, 0.14), 0 8px 18px -8px rgba(28, 31, 29, 0.42);
+  --tint-strength: 22%;
+
+  --serif: 'Newsreader Variable', Georgia, serif;
+  --sans: 'Instrument Sans Variable', system-ui, sans-serif;
+
+  /* Escala tipográfica (razón 1,2) */
+  --t-xs: 0.75rem;
+  --t-sm: 0.8125rem;
+  --t-md: 0.9375rem;
+  --t-lg: 1.125rem;
+  --t-xl: 1.5rem;
+  --t-2xl: 2rem;
+
+  --safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --gutter: 16px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  /* Noche: madera oscura a la luz de una vela, acento ámbar */
+  --paper: #15120f;
+  --surface: #1d1915;
+  --surface-2: #27211c;
+  --ink: #ede6da;
+  --ink-2: #a49a8c;
+  --ink-3: #6f665b;
+  --line: #2e2721;
+  --accent: #e0a75e; /* vela */
+  --accent-ink: #15120f;
+  --scrim: rgba(0, 0, 0, 0.5);
+  --cover-shadow: 0 1px 1px rgba(0, 0, 0, 0.4), 0 10px 22px -8px rgba(0, 0, 0, 0.8);
+  --tint-strength: 28%;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+body {
+  transition: background-color 0.3s ease;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Botones ---------- */
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--ink-2);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.icon-button:active {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .icon-button:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-weight: 550;
+  font-size: var(--t-md);
+}
+
+.button.primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.button.quiet {
+  background: none;
+  color: var(--ink-2);
+  padding: 0 8px;
+}
+
+.button.danger {
+  background: none;
+  color: var(--accent);
+  padding: 0 8px;
+}
+
+.field {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: var(--t-md);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field:focus {
+  border-color: var(--ink-3);
+}
+
+textarea.field {
+  resize: none;
+  line-height: 1.5;
+}
+
+/* ---------- Portadas ---------- */
+
+.cover {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  width: 100%;
+  /* El lomo va a la izquierda: esquinas casi rectas ahí, apenas redondeadas al canto */
+  border-radius: 2px 5px 5px 2px;
+  overflow: hidden;
+  background: var(--surface-2);
+  box-shadow: var(--cover-shadow);
+}
+
+.cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Pliegue del lomo: una sombra y un brillo finos a la izquierda */
+.cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.22) 0,
+    rgba(255, 255, 255, 0.16) 2.5%,
+    rgba(0, 0, 0, 0.06) 5%,
+    transparent 9%
+  );
+}
+
+.cover-cloth {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14% 12% 12% 16%;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.cover-cloth .t {
+  font-family: var(--serif);
+  font-size: clamp(0.8rem, 0.55rem + 1.2cqi, 1.6rem);
+  line-height: 1.15;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cover-cloth .a {
+  font-size: clamp(0.6rem, 0.45rem + 0.6cqi, 0.9rem);
+  opacity: 0.75;
+}
+
+.cover-wrap {
+  container-type: inline-size;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}
