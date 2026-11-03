@@ -1,6 +1,6 @@
 // Ficha del libro. La portada llega volando desde la cuadrícula (mismo layoutId) y la página
 // toma un tinte del color de esa portada.
-import { X } from 'lucide-react';
+import { Paperclip, X } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useLibrary } from '../app/library';
@@ -11,6 +11,43 @@ import { fade, spring } from '../ui/motion';
 import { Rating, Segmented } from './Controls';
 import { Cover, useCoverColor } from './Cover';
 import { Sheet } from './Sheet';
+import { ACCEPT, FileRow, useFiles, useImport } from './Vault';
+
+type Toast = (m: string, action?: { label: string; run: () => void }) => void;
+
+/** Los EPUB y PDF de este libro, con un botón para adjuntar más */
+function BookFiles({ book, toast }: { book: Book; toast: Toast }) {
+  const { t } = useI18n();
+  const files = useFiles(book.id);
+  const input = useRef<HTMLInputElement>(null);
+  const { busy, importFiles } = useImport(toast);
+  return (
+    <section>
+      <h2 className="detail-label">{t('book.files')}</h2>
+      <div className="book-files">
+        {files?.map((f) => (
+          <FileRow key={f.id} file={f} books={[]} toast={toast} compact />
+        ))}
+        <button className="button attach" disabled={!!busy} onClick={() => input.current?.click()}>
+          <Paperclip size={16} strokeWidth={1.5} aria-hidden />
+          {busy ?? t('book.attach')}
+        </button>
+        <input
+          ref={input}
+          type="file"
+          accept={ACCEPT}
+          multiple
+          hidden
+          onChange={(e) => {
+            const list = [...(e.target.files ?? [])];
+            e.target.value = '';
+            if (list.length) void importFiles(list, { bookId: book.id });
+          }}
+        />
+      </div>
+    </section>
+  );
+}
 
 function useTint(book: Book): CSSProperties {
   const color = useCoverColor(book);
@@ -45,7 +82,15 @@ function Head({ book }: { book: Book }) {
   );
 }
 
-function Body({ book, onDelete }: { book: Book; onDelete: (b: Book) => void }) {
+function Body({
+  book,
+  onDelete,
+  toast,
+}: {
+  book: Book;
+  onDelete: (b: Book) => void;
+  toast: Toast;
+}) {
   const lib = useLibrary();
   const { t, status, date } = useI18n();
   const update = (patch: BookPatch) => void lib.updateBook(book.id, patch);
@@ -161,6 +206,8 @@ function Body({ book, onDelete }: { book: Book; onDelete: (b: Book) => void }) {
         />
       </section>
 
+      <BookFiles book={book} toast={toast} />
+
       <dl className="facts">
         {facts.map(([k, v]) => (
           <div key={k + v}>
@@ -182,10 +229,12 @@ export function BookSheet({
   book,
   onClose,
   onDelete,
+  toast,
 }: {
   book: Book;
   onClose: () => void;
   onDelete: (b: Book) => void;
+  toast: Toast;
 }) {
   return (
     <Sheet
@@ -196,7 +245,7 @@ export function BookSheet({
       style={useTint(book)}
       header={<Head book={book} />}
     >
-      <Body book={book} onDelete={onDelete} />
+      <Body book={book} onDelete={onDelete} toast={toast} />
     </Sheet>
   );
 }
@@ -206,10 +255,12 @@ export function BookPanel({
   book,
   onClose,
   onDelete,
+  toast,
 }: {
   book: Book;
   onClose: () => void;
   onDelete: (b: Book) => void;
+  toast: Toast;
 }) {
   const { t } = useI18n();
   return (
@@ -226,7 +277,7 @@ export function BookPanel({
         <X size={20} strokeWidth={1.5} />
       </button>
       <Head book={book} />
-      <Body book={book} onDelete={onDelete} />
+      <Body book={book} onDelete={onDelete} toast={toast} />
     </motion.aside>
   );
 }

@@ -378,6 +378,14 @@ export class Library {
     this.changed();
   }
 
+  async restoreFile(fileId: string) {
+    await this.db.run('UPDATE files SET deleted_at = NULL, updated_at = ? WHERE id = ?', [
+      now(),
+      fileId,
+    ]);
+    this.changed();
+  }
+
   async writeFile(db: Db, file: VaultFile) {
     const updates = FILE_COLUMNS.filter((c) => c !== 'id')
       .map((c) => `${c} = excluded.${c}`)

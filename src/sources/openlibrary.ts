@@ -1,6 +1,7 @@
 // Búsqueda en Open Library (adaptado de book_app/src/worker/openlibrary.ts).
 // Open Library responde con CORS abierto, así que se consulta directo desde la app.
 import type { Candidate } from '../data';
+import { similarTitle } from './text';
 
 const FIELDS =
   'key,title,author_name,first_publish_year,cover_i,isbn,number_of_pages_median,series_name,series_position';
@@ -67,9 +68,12 @@ export async function lookup(title: string, author?: string | null): Promise<Can
   const params: Record<string, string> = { title };
   if (author) params.author = author;
   const [first] = await query(params, 1);
-  if (first) return first;
-  // Sin resultados con autor: reintentar solo con el título
-  if (author) return (await query({ title }, 1))[0] ?? null;
+  if (first && similarTitle(first.title, title)) return first;
+  // Sin resultados con autor: reintentar solo con el título, pero sin aceptar cualquier cosa
+  if (author) {
+    const [loose] = await query({ title }, 1);
+    if (loose && similarTitle(loose.title, title)) return loose;
+  }
   return null;
 }
 

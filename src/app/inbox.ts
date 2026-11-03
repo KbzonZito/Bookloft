@@ -6,7 +6,9 @@ import type { InboxItem, Library } from '../data';
 import { getApiKey } from '../sources/ai';
 import { identify } from '../sources/identify';
 import { deleteInboxImage, saveInboxImage } from '../sources/images';
+import { formatOf } from '../sources/epub';
 import { findUrls } from '../sources/text';
+import { importToVault } from '../sources/vault';
 import { useLibrary } from './library';
 
 /** Crea un elemento de la bandeja con un texto, un link y/o una imagen */
@@ -75,18 +77,26 @@ export function usePendingInbox(): InboxItem[] {
 
 // ---------- Compartir desde otras apps ----------
 
-type ShareListener = () => void;
+/** Adónde fue a parar lo compartido: a la bandeja (posts, pantallazos) o a la bóveda (EPUB, PDF) */
+export type ShareOutcome =
+  { to: 'inbox' } | { to: 'vault'; files: { name: string; duplicate: boolean }[] };
+type ShareListener = (outcome: ShareOutcome) => void;
 const shareListeners = new Set<ShareListener>();
-let missedShare = false;
+let missed: ShareOutcome | null = null;
 
-/** La UI abre la bandeja cuando llega algo; si todavía no escucha, se acuerda para después */
+/** La UI abre la bandeja o la bóveda cuando llega algo; si todavía no escucha, se acuerda */
 export function onShare(listener: ShareListener) {
   shareListeners.add(listener);
-  if (missedShare) {
-    missedShare = false;
-    listener();
+  if (missed) {
+    listener(missed);
+    missed = null;
   }
   return () => void shareListeners.delete(listener);
+}
+
+function announce(outcome: ShareOutcome) {
+  if (shareListeners.size) for (const l of shareListeners) l(outcome);
+  else missed = outcome;
 }
 
 /**
@@ -97,6 +107,28 @@ export function listenForShares(lib: Library) {
   if (!Capacitor.isNativePlatform()) return;
   void CapacitorShareTarget.addListener('shareReceived', async (event) => {
     const text = [event.title, ...event.texts].filter(Boolean).join('\n');
+
+    // EPUB y PDF van directo a la bóveda, vinculados a su libro si ya está en la biblioteca
+    const docs = event.files.filter((f) => formatOf(f.name, f.mimeType));
+    if (docs.length) {
+      const books = await lib.listBooks();
+      const files: { name: string; duplicate: boolean }[] = [];
+      for (const f of docs) {
+        try {
+          const r = await importToVault(
+            lib,
+            { path: f.uri, name: f.name, mimeType: f.mimeType },
+            { books },
+          );
+          files.push({ name: r.file.meta_title ?? r.file.filename, duplicate: r.duplicate });
+        } catch (error) {
+          console.error('No se pudo guardar el archivo compartido', error);
+        }
+      }
+      if (files.length) announce({ to: 'vault', files });
+      return;
+    }
+
     const images = event.files.filter((f) => f.mimeType.startsWith('image/'));
     let added = 0;
     for (const f of images.slice(0, 5)) {
@@ -113,7 +145,6 @@ export function listenForShares(lib: Library) {
       added++;
     }
     if (!added) return;
-    if (shareListeners.size) for (const l of shareListeners) l();
-    else missedShare = true;
+    announce({ to: 'inbox' });
   });
 }

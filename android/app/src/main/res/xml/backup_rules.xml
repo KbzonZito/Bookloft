@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 o anterior. Auto Backup tiene un límite de 25 MB: si la app lo pasa, no respalda nada.
+     La base de datos va siempre; la bóveda (EPUB/PDF) y los pantallazos de la bandeja, no. -->
+<full-backup-content>
+    <include domain="database" path="." />
+    <include domain="file" path="." />
+    <exclude domain="file" path="vault/" />
+    <exclude domain="file" path="inbox/" />
+</full-backup-content>

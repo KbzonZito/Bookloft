@@ -54,6 +54,10 @@ adb shell am start -a android.intent.action.SEND -t text/plain --es android.inte
 
 Compartir una imagen con `adb` falla por permisos (el shell no puede prestar acceso a la galería); pruébalo con «Desde una imagen» o compartiendo desde la app Fotos.
 
+## Bóveda
+
+EPUB y PDF guardados en el teléfono, vinculados a los libros. Se agregan desde la bóveda, desde la ficha de un libro o compartiéndolos a la app. En el emulador no hay lector instalado: «Abrir» avisa que falta uno (instala KOReader para probarlo).
+
 ## Datos
 
 - `src/data/`: capa de datos. La UI solo usa `Library` (`src/data/library.ts`).

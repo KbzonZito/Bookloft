@@ -81,11 +81,14 @@ export function Sheet({
             transition={fade}
           />
         )}
-        <div className="sheet-drag" onPointerDown={(e) => controls.start(e)}>
-          <div className="grab" aria-hidden />
-          {header}
+        {/* El desplazamiento va por dentro: así el fondo (y su tinte) cubre siempre toda la hoja */}
+        <div className="sheet-scroll">
+          <div className="sheet-drag" onPointerDown={(e) => controls.start(e)}>
+            <div className="grab" aria-hidden />
+            {header}
+          </div>
+          <div className="sheet-body">{children}</div>
         </div>
-        <div className="sheet-body">{children}</div>
       </motion.div>
     </div>
   );

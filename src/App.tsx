@@ -1,4 +1,5 @@
 import {
+  Archive,
   ArrowDownUp,
   Check,
   Inbox as InboxIcon,
@@ -21,6 +22,7 @@ import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { BookGrid } from './components/BookGrid';
 import { Inbox } from './components/Inbox';
+import { Vault } from './components/Vault';
 import { Settings, type LangSetting, type ThemeSetting } from './components/Settings';
 import { ShelfTabs } from './components/ShelfTabs';
 import { Toast, type ToastMessage } from './components/Toast';
@@ -93,18 +95,9 @@ function Shell({
   // Ajustes abiertos; con ai: true, directo a conectar la API key
   const [settings, setSettings] = useState<false | { ai: boolean }>(false);
   const [inbox, setInbox] = useState(false);
+  const [vault, setVault] = useState(false);
   const pending = usePendingInbox();
 
-  // Lo que se comparte desde otra app abre la bandeja
-  useEffect(
-    () =>
-      onShare(() => {
-        setOpenId(null);
-        setAdding(false);
-        setInbox(true);
-      }),
-    [],
-  );
   const [toast, setToastState] = useState<ToastMessage | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -113,6 +106,28 @@ function Shell({
     setToastState({ id: Date.now(), text, action });
     toastTimer.current = setTimeout(() => setToastState(null), action ? 5000 : 3000);
   }, []);
+
+  // Lo que se comparte desde otra app abre la bandeja (posts) o la bóveda (EPUB, PDF).
+  // Se escucha una sola vez; el texto del aviso usa el idioma vigente a través de la ref.
+  const tRef = useRef(t);
+  tRef.current = t;
+  useEffect(
+    () =>
+      onShare((outcome) => {
+        setOpenId(null);
+        setAdding(false);
+        if (outcome.to === 'inbox') return setInbox(true);
+        setVault(true);
+        showToast(
+          outcome.files
+            .map((f) =>
+              tRef.current(f.duplicate ? 'vault.alreadyThere' : 'vault.received', { name: f.name }),
+            )
+            .join('. '),
+        );
+      }),
+    [showToast],
+  );
 
   // Al abrir, el estante "Leyendo" si hay algo ahí
   const started = useRef(false);
@@ -271,6 +286,10 @@ function Shell({
                 goTo(s);
               }}
             />
+            <button className="rail-link" onClick={() => setVault(true)}>
+              <Archive size={18} strokeWidth={1.5} aria-hidden />
+              {t('vault.title')}
+            </button>
             <div className="rail-actions">
               <button className="button primary" onClick={() => setAdding(true)}>
                 <Plus size={18} strokeWidth={2} aria-hidden />
@@ -313,6 +332,13 @@ function Shell({
                       <span className="badge">{pending.length}</span>
                     </button>
                   )}
+                  <button
+                    className="icon-button"
+                    onClick={() => setVault(true)}
+                    aria-label={t('vault.openVault')}
+                  >
+                    <Archive size={20} strokeWidth={1.5} />
+                  </button>
                   <button
                     className="icon-button"
                     onClick={() => setSearching(true)}
@@ -380,9 +406,21 @@ function Shell({
         <AnimatePresence>
           {openBook &&
             (expanded ? (
-              <BookPanel key={openBook.id} book={openBook} onClose={close} onDelete={remove} />
+              <BookPanel
+                key={openBook.id}
+                book={openBook}
+                onClose={close}
+                onDelete={remove}
+                toast={showToast}
+              />
             ) : (
-              <BookSheet key="sheet" book={openBook} onClose={close} onDelete={remove} />
+              <BookSheet
+                key="sheet"
+                book={openBook}
+                onClose={close}
+                onDelete={remove}
+                toast={showToast}
+              />
             ))}
         </AnimatePresence>
 
@@ -402,6 +440,16 @@ function Shell({
                 setSearching(false);
                 setQuery('');
                 goTo(addedTo);
+              }}
+            />
+          )}
+          {vault && (
+            <Vault
+              onClose={() => setVault(false)}
+              toast={showToast}
+              onOpenBook={(b) => {
+                setVault(false);
+                onOpen(b);
               }}
             />
           )}

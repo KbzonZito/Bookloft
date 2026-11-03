@@ -17,11 +17,17 @@ project(':capacitor-mlkit-text-recognition').projectDir = new File('../node_modu
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
 
+include ':capacitor-file-viewer'
+project(':capacitor-file-viewer').projectDir = new File('../node_modules/@capacitor/file-viewer/android')
+
 include ':capacitor-filesystem'
 project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacitor/filesystem/android')
 
 include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/@capacitor/haptics/android')
+
+include ':capacitor-share'
+project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
 
 include ':capgo-capacitor-share-target'
 project(':capgo-capacitor-share-target').projectDir = new File('../node_modules/@capgo/capacitor-share-target/android')

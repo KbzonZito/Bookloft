@@ -1,6 +1,6 @@
 # Biblioteca (app) — Plan del proyecto
 
-> Estado: **Fases 1 a 3 listas** · Creado: 2026-11-03
+> Estado: **Fases 1 a 4 listas** · Creado: 2026-11-03
 > Origen: la app web familiar en Cloudflare (`~/dev/book_app`). Esta app la **reemplaza**.
 
 ## 1. Qué es
@@ -89,6 +89,15 @@ Configuración de la key: pantalla "Conectar IA" con un paso a paso para sacar l
 - **La API key** se guarda en el Keystore/Keychain (`@aparajita/capacitor-secure-storage`), nunca en SQLite ni en los respaldos. Se prueba antes de guardarla.
 - Lo que llega desde Instagram se agrega por defecto a **Deseos**.
 
+### Bóveda (Fase 4)
+
+- EPUB y PDF se guardan en `vault/<huella>.<formato>` dentro del almacenamiento privado de la app; la huella (SHA-256) evita duplicados.
+- Se vinculan solos a un libro de la biblioteca por título y autor del EPUB (acepta subtítulos como "Tenth Anniversary"); si no está, se puede crear la ficha desde el archivo.
+- Se abren en el lector que el usuario tenga instalado y se comparten con su nombre original. Si la ficha está pero el archivo no (respaldo JSON restaurado sin archivos), la app lo dice.
+- Se pueden recibir desde otras apps (Compartir → Biblioteca).
+- **Android Auto Backup excluye `vault/` e `inbox/`**: su límite es 25 MB y, si se pasa, Android deja de respaldar todo, incluida la base. Los EPUB irán en el respaldo completo (Fase 5).
+- Quitar un archivo es reversible por un día; después se borra del disco (la fila queda para los respaldos).
+
 ## 6. Respaldos
 
 | Nivel | Qué es | Esfuerzo para el usuario |
@@ -158,7 +167,7 @@ Niveles de pensamiento (esfuerzo sugerido para Claude):
 | 1 | **Datos locales**: SQLite nativo y WASM, esquema con UUID, migraciones, repositorio, respaldo JSON, tests | 🔴 | ✅ |
 | 2 | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche | 🟠 | ✅ Falta reordenar arrastrando |
 | 3 | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia | 🟠 | ✅ Falta probar en un teléfono real: escáner, compartir imagen desde Instagram e IA con una key real |
-| 4 | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir | 🟡 | ⏳ |
+| 4 | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir | 🟡 | ✅ Falta probar abrir en un lector real (KOReader, Play Libros) y archivos grandes |
 | 5 | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión | 🟠 | ⏳ |
 | 6 | **Migración desde Cloudflare**: script que exporta cada persona de D1 + sus EPUB de R2 a un ZIP de la app; importarlo en cada teléfono | 🟡 | ⏳ |
 | 7 | **Apagar Cloudflare**: borrar webhook, Workers, Access, D1 y R2 **solo después** de verificar los ZIP de todos | 🔴 | ⏳ |

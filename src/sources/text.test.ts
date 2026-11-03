@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findIsbns, guessQueries, isbn10to13, titleLines } from './text';
+import { findIsbns, guessQueries, isbn10to13, similarTitle, titleLines } from './text';
 
 describe('ISBN', () => {
   it('encuentra ISBN-13 e ISBN-10 válidos y los deja en 13 dígitos', () => {
@@ -55,5 +55,21 @@ Hoy terminé «El nombre del viento» y estoy en shock
         { text: 'THE MULTIMILLION-COPY BESTSELLING AUTHOR OF', height: 9, top: 445 },
       ])[0],
     ).toBe('HAIL MARY ANDY WEIR');
+  });
+});
+
+describe('títulos parecidos', () => {
+  it('acepta ediciones y subtítulos, rechaza coincidencias de una palabra', () => {
+    expect(similarTitle('Elantris', 'Elantris (Tenth Anniversary Edition)')).toBe(true);
+    expect(similarTitle('El nombre del viento', 'El Nombre del Viento')).toBe(true);
+    expect(similarTitle('The Way of Kings', 'Way of Kings, The')).toBe(true);
+    expect(
+      similarTitle(
+        'Un libro que no tengo',
+        'Tengo Miedo : un Libro para Vencer Aquello Que Nos Hace Sentir Diminutos',
+      ),
+    ).toBe(false);
+    expect(similarTitle('Dune', 'Dune Messiah')).toBe(true);
+    expect(similarTitle('It', 'It')).toBe(true);
   });
 });

@@ -5,6 +5,7 @@ import { listenForShares } from './app/inbox';
 import { LibraryProvider } from './app/library';
 import { openLibrary } from './data';
 import { systemLang, translate } from './i18n';
+import { purgeDeletedFiles } from './sources/vault';
 import './ui/theme.css';
 import './ui/app.css';
 
@@ -14,6 +15,7 @@ openLibrary().then(
   (lib) => {
     // Lo antes posible: si la app se abrió desde "Compartir", el plugin entrega lo compartido ahora
     listenForShares(lib);
+    void purgeDeletedFiles(lib);
     root.render(
       <StrictMode>
         <LibraryProvider lib={lib}>

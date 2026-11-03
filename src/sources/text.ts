@@ -29,6 +29,38 @@ export function isbn10to13(isbn10: string) {
   return body + ((10 - (sum % 10)) % 10);
 }
 
+// Palabras que no distinguen un título de otro: artículos, preposiciones y avisos de edición
+const FILLER = new Set(
+  (
+    'the and for with from into los las del una uno por para con que sus nos les ' +
+    'edition edicion anniversary aniversario novel novela book libro volume vol tomo ' +
+    'illustrated ilustrada special especial complete completa'
+  ).split(' '),
+);
+
+/**
+ * ¿Es razonable que estos dos títulos sean el mismo libro? Compara las palabras que importan:
+ * el título corto tiene que estar casi entero en el largo, y el largo no puede ser otra cosa
+ * con una palabra en común. "Elantris" ≈ "Elantris (Tenth Anniversary)";
+ * "Un libro que no tengo" ≠ "Tengo miedo: un libro para vencer…".
+ */
+export function similarTitle(a: string, b: string) {
+  const words = (s: string) =>
+    new Set(
+      s
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((w) => w.length > 2 && !FILLER.has(w)),
+    );
+  const [x, y] = [words(a), words(b)];
+  const [small, big] = x.size <= y.size ? [x, y] : [y, x];
+  if (!small.size) return a.trim().toLowerCase() === b.trim().toLowerCase();
+  const shared = [...small].filter((w) => big.has(w)).length;
+  return shared / small.size >= 0.6 && shared / big.size >= 0.34;
+}
+
 export const findUrls = (text: string) => text.match(/https?:\/\/\S+/g) ?? [];
 
 /** Lo que no es un libro en un post: links, cuentas, hashtags, contadores y avisos */
