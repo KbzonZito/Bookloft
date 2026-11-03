@@ -1,14 +1,26 @@
-import { ArrowDownUp, Check, LayoutGrid, Plus, Rows3, Search, Settings2, X } from 'lucide-react';
+import {
+  ArrowDownUp,
+  Check,
+  Inbox as InboxIcon,
+  LayoutGrid,
+  Plus,
+  Rows3,
+  Search,
+  Settings2,
+  X,
+} from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAllBooks, useLibrary, useSetting } from './app/library';
 import { useWindowSize } from './app/layout';
 import { haptic, setSystemBars, useBack } from './app/native';
 import { searchBooks, SHELVES, sortBooks, SORTS, type Sort } from './app/shelves';
+import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { BookGrid } from './components/BookGrid';
+import { Inbox } from './components/Inbox';
 import { Settings, type LangSetting, type ThemeSetting } from './components/Settings';
 import { ShelfTabs } from './components/ShelfTabs';
 import { Toast, type ToastMessage } from './components/Toast';
@@ -78,7 +90,21 @@ function Shell({
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
-  const [settings, setSettings] = useState(false);
+  // Ajustes abiertos; con ai: true, directo a conectar la API key
+  const [settings, setSettings] = useState<false | { ai: boolean }>(false);
+  const [inbox, setInbox] = useState(false);
+  const pending = usePendingInbox();
+
+  // Lo que se comparte desde otra app abre la bandeja
+  useEffect(
+    () =>
+      onShare(() => {
+        setOpenId(null);
+        setAdding(false);
+        setInbox(true);
+      }),
+    [],
+  );
   const [toast, setToastState] = useState<ToastMessage | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -250,9 +276,19 @@ function Shell({
                 <Plus size={18} strokeWidth={2} aria-hidden />
                 {t('app.add')}
               </button>
+              {pending.length > 0 && (
+                <button
+                  className="icon-button inbox-button"
+                  onClick={() => setInbox(true)}
+                  aria-label={t('inbox.open', { n: pending.length })}
+                >
+                  <InboxIcon size={20} strokeWidth={1.5} />
+                  <span className="badge">{pending.length}</span>
+                </button>
+              )}
               <button
                 className="icon-button"
-                onClick={() => setSettings(true)}
+                onClick={() => setSettings({ ai: false })}
                 aria-label={t('app.settings')}
               >
                 <Settings2 size={20} strokeWidth={1.5} />
@@ -267,6 +303,16 @@ function Shell({
               ) : (
                 <>
                   <h1 className="wordmark">{t('app.name')}</h1>
+                  {pending.length > 0 && (
+                    <button
+                      className="icon-button inbox-button"
+                      onClick={() => setInbox(true)}
+                      aria-label={t('inbox.open', { n: pending.length })}
+                    >
+                      <InboxIcon size={20} strokeWidth={1.5} />
+                      <span className="badge">{pending.length}</span>
+                    </button>
+                  )}
                   <button
                     className="icon-button"
                     onClick={() => setSearching(true)}
@@ -276,7 +322,7 @@ function Shell({
                   </button>
                   <button
                     className="icon-button"
-                    onClick={() => setSettings(true)}
+                    onClick={() => setSettings({ ai: false })}
                     aria-label={t('app.settings')}
                   >
                     <Settings2 size={20} strokeWidth={1.5} />
@@ -345,6 +391,11 @@ function Shell({
             <AddBook
               initialShelf={shelf}
               onClose={() => setAdding(false)}
+              toast={showToast}
+              onToInbox={() => {
+                setAdding(false);
+                setInbox(true);
+              }}
               onAdded={(message, addedTo) => {
                 setAdding(false);
                 showToast(message);
@@ -354,8 +405,18 @@ function Shell({
               }}
             />
           )}
+          {inbox && (
+            <Inbox
+              onClose={() => setInbox(false)}
+              onOpenAi={() => {
+                setInbox(false);
+                setSettings({ ai: true });
+              }}
+            />
+          )}
           {settings && (
             <Settings
+              aiFocus={settings.ai}
               theme={theme}
               setTheme={setTheme}
               lang={lang}

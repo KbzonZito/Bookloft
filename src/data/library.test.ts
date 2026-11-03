@@ -152,8 +152,15 @@ describe('Library', () => {
   it('bandeja de entrada y ajustes', async () => {
     const lib = await openTestLibrary();
     const item = await lib.addInbox({ kind: 'text', input: 'Mira este libro' });
-    await lib.setInboxCandidates(item.id, [candidate('Dune', 'Frank Herbert')]);
-    expect((await lib.listInbox())[0].candidates[0].title).toBe('Dune');
+    expect((await lib.listInbox())[0].method).toBeNull();
+    await lib.setInboxResult(item.id, {
+      candidates: [candidate('Dune', 'Frank Herbert')],
+      method: 'search',
+      queries: ['Mira este libro'],
+    });
+    const [found] = await lib.listInbox();
+    expect(found.candidates[0].title).toBe('Dune');
+    expect(found).toMatchObject({ method: 'search', queries: ['Mira este libro'], error: null });
     await lib.resolveInbox(item.id, 'dismissed');
     expect(await lib.listInbox()).toHaveLength(0);
 

@@ -37,4 +37,11 @@ else
   TARGET=$(adb devices | awk 'NR > 1 && $1 ~ /^emulator/ { print $1; exit }')
 fi
 
-npx cap run android --live-reload --host "$HOST" --port "$PORT" --target "$TARGET"
+# cap run espera 5 s a que la app abra; en frío a veces tarda más y falla aunque ya quedó instalada.
+# La app instalada ya apunta al servidor de desarrollo, así que basta con abrirla.
+APP_ID=$(grep -o "appId: '[^']*'" capacitor.config.ts | cut -d"'" -f2)
+npx cap run android --live-reload --host "$HOST" --port "$PORT" --target "$TARGET" || {
+  echo "Abriendo la app de nuevo…"
+  adb -s "$TARGET" wait-for-device
+  adb -s "$TARGET" shell am start -n "$APP_ID/.MainActivity"
+}

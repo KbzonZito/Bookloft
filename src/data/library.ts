@@ -6,6 +6,7 @@ import type {
   Book,
   BookPatch,
   Candidate,
+  IdentifyMethod,
   InboxItem,
   InboxKind,
   InboxState,
@@ -77,7 +78,11 @@ export function bookRow(b: Book): Value[] {
 const toFile = (r: Row) => r as unknown as VaultFile;
 
 function toInbox(r: Row): InboxItem {
-  return { ...(r as unknown as InboxItem), candidates: json(r.candidates, []) };
+  return {
+    ...(r as unknown as InboxItem),
+    candidates: json(r.candidates, []),
+    queries: json(r.queries, []),
+  };
 }
 
 const placeholders = (n: number) => Array(n).fill('?').join(', ');
@@ -402,6 +407,10 @@ export class Library {
       book_id: null,
       created_at: t,
       updated_at: t,
+      method: null,
+      queries: [],
+      identified_at: null,
+      error: null,
     };
     await this.db.run(
       `INSERT INTO inbox (id, kind, input, image_path, candidates, state, book_id, created_at, updated_at)
@@ -419,12 +428,44 @@ export class Library {
     return rows.map(toInbox);
   }
 
-  async setInboxCandidates(id: string, candidates: Candidate[]) {
-    await this.db.run('UPDATE inbox SET candidates = ?, updated_at = ? WHERE id = ?', [
-      JSON.stringify(candidates),
-      now(),
-      id,
-    ]);
+  async getInbox(id: string): Promise<InboxItem | undefined> {
+    const row = await this.db.get('SELECT * FROM inbox WHERE id = ?', [id]);
+    return row && toInbox(row);
+  }
+
+  /** Guarda lo que se encontró al identificar (o por qué falló) */
+  async setInboxResult(
+    id: string,
+    result: {
+      candidates: Candidate[];
+      method: IdentifyMethod;
+      queries: string[];
+      error?: string | null;
+    },
+  ) {
+    const t = now();
+    await this.db.run(
+      `UPDATE inbox SET candidates = ?, method = ?, queries = ?, error = ?, identified_at = ?,
+       updated_at = ? WHERE id = ?`,
+      [
+        JSON.stringify(result.candidates),
+        result.method,
+        JSON.stringify(result.queries),
+        result.error ?? null,
+        t,
+        t,
+        id,
+      ],
+    );
+    this.changed();
+  }
+
+  /** Para volver a identificar (por ejemplo, después de conectar la IA) */
+  async resetInbox(id: string) {
+    await this.db.run(
+      `UPDATE inbox SET method = NULL, identified_at = NULL, error = NULL, updated_at = ? WHERE id = ?`,
+      [now(), id],
+    );
     this.changed();
   }
 

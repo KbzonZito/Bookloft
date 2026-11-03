@@ -40,9 +40,23 @@ npm run seed           # convierte ~/dev/book_app/seed a seed/biblioteca-dev.jso
 
 Después, en la app: Ajustes → Desarrollo → «Cargar biblioteca de ejemplo».
 
+## Agregar libros
+
+- Buscar en Open Library, escanear el ISBN, elegir una imagen o pegar el texto o el link de un post.
+- Desde otra app: Compartir → Biblioteca. Llega a la bandeja.
+- IA opcional: Ajustes → «Leer pantallazos con IA», con la API key de Anthropic de cada usuario (Claude Haiku 5.5, ~0,03 USD cada 100 pantallazos).
+
+Para probar «compartir» en el emulador:
+
+```bash
+adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT 'Terminé «Piranesi»' -n dev.martinvergara.biblioteca/.MainActivity
+```
+
+Compartir una imagen con `adb` falla por permisos (el shell no puede prestar acceso a la galería); pruébalo con «Desde una imagen» o compartiendo desde la app Fotos.
+
 ## Datos
 
 - `src/data/`: capa de datos. La UI solo usa `Library` (`src/data/library.ts`).
 - SQLite nativo en Android/iOS (`@capacitor-community/sqlite`), sql.js en el navegador y en los tests: el mismo SQL en todas partes.
-- Migraciones en `src/data/migrations/`, numeradas con `PRAGMA user_version`. **Nunca se edita una migración publicada**: se agrega una nueva.
+- Migraciones en `src/data/migrations/`, numeradas con `PRAGMA user_version`. **Nunca se edita una migración publicada**: se agrega una nueva. Se ejecutan de a una sentencia (`src/data/sql.ts`): el plugin nativo se salta sentencias si recibe varias con comentarios `--`. Al abrir, `checkSchema` verifica que estén todas las columnas.
 - Respaldo JSON v1 (`src/data/backup.ts`): exportar incluye los borrados; importar fusiona por UUID y gana el `updated_at` más nuevo.

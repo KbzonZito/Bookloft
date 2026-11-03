@@ -18,11 +18,17 @@
     "seed": "node scripts/seed-from-book-app.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "@aparajita/capacitor-secure-storage": "^8.0.1",
     "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor-mlkit/barcode-scanning": "^8.2.2",
+    "@capacitor-mlkit/text-recognition": "^8.2.2",
     "@capacitor/android": "^8.6.0",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
+    "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
+    "@capgo/capacitor-share-target": "^8.0.65",
     "@fontsource-variable/instrument-sans": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",
     "lucide-react": "^1.67.0",

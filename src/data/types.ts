@@ -65,6 +65,8 @@ export interface VaultFile {
 export type InboxKind = 'text' | 'url' | 'image';
 export type InboxState = 'pending' | 'done' | 'dismissed';
 
+export type IdentifyMethod = 'isbn' | 'ai' | 'ocr' | 'search' | 'none';
+
 export interface InboxItem {
   id: string;
   kind: InboxKind;
@@ -75,4 +77,9 @@ export interface InboxItem {
   book_id: string | null;
   created_at: string;
   updated_at: string;
+  /** null mientras no se ha identificado */
+  method: IdentifyMethod | null;
+  queries: string[];
+  identified_at: string | null;
+  error: string | null;
 }

@@ -1,6 +1,6 @@
 # Biblioteca (app) — Plan del proyecto
 
-> Estado: **Fase 1 lista (datos locales)** · Creado: 2026-11-03
+> Estado: **Fases 1 a 3 listas** · Creado: 2026-11-03
 > Origen: la app web familiar en Cloudflare (`~/dev/book_app`). Esta app la **reemplaza**.
 
 ## 1. Qué es
@@ -80,6 +80,15 @@ Esquema real: `src/data/migrations/0001_init.sql`.
 
 Configuración de la key: pantalla "Conectar IA" con un paso a paso para sacar la key en console.anthropic.com, un botón "Probar" y el costo estimado por pantallazo.
 
+### Cómo quedó (Fase 3)
+
+- **Compartir a la app** (`@capgo/capacitor-share-target`): textos, links y pantallazos llegan a la **bandeja**, que se abre sola. Las imágenes se copian reducidas (1568 px, JPEG) a `inbox/` en el almacenamiento de la app.
+- **Identificar** (`src/sources/identify.ts`), de lo más exacto a lo más difuso: ISBN en el texto → IA con la key del usuario (Claude Haiku 5.5) → OCR en el teléfono (ML Kit) → búsqueda en Open Library. Con un link, el teléfono intenta leer `og:description`; Instagram suele pedir sesión, así que el pantallazo sigue siendo lo más confiable.
+- **OCR sin IA**: junta las líneas grandes de la portada en orden de lectura ("HAIL" + "MARY" + "ANDY WEIR") antes de buscar.
+- **Escanear ISBN** con el lector de Google Play Services: no pide permiso de cámara.
+- **La API key** se guarda en el Keystore/Keychain (`@aparajita/capacitor-secure-storage`), nunca en SQLite ni en los respaldos. Se prueba antes de guardarla.
+- Lo que llega desde Instagram se agrega por defecto a **Deseos**.
+
 ## 6. Respaldos
 
 | Nivel | Qué es | Esfuerzo para el usuario |
@@ -148,7 +157,7 @@ Niveles de pensamiento (esfuerzo sugerido para Claude):
 | 0 | Base: Vite + React + TS + Capacitor, estructura, lint/format/tests (como Printer Hub), emuladores teléfono y tablet, `android:live`, scrcpy | 🟡 | 🟡 Falta scrcpy y el script de APK |
 | 1 | **Datos locales**: SQLite nativo y WASM, esquema con UUID, migraciones, repositorio, respaldo JSON, tests | 🔴 | ✅ |
 | 2 | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche | 🟠 | ✅ Falta reordenar arrastrando |
-| 3 | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia | 🟠 | ⏳ |
+| 3 | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia | 🟠 | ✅ Falta probar en un teléfono real: escáner, compartir imagen desde Instagram e IA con una key real |
 | 4 | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir | 🟡 | ⏳ |
 | 5 | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión | 🟠 | ⏳ |
 | 6 | **Migración desde Cloudflare**: script que exporta cada persona de D1 + sus EPUB de R2 a un ZIP de la app; importarlo en cada teléfono | 🟡 | ⏳ |

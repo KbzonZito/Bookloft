@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import { useLibrary } from '../app/library';
 import { exportJson, importJson } from '../data';
 import { useI18n, type Lang } from '../i18n';
+import { AiSettings } from './AiSettings';
 import { Segmented } from './Controls';
 import { Sheet } from './Sheet';
 
@@ -18,6 +19,7 @@ export function Settings({
   onClose,
   toast,
   onLoadSample,
+  aiFocus = false,
 }: {
   theme: ThemeSetting;
   setTheme: (t: ThemeSetting) => void;
@@ -26,6 +28,8 @@ export function Settings({
   onClose: () => void;
   toast: (message: string) => void;
   onLoadSample?: () => void;
+  /** Abrir directo en conectar la IA (por ejemplo, desde un error en la bandeja) */
+  aiFocus?: boolean;
 }) {
   const lib = useLibrary();
   const { t } = useI18n();
@@ -84,6 +88,8 @@ export function Settings({
             onChange={setLang}
           />
         </section>
+
+        <AiSettings startEditing={aiFocus} />
 
         <section>
           <h2 className="detail-label">{t('settings.backup')}</h2>
