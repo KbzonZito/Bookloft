@@ -8,6 +8,7 @@ import type { Book, Library, VaultFile } from '../data';
 import { normalize } from '../data/text';
 import { formatOf, readEpubMeta, sha256, titleFromFilename, type FileMeta } from './epub';
 import { lookup } from './openlibrary';
+import { fromBase64, toBase64 } from './bytes';
 
 const native = Capacitor.isNativePlatform();
 const DIR = Directory.Data;
@@ -19,21 +20,6 @@ export class VaultError extends Error {
   constructor(readonly kind: 'format' | 'read') {
     super(kind);
   }
-}
-
-function toBase64(bytes: Uint8Array) {
-  let binary = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  }
-  return btoa(binary);
-}
-
-function fromBase64(b64: string) {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
 }
 
 async function readSource(source: VaultSource): Promise<Uint8Array> {
@@ -205,7 +191,10 @@ export async function shareFile(file: VaultFile): Promise<'ok' | 'missing'> {
       toDirectory: Directory.Cache,
     });
     const { uri } = await Filesystem.getUri({ path: named, directory: Directory.Cache });
-    await Share.share({ title: file.meta_title ?? file.filename, files: [uri] }).catch(() => {}); // cerrar la hoja sin elegir también llega como error
+    await Share.share({ title: file.meta_title ?? file.filename, files: [uri] }).catch((error) => {
+      // Cerrar la hoja sin elegir también llega como error; eso no es una falla
+      if (!/cancel/i.test(String(error))) throw error;
+    });
   }
   return 'ok';
 }

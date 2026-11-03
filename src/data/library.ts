@@ -318,14 +318,26 @@ export class Library {
 
   /** Guarda todas las columnas de un libro (insertando o reemplazando, sin borrar la fila) */
   async writeBook(db: Db, book: Book) {
+    await this.writeBooks(db, [book]);
+  }
+
+  /**
+   * Varios libros en una sola sentencia (hasta 40 filas × 24 columnas, bajo el límite de 999
+   * parámetros de SQLite): en el teléfono cada sentencia cruza el puente nativo.
+   */
+  async writeBooks(db: Db, books: Book[]) {
     const updates = BOOK_COLUMNS.filter((c) => c !== 'id')
       .map((c) => `${c} = excluded.${c}`)
       .join(', ');
-    await db.run(
-      `INSERT INTO books (${BOOK_COLUMNS.join(', ')}) VALUES (${placeholders(BOOK_COLUMNS.length)})
-       ON CONFLICT (id) DO UPDATE SET ${updates}`,
-      bookRow(book),
-    );
+    const row = `(${placeholders(BOOK_COLUMNS.length)})`;
+    for (let i = 0; i < books.length; i += 40) {
+      const chunk = books.slice(i, i + 40);
+      await db.run(
+        `INSERT INTO books (${BOOK_COLUMNS.join(', ')}) VALUES ${chunk.map(() => row).join(', ')}
+         ON CONFLICT (id) DO UPDATE SET ${updates}`,
+        chunk.flatMap(bookRow),
+      );
+    }
   }
 
   // ---------- Bóveda ----------

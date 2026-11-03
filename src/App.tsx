@@ -28,6 +28,7 @@ import { ShelfTabs } from './components/ShelfTabs';
 import { Toast, type ToastMessage } from './components/Toast';
 import { importJson, type Book, type Status } from './data';
 import { I18nProvider, systemLang, useI18n } from './i18n';
+import { daysSinceBackup } from './sources/backup-zip';
 import { fade, spring } from './ui/motion';
 
 type View = 'covers' | 'authors';
@@ -128,6 +129,25 @@ function Shell({
       }),
     [showToast],
   );
+
+  // Un recordatorio suave para respaldar: con 10 libros o más, si pasó un mes, una vez por semana
+  const reminded = useRef(false);
+  useEffect(() => {
+    if (!books || books.length < 10 || reminded.current) return;
+    reminded.current = true;
+    void (async () => {
+      const days = await daysSinceBackup(lib);
+      const last = await lib.getSetting<string | null>('backup_reminded_at', null);
+      const weekAgo = Date.now() - 7 * 86_400_000;
+      if ((days === null || days > 30) && (!last || Date.parse(last) < weekAgo)) {
+        await lib.setSetting('backup_reminded_at', new Date().toISOString());
+        showToast(tRef.current('backup.remind'), {
+          label: tRef.current('backup.remindAction'),
+          run: () => setSettings({ ai: false }),
+        });
+      }
+    })();
+  }, [books]);
 
   // Al abrir, el estante "Leyendo" si hay algo ahí
   const started = useRef(false);

@@ -16,6 +16,8 @@ openLibrary().then(
     // Lo antes posible: si la app se abrió desde "Compartir", el plugin entrega lo compartido ahora
     listenForShares(lib);
     void purgeDeletedFiles(lib);
+    // Para probar desde las herramientas de desarrollo (emulador por CDP); nunca en la app publicada
+    if (import.meta.env.DEV) Object.assign(window, { __lib: lib });
     root.render(
       <StrictMode>
         <LibraryProvider lib={lib}>

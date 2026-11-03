@@ -204,7 +204,11 @@ export function FileRow({
   }
 
   async function share() {
-    if ((await shareFile(file)) === 'missing') toast(t('vault.missing'));
+    try {
+      if ((await shareFile(file)) === 'missing') toast(t('vault.missing'));
+    } catch {
+      toast(t('share.failed'));
+    }
   }
 
   async function remove() {

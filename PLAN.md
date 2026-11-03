@@ -1,6 +1,6 @@
 # Biblioteca (app) — Plan del proyecto
 
-> Estado: **Fases 1 a 4 listas** · Creado: 2026-11-03
+> Estado: **Fases 1 a 5 listas** · Creado: 2026-11-03
 > Origen: la app web familiar en Cloudflare (`~/dev/book_app`). Esta app la **reemplaza**.
 
 ## 1. Qué es
@@ -111,6 +111,14 @@ Configuración de la key: pantalla "Conectar IA" con un paso a paso para sacar l
 - Restaurar **fusiona por UUID** usando `updated_at`: nunca borra lo más nuevo.
 - Drive usa el permiso más acotado posible (solo los archivos que crea la app), para que la verificación de Google sea liviana.
 
+### Cómo quedó (Fase 5)
+
+- **ZIP**: `biblioteca.json` (fichas, bóveda, ajustes, con los borrados) y, en el respaldo completo, `vault/…` con los EPUB/PDF tal cual (sin recomprimir). Se arma archivo por archivo en la caché y se entrega por la hoja de compartir: **Drive**, Gmail, Bluetooth, Archivos. En el navegador se descarga. Es un ZIP estándar: se abre en cualquier computador.
+- **Restaurar** lee el ZIP por su índice (directorio central): un EPUB es en sí un ZIP y un lector por partes confundía sus marcas internas. Fusiona por UUID (gana lo más nuevo, nunca borra) y solo escribe los archivos que faltan. 573 libros en 0,7 s en el emulador.
+- **Recordatorio**: con 10 libros o más, si pasó un mes sin respaldar, un aviso con "Respaldar", como máximo una vez por semana.
+- **Respaldo automático a Drive (pendiente)**: necesita un proyecto en Google Cloud con una credencial OAuth atada al nombre del paquete y a la huella SHA-1 de la firma, y la verificación de Google de la pantalla de permisos. Conviene hacerlo con el nombre y la firma definitivos (antes de la Fase 9). Ámbito sugerido: `drive.file` o `drive.appdata` (no sensibles).
+- Si la página se recarga con una transacción a medias (Android reiniciando el WebView), al abrir se deshace antes de reconectar; antes la base quedaba bloqueada.
+
 ## 7. Diseño: cozy, moderno, simple
 
 **Dirección (2026-11-03): minimalista y cálido, con animaciones excelentes.** Menos adornos que `book_app`: las portadas son el color de la app.
@@ -168,7 +176,7 @@ Niveles de pensamiento (esfuerzo sugerido para Claude):
 | 2 | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche | 🟠 | ✅ Falta reordenar arrastrando |
 | 3 | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia | 🟠 | ✅ Falta probar en un teléfono real: escáner, compartir imagen desde Instagram e IA con una key real |
 | 4 | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir | 🟡 | ✅ Falta probar abrir en un lector real (KOReader, Play Libros) y archivos grandes |
-| 5 | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión | 🟠 | ⏳ |
+| 5 | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión | 🟠 | ✅ ZIP + Drive por la hoja de compartir. Falta el respaldo **automático** a Drive (después de elegir nombre y firma) |
 | 6 | **Migración desde Cloudflare**: script que exporta cada persona de D1 + sus EPUB de R2 a un ZIP de la app; importarlo en cada teléfono | 🟡 | ⏳ |
 | 7 | **Apagar Cloudflare**: borrar webhook, Workers, Access, D1 y R2 **solo después** de verificar los ZIP de todos | 🔴 | ⏳ |
 | 8 | **Pro y propinas**: Google Play Billing (pago único Pro + propinas), flavor "GitHub" con link a Ko-fi | 🟠 | ⏳ |

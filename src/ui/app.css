@@ -1385,3 +1385,33 @@
   font-size: var(--t-lg);
   color: var(--ink-2);
 }
+
+/* ---------- Respaldos ---------- */
+
+.backup-settings {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.backup-status {
+  margin: 0;
+  font-size: var(--t-md);
+}
+
+.backup-status.stale {
+  color: var(--accent);
+}
+
+.backup-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.backup-actions .button {
+  gap: 8px;
+}

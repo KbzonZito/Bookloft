@@ -121,3 +121,18 @@ describe('importar respaldos con datos malos', () => {
     expect((await target.listFiles())[0].book_id).toBeNull();
   });
 });
+
+describe('importar muchos libros', () => {
+  it('escribe de a grupos y un libro malo en medio solo se pierde a sí mismo', async () => {
+    const source = await openTestLibrary();
+    for (let i = 0; i < 95; i++) await source.addBook(candidate(`Libro ${i}`));
+    const backup = await exportJson(source);
+    backup.books[57].rating = 9; // en el segundo grupo de 40
+
+    const target = await openTestLibrary();
+    expect(await importJson(target, backup)).toMatchObject({ added: 94, invalid: 1 });
+    expect(await target.listBooks()).toHaveLength(94);
+    // Volver a importar no cambia nada
+    expect(await importJson(target, backup)).toMatchObject({ added: 0, updated: 0, skipped: 94 });
+  });
+});

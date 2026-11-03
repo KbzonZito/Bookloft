@@ -114,16 +114,21 @@ export async function importJson(lib: Library, data: unknown): Promise<ImportRes
   const result: ImportResult = { added: 0, updated: 0, skipped: 0, invalid: 0 };
 
   await lib.db.transaction(async (tx) => {
+    // Lo que ya hay, en una sola consulta: en el teléfono cada consulta cruza el puente nativo
+    const bookVersions = new Map(
+      (await tx.all<{ id: string; updated_at: string }>('SELECT id, updated_at FROM books')).map(
+        (b) => [b.id, b.updated_at],
+      ),
+    );
+
+    const toWrite: { book: Book; isNew: boolean }[] = [];
     for (const incoming of backup.books) {
       if (!validBook(incoming)) {
         result.invalid++;
         continue;
       }
-      const current = await tx.get<{ updated_at: string }>(
-        'SELECT updated_at FROM books WHERE id = ?',
-        [incoming.id],
-      );
-      if (current && current.updated_at >= incoming.updated_at) {
+      const currentVersion = bookVersions.get(incoming.id);
+      if (currentVersion !== undefined && currentVersion >= incoming.updated_at) {
         result.skipped++;
         continue;
       }
@@ -131,10 +136,30 @@ export async function importJson(lib: Library, data: unknown): Promise<ImportRes
       const book = Object.fromEntries(
         BOOK_COLUMNS.map((c) => [c, (incoming as unknown as Record<string, unknown>)[c] ?? null]),
       ) as unknown as Book;
-      if (await tryRow(tx, () => lib.writeBook(tx, { ...book, priority: book.priority ?? 0 }))) {
-        result[current ? 'updated' : 'added']++;
-      } else {
-        result.invalid++;
+      toWrite.push({
+        book: { ...book, priority: book.priority ?? 0 },
+        isNew: currentVersion === undefined,
+      });
+    }
+
+    // De a grupos; si un grupo rompe el esquema, ese grupo se reintenta libro por libro
+    for (let i = 0; i < toWrite.length; i += 40) {
+      const chunk = toWrite.slice(i, i + 40);
+      if (
+        await tryRow(tx, () =>
+          lib.writeBooks(
+            tx,
+            chunk.map((c) => c.book),
+          ),
+        )
+      ) {
+        for (const c of chunk) result[c.isNew ? 'added' : 'updated']++;
+        continue;
+      }
+      for (const c of chunk) {
+        if (await tryRow(tx, () => lib.writeBook(tx, c.book)))
+          result[c.isNew ? 'added' : 'updated']++;
+        else result.invalid++;
       }
     }
 

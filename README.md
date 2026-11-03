@@ -58,6 +58,12 @@ Compartir una imagen con `adb` falla por permisos (el shell no puede prestar acc
 
 EPUB y PDF guardados en el teléfono, vinculados a los libros. Se agregan desde la bóveda, desde la ficha de un libro o compartiéndolos a la app. En el emulador no hay lector instalado: «Abrir» avisa que falta uno (instala KOReader para probarlo).
 
+## Respaldos
+
+Ajustes → Respaldo: «Respaldar la biblioteca» (liviano) o «Respaldo completo» (con los EPUB/PDF). Se guarda donde elijas en la hoja de compartir (Drive, Gmail, Archivos). «Restaurar un respaldo» acepta el ZIP o el JSON antiguo y fusiona sin borrar nada.
+
+Para probar en el emulador sin que la recarga en vivo interrumpa (pasa al volver de un selector de archivos), en modo desarrollo la biblioteca queda en `window.__lib` y se puede restaurar por las herramientas de Chrome.
+
 ## Datos
 
 - `src/data/`: capa de datos. La UI solo usa `Library` (`src/data/library.ts`).
