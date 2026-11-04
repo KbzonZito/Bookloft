@@ -7,6 +7,7 @@ import { Share } from '@capacitor/share';
 import type { Book, Library, VaultFile } from '../data';
 import { normalize } from '../data/text';
 import { formatOf, readEpubMeta, sha256, titleFromFilename, type FileMeta } from './epub';
+import { ensureCover } from './covers';
 import { lookup } from './openlibrary';
 import { fromBase64, toBase64 } from './bytes';
 
@@ -124,6 +125,7 @@ export async function createBookFromFile(lib: Library, file: VaultFile): Promise
     { status: 'to_read' },
   );
   await lib.linkFile(file.id, book.id);
+  void ensureCover(lib, book);
   return book;
 }
 

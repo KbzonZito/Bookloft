@@ -100,22 +100,31 @@ export async function createBackup(
   json.push(strToU8(JSON.stringify(backup)), true);
   await flush();
 
+  const addFile = async (path: string) => {
+    let bytes: Uint8Array;
+    try {
+      const { data } = await Filesystem.readFile({ path, directory: Directory.Data });
+      bytes =
+        typeof data === 'string' ? fromBase64(data) : new Uint8Array(await data.arrayBuffer());
+    } catch {
+      return false;
+    }
+    const entry = new ZipPassThrough(path);
+    zip.add(entry);
+    entry.push(bytes, true);
+    await flush();
+    return true;
+  };
+
+  // Las portadas propias pesan poco y no se pueden volver a descargar: van en todo respaldo
+  for (const book of backup.books) {
+    if (book.cover_path?.startsWith('covers/')) await addFile(book.cover_path);
+  }
+
   let missing = 0;
   if (withFiles) {
     for (const file of backup.files.filter((f) => !f.deleted_at)) {
-      let bytes: Uint8Array;
-      try {
-        const { data } = await Filesystem.readFile({ path: file.path, directory: Directory.Data });
-        bytes =
-          typeof data === 'string' ? fromBase64(data) : new Uint8Array(await data.arrayBuffer());
-      } catch {
-        missing++;
-        continue;
-      }
-      const entry = new ZipPassThrough(file.path);
-      zip.add(entry);
-      entry.push(bytes, true);
-      await flush();
+      if (!(await addFile(file.path))) missing++;
     }
   }
 
@@ -259,7 +268,7 @@ export async function restoreBackup(
   try {
     json = strFromU8(await readZipEntry(source, jsonEntry));
     // De a un archivo: solo uno de la bóveda está en memoria a la vez
-    for (const entry of entries.filter((e) => /^vault\/[^/]+$/.test(e.name))) {
+    for (const entry of entries.filter((e) => /^(vault|covers)\/[^/]+$/.test(e.name))) {
       if (await exists(entry.name)) continue;
       await Filesystem.writeFile({
         path: entry.name,

@@ -149,3 +149,24 @@ export function titleLines(lines: OcrLine[], max = 3): string[] {
   }
   return out.slice(0, max);
 }
+
+/**
+ * Separa la saga cuando viene pegada al título: "The Final Empire (Mistborn, #1)",
+ * "Golden Son (Red Rising Saga, Book 2)", "El pozo de la ascensión (Nacidos de la bruma 2)".
+ */
+export function splitSeries(title: string): {
+  title: string;
+  series: string | null;
+  index: number | null;
+} {
+  const m =
+    title.match(
+      /^(.+?)\s*[([]\s*([^()[\]]+?)[,:]?\s*(?:#|n\.?º\s*|book\s+|libro\s+|vol\.?\s*|tomo\s+)(\d+(?:[.,]\d+)?)\s*[)\]]\s*$/i,
+    ) ?? title.match(/^(.+?)\s*\(\s*([^()]+?)\s+(\d+(?:[.,]\d+)?)\s*\)\s*$/);
+  if (!m) return { title, series: null, index: null };
+  return {
+    title: m[1].trim(),
+    series: m[2].trim(),
+    index: Number.parseFloat(m[3].replace(',', '.')),
+  };
+}

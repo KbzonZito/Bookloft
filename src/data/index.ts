@@ -16,3 +16,10 @@ export async function openLibrary(): Promise<Library> {
 export { Library } from './library';
 export { exportJson, importJson, type BackupV1, type ImportResult } from './backup';
 export * from './types';
+export {
+  importBooks,
+  parseJsonBooks,
+  parseMarkdown,
+  type ImportedBook,
+  type NotesImportResult,
+} from './import-notes';

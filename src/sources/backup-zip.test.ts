@@ -31,6 +31,7 @@ vi.mock('@capacitor/filesystem', () => ({
 vi.mock('@capacitor/file-viewer', () => ({ FileViewer: {} }));
 vi.mock('@capacitor/share', () => ({ Share: {} }));
 vi.mock('./openlibrary', () => ({ lookup: vi.fn(async () => null) }));
+vi.mock('./covers', () => ({ ensureCover: vi.fn(async () => {}) }));
 
 const { createBackup, restoreBackup, RestoreError } = await import('./backup-zip');
 const { importToVault } = await import('./vault');

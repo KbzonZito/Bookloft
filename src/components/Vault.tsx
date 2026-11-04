@@ -17,7 +17,6 @@ import {
 } from '../sources/vault';
 import { spring } from '../ui/motion';
 import { Cover } from './Cover';
-import { Sheet } from './Sheet';
 
 export const ACCEPT = '.epub,.pdf,application/epub+zip,application/pdf';
 
@@ -75,11 +74,9 @@ export function useImport(toast: (m: string) => void) {
 }
 
 export function Vault({
-  onClose,
   onOpenBook,
   toast,
 }: {
-  onClose: () => void;
   onOpenBook: (b: Book) => void;
   toast: (m: string, action?: { label: string; run: () => void }) => void;
 }) {
@@ -102,78 +99,71 @@ export function Vault({
   const total = (files ?? []).reduce((n, f) => n + f.size, 0);
 
   return (
-    <Sheet label={t('vault.title')} onClose={onClose} className="form-sheet vault-sheet">
-      <div className="vault">
-        <div className="vault-head">
-          <div>
-            <h1 className="sheet-title">{t('vault.title')}</h1>
-            {files && files.length > 0 && (
-              <p className="hint">
-                {files.length === 1
-                  ? t('vault.summary1', { size: formatSize(total) })
-                  : t('vault.summary', { n: files.length, size: formatSize(total) })}
-              </p>
-            )}
-          </div>
-          <button
-            className="button primary"
-            onClick={() => input.current?.click()}
-            disabled={!!busy}
-          >
-            <Plus size={18} strokeWidth={2} aria-hidden />
-            {t('vault.add')}
-          </button>
-          <input
-            ref={input}
-            type="file"
-            accept={ACCEPT}
-            multiple
-            hidden
-            onChange={(e) => {
-              const list = [...(e.target.files ?? [])];
-              e.target.value = '';
-              if (list.length) void importFiles(list, { books });
-            }}
-          />
+    <div className="vault">
+      <div className="vault-head">
+        <div>
+          {files && files.length > 0 && (
+            <p className="hint">
+              {files.length === 1
+                ? t('vault.summary1', { size: formatSize(total) })
+                : t('vault.summary', { n: files.length, size: formatSize(total) })}
+            </p>
+          )}
         </div>
-
-        {busy && <p className="hint pulse">{busy}</p>}
-        {files && files.length === 0 && !busy && <p className="empty-shelf">{t('vault.empty')}</p>}
-        {files && files.length > 6 && (
-          <input
-            className="field"
-            type="search"
-            value={filter}
-            placeholder={t('vault.filter')}
-            aria-label={t('vault.filter')}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-        )}
-
-        <ul className="files">
-          <AnimatePresence initial={false}>
-            {shown.map((f) => (
-              <motion.li
-                key={f.id}
-                layout
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -40, transition: { duration: 0.18 } }}
-                transition={spring.sheet}
-              >
-                <FileRow
-                  file={f}
-                  book={f.book_id ? byId.get(f.book_id) : undefined}
-                  books={books}
-                  onOpenBook={onOpenBook}
-                  toast={toast}
-                />
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ul>
+        <button className="button primary" onClick={() => input.current?.click()} disabled={!!busy}>
+          <Plus size={18} strokeWidth={2} aria-hidden />
+          {t('vault.add')}
+        </button>
+        <input
+          ref={input}
+          type="file"
+          accept={ACCEPT}
+          multiple
+          hidden
+          onChange={(e) => {
+            const list = [...(e.target.files ?? [])];
+            e.target.value = '';
+            if (list.length) void importFiles(list, { books });
+          }}
+        />
       </div>
-    </Sheet>
+
+      {busy && <p className="hint pulse">{busy}</p>}
+      {files && files.length === 0 && !busy && <p className="empty-shelf">{t('vault.empty')}</p>}
+      {files && files.length > 6 && (
+        <input
+          className="field"
+          type="search"
+          value={filter}
+          placeholder={t('vault.filter')}
+          aria-label={t('vault.filter')}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      )}
+
+      <ul className="files">
+        <AnimatePresence initial={false}>
+          {shown.map((f) => (
+            <motion.li
+              key={f.id}
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -40, transition: { duration: 0.18 } }}
+              transition={spring.sheet}
+            >
+              <FileRow
+                file={f}
+                book={f.book_id ? byId.get(f.book_id) : undefined}
+                books={books}
+                onOpenBook={onOpenBook}
+                toast={toast}
+              />
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </ul>
+    </div>
   );
 }
 

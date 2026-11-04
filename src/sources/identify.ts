@@ -4,6 +4,7 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { TextRecognition } from '@capacitor-mlkit/text-recognition';
 import type { Candidate, IdentifyMethod } from '../data';
 import { AiError, extractBooks } from './ai';
+import { appleCovers } from './covers';
 import { inboxImageUri, readInboxImage } from './images';
 import { byIsbn, lookup, mergeCandidates, search } from './openlibrary';
 import { findIsbns, findUrls, guessQueries, titleLines, type OcrLine } from './text';
@@ -79,6 +80,20 @@ async function fromIsbns(isbns: string[]): Promise<Candidate[]> {
   return found.filter((c): c is Candidate => c !== null);
 }
 
+/** Como Promise.all, pero con a lo más `limit` tareas a la vez y el orden original */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>) {
+  const out: R[] = Array.from({ length: items.length });
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
 const aiMessage = (e: unknown) => (e instanceof AiError ? e.kind : 'other');
 
 export async function identify({
@@ -108,23 +123,23 @@ export async function identify({
         ? { data: await readInboxImage(imagePath), mediaType: 'image/jpeg' as const }
         : undefined;
       const books = await extractBooks(apiKey, { text: shared || undefined, image });
-      const resolved = await Promise.all(
-        books.slice(0, 6).map(async (b) => {
-          const found = await lookup(b.title, b.author).catch(() => null);
-          // Si Open Library no lo conoce, igual se propone con lo que leyó la IA
-          return (
-            found ?? {
-              title: b.title,
-              authors: b.author ? [b.author] : [],
-              year: null,
-              cover_url: null,
-              ol_key: null,
-              isbn: null,
-              pages: null,
-            }
-          );
-        }),
-      );
+      // Una foto de una repisa puede traer muchos libros: se resuelven de a tres para que
+      // Open Library no corte, y lo que no conozca se propone igual con lo que leyó la IA
+      const resolved = await mapLimit(books.slice(0, 24), 3, async (b) => {
+        const found = await lookup(b.title, b.author).catch(() => null);
+        if (found) return found;
+        const fallback: Candidate = {
+          title: b.title,
+          authors: b.author ? [b.author] : [],
+          year: null,
+          cover_url: null,
+          ol_key: null,
+          isbn: null,
+          pages: null,
+        };
+        const [cover] = await appleCovers(b.title, b.author, 5).catch(() => []);
+        return cover ? { ...fallback, cover_url: cover.url } : fallback;
+      });
       const queries = books.map((b) => [b.title, b.author].filter(Boolean).join(' '));
       if (resolved.length) {
         return { candidates: mergeCandidates([resolved]), method: 'ai', queries, error: null };

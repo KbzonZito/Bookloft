@@ -5,6 +5,7 @@ import { listenForShares } from './app/inbox';
 import { LibraryProvider } from './app/library';
 import { openLibrary } from './data';
 import { systemLang, translate } from './i18n';
+import { initLocalCovers } from './sources/covers';
 import { purgeDeletedFiles } from './sources/vault';
 import './ui/theme.css';
 import './ui/app.css';
@@ -13,8 +14,8 @@ const root = createRoot(document.getElementById('root')!);
 // La primera vez, crear la base tarda unos segundos: que se note que la app está viva
 root.render(<p className="loading">{translate(systemLang(), 'app.loading')}</p>);
 
-openLibrary().then(
-  (lib) => {
+Promise.all([openLibrary(), initLocalCovers()]).then(
+  ([lib]) => {
     // Lo antes posible: si la app se abrió desde "Compartir", el plugin entrega lo compartido ahora
     listenForShares(lib);
     void purgeDeletedFiles(lib);

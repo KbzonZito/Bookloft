@@ -18,8 +18,11 @@ export interface ExtractInput {
 }
 
 const SYSTEM = `Identificas libros en publicaciones de redes sociales (posts, reels, pantallazos, descripciones).
-Devuelve cada libro mencionado o cuya portada se vea, con su título y autor si se conoce.
-- Usa el título tal como se ve; si es una traducción conocida, prefiere el título original.
+Devuelve TODOS los libros mencionados o que se vean (portadas, lomos en una repisa, listas), con su título y autor.
+- Revisa la imagen completa: en una foto de una repisa o de una pila, cada lomo es un libro; no te saltes ninguno.
+- Usa el título tal como se ve, en el idioma en que aparece; no lo traduzcas.
+- Si el autor no se lee pero conoces el libro con certeza, escríbelo; si no, déjalo en null.
+- Si el título incluye la saga (por ejemplo "Libro 2 de..."), deja solo el título del libro.
 - No inventes libros: si no hay ninguno claro, devuelve una lista vacía.
 - Ignora hashtags, nombres de cuentas y textos promocionales que no sean libros.`;
 
@@ -108,7 +111,11 @@ export async function extractBooks(apiKey: string, input: ExtractInput): Promise
       max_tokens: 4000,
       system: SYSTEM,
       messages: [{ role: 'user', content }],
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
+      // Una imagen pide mirar con más cuidado (lomos chicos, repisas): con esfuerzo bajo se saltaba libros
+      output_config: {
+        effort: input.image ? 'medium' : 'low',
+        format: { type: 'json_schema', schema: SCHEMA },
+      },
     });
     // Haiku 5.5 no tiene modelo de respaldo: si se niega, no hay libros que proponer
     if (response.stop_reason === 'refusal') return [];
@@ -133,4 +140,66 @@ export async function testApiKey(apiKey: string): Promise<void> {
   } catch (error) {
     throw toAiError(error);
   }
+}
+
+export interface SeriesGuess {
+  id: string;
+  series: string | null;
+  index: number | null;
+}
+
+const SERIES_SYSTEM = `Eres bibliotecario. Para cada libro de la lista, indica la saga o serie a la que pertenece y su número de orden dentro de ella.
+- Usa el nombre más conocido de la saga, en el mismo idioma del título del libro (Mistborn / Nacidos de la bruma).
+- Para el número usa el orden de publicación habitual; las novelas cortas o precuelas pueden llevar decimales (2.5).
+- Si el libro es autoconclusivo o no estás seguro, devuelve series null e index null. No inventes.
+- Devuelve exactamente un elemento por cada id recibido.`;
+
+const SERIES_SCHEMA = {
+  type: 'object',
+  properties: {
+    books: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          series: { type: ['string', 'null'] },
+          index: { type: ['number', 'null'] },
+        },
+        required: ['id', 'series', 'index'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['books'],
+  additionalProperties: false,
+};
+
+/** Pregunta a Claude a qué saga pertenece cada libro (de a 60 por llamada) */
+export async function inferSeries(
+  apiKey: string,
+  books: { id: string; title: string; author: string | null }[],
+): Promise<SeriesGuess[]> {
+  const out: SeriesGuess[] = [];
+  for (let i = 0; i < books.length; i += 60) {
+    const chunk = books.slice(i, i + 60);
+    const list = chunk.map((b) => `${b.id} | ${b.title} | ${b.author ?? '?'}`).join('\n');
+    try {
+      const response = await client(apiKey).messages.create({
+        model: AI_MODEL,
+        max_tokens: 8000,
+        system: SERIES_SYSTEM,
+        messages: [{ role: 'user', content: `id | título | autor\n${list}` }],
+        output_config: { effort: 'low', format: { type: 'json_schema', schema: SERIES_SCHEMA } },
+      });
+      const text = response.content.find((b) => b.type === 'text');
+      if (!text || text.type !== 'text') continue;
+      const ids = new Set(chunk.map((b) => b.id));
+      const parsed = JSON.parse(text.text) as { books: SeriesGuess[] };
+      out.push(...parsed.books.filter((g) => ids.has(g.id)));
+    } catch (error) {
+      throw toAiError(error);
+    }
+  }
+  return out;
 }

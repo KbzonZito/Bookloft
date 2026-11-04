@@ -4,6 +4,7 @@ import {
   Check,
   Inbox as InboxIcon,
   LayoutGrid,
+  LibraryBig,
   Plus,
   Rows3,
   Search,
@@ -11,7 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useAllBooks, useLibrary, useSetting } from './app/library';
 import { useWindowSize } from './app/layout';
 import { haptic, setSystemBars, useBack } from './app/native';
@@ -22,6 +23,7 @@ import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { BookGrid } from './components/BookGrid';
 import { Inbox } from './components/Inbox';
+import { NavBar } from './components/NavBar';
 import { Vault } from './components/Vault';
 import { Settings, type LangSetting, type ThemeSetting } from './components/Settings';
 import { ShelfTabs } from './components/ShelfTabs';
@@ -32,6 +34,7 @@ import { daysSinceBackup } from './sources/backup-zip';
 import { fade, spring } from './ui/motion';
 
 type View = 'covers' | 'authors';
+type Tab = 'library' | 'search' | 'vault' | 'settings';
 
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 
@@ -87,16 +90,15 @@ function Shell({
   const [direction, setDirection] = useState(0);
   const [view, setView] = useState<View>('covers');
   const [sorts, setSorts] = useState<Partial<Record<Status, Sort>>>({});
+  const [tab, setTab] = useState<Tab>('library');
   const [query, setQuery] = useState('');
-  const [searching, setSearching] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
-  // Ajustes abiertos; con ai: true, directo a conectar la API key
-  const [settings, setSettings] = useState<false | { ai: boolean }>(false);
+  // Ajustes abiertos desde un error de la IA: directo a conectar la API key
+  const [aiFocus, setAiFocus] = useState(false);
   const [inbox, setInbox] = useState(false);
-  const [vault, setVault] = useState(false);
   const pending = usePendingInbox();
 
   const [toast, setToastState] = useState<ToastMessage | null>(null);
@@ -118,7 +120,7 @@ function Shell({
         setOpenId(null);
         setAdding(false);
         if (outcome.to === 'inbox') return setInbox(true);
-        setVault(true);
+        setTab('vault');
         showToast(
           outcome.files
             .map((f) =>
@@ -130,11 +132,13 @@ function Shell({
     [showToast],
   );
 
-  // Un recordatorio suave para respaldar: con 10 libros o más, si pasó un mes, una vez por semana
+  // Un recordatorio suave para respaldar: con 10 libros o más, si pasó un mes, una vez por semana.
+  // Solo al abrir la app: si no, tapaba el aviso de una importación que pasaba de 10 libros.
   const reminded = useRef(false);
   useEffect(() => {
-    if (!books || books.length < 10 || reminded.current) return;
+    if (!books || reminded.current) return;
     reminded.current = true;
+    if (books.length < 10) return;
     void (async () => {
       const days = await daysSinceBackup(lib);
       const last = await lib.getSetting<string | null>('backup_reminded_at', null);
@@ -143,7 +147,7 @@ function Shell({
         await lib.setSetting('backup_reminded_at', new Date().toISOString());
         showToast(tRef.current('backup.remind'), {
           label: tRef.current('backup.remindAction'),
-          run: () => setSettings({ ai: false }),
+          run: () => setTab('settings'),
         });
       }
     })();
@@ -164,15 +168,18 @@ function Shell({
   }, [books]);
 
   const sort = sorts[shelf] ?? defaultSort(shelf);
-  const searchActive = searching && query.trim() !== '';
-  const shown = useMemo(() => {
-    if (!books) return [];
-    if (searchActive) return sortBooks(searchBooks(books, query), 'title');
-    return sortBooks(
-      books.filter((b) => b.status === shelf),
-      sort,
-    );
-  }, [books, shelf, sort, query, searchActive]);
+  const shown = useMemo(
+    () =>
+      sortBooks(
+        (books ?? []).filter((b) => b.status === shelf),
+        sort,
+      ),
+    [books, shelf, sort],
+  );
+  const found = useMemo(
+    () => (books && query.trim() ? sortBooks(searchBooks(books, query), 'title') : []),
+    [books, query],
+  );
 
   const openBook = books?.find((b) => b.id === openId) ?? null;
   // La portada recibe su layoutId al apoyar el dedo; Motion la mide mientras tanto y al soltar
@@ -225,29 +232,31 @@ function Shell({
         const res = await fetch('/seed/biblioteca-dev.json');
         if (!res.ok) return showToast('Falta seed/: npm run seed');
         const r = await importJson(lib, await res.json());
-        setSettings(false);
+        setTab('library');
         showToast(
           t('settings.imported', { added: r.added, updated: r.updated, invalid: r.invalid }),
         );
       }
     : undefined;
 
-  useBack(searching && openId === null, () => {
-    setSearching(false);
-    setQuery('');
-  });
+  // Atrás en otra pestaña vuelve a la biblioteca
+  useBack(tab !== 'library' && openId === null, () => setTab('library'));
+
+  const go = (next: Tab) => {
+    setAiFocus(false);
+    if (next === tab && next === 'library') window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTab(next);
+  };
 
   if (!books) return <div className="loading">{t('app.loading')}</div>;
 
   const expanded = size === 'expanded';
-  const content =
+  const libraryContent =
     books.length === 0 ? (
       <EmptyLibrary onAdd={() => setAdding(true)} onSample={loadSample} />
     ) : shown.length === 0 ? (
-      <p className="empty-shelf">
-        {searchActive ? t('app.noResults', { q: query.trim() }) : t(`empty.${shelf}`)}
-      </p>
-    ) : view === 'authors' && !searchActive ? (
+      <p className="empty-shelf">{t(`empty.${shelf}`)}</p>
+    ) : view === 'authors' ? (
       <AuthorList
         books={shown}
         activeId={activeId}
@@ -260,168 +269,132 @@ function Shell({
         books={shown}
         activeId={activeId}
         openId={openId}
-        showStatus={searchActive}
         onPrepare={onPrepare}
         onOpen={onOpen}
       />
     );
 
-  const toolbar = books.length > 0 && (
-    <Toolbar
-      count={shown.length}
-      searchActive={searchActive}
-      view={view}
-      setView={setView}
-      sort={sort}
-      setSort={(s) => setSorts((m) => ({ ...m, [shelf]: s }))}
-    />
-  );
-
-  const search = (
-    <SearchField
-      query={query}
-      setQuery={setQuery}
-      autoFocus={!expanded}
-      onClose={() => {
-        setSearching(false);
-        setQuery('');
-      }}
-    />
-  );
+  const screens: Record<Tab, ReactNode> = {
+    library: (
+      <>
+        {pending.length > 0 && (
+          <button className="inbox-banner" onClick={() => setInbox(true)}>
+            <InboxIcon size={18} strokeWidth={1.6} aria-hidden />
+            <span>{t('inbox.banner', { n: pending.length })}</span>
+          </button>
+        )}
+        {books.length > 0 && (
+          <Toolbar
+            count={shown.length}
+            view={view}
+            setView={setView}
+            sort={sort}
+            setSort={(s) => setSorts((m) => ({ ...m, [shelf]: s }))}
+          />
+        )}
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <motion.div
+            key={shelf}
+            className="shelf-page"
+            custom={direction}
+            variants={{
+              enter: (d: number) => ({ opacity: 0, x: d * 28 }),
+              center: { opacity: 1, x: 0 },
+              exit: (d: number) => ({ opacity: 0, x: d * -28, transition: { duration: 0.12 } }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={spring.sheet}
+            {...(!expanded && {
+              drag: 'x' as const,
+              dragDirectionLock: true,
+              dragConstraints: { left: 0, right: 0 },
+              dragElastic: 0.18,
+              dragSnapToOrigin: true,
+              onDragEnd: onSwipe,
+            })}
+          >
+            {libraryContent}
+          </motion.div>
+        </AnimatePresence>
+      </>
+    ),
+    search: (
+      <>
+        <SearchField query={query} setQuery={setQuery} />
+        {!query.trim() ? (
+          <p className="hint search-hint">{t('search.hint')}</p>
+        ) : found.length === 0 ? (
+          <p className="empty-shelf">{t('app.noResults', { q: query.trim() })}</p>
+        ) : (
+          <>
+            <p className="toolbar-count search-count">{t('app.results', { n: found.length })}</p>
+            <BookGrid
+              books={found}
+              activeId={activeId}
+              openId={openId}
+              showStatus
+              onPrepare={onPrepare}
+              onOpen={onOpen}
+            />
+          </>
+        )}
+      </>
+    ),
+    vault: <Vault toast={showToast} onOpenBook={onOpen} />,
+    settings: (
+      <Settings
+        aiFocus={aiFocus}
+        theme={theme}
+        setTheme={setTheme}
+        lang={lang}
+        setLang={setLang}
+        toast={showToast}
+        onLoadSample={loadSample}
+      />
+    ),
+  };
 
   return (
     <LayoutGroup>
       <div className={`app ${size} ${openBook && expanded ? 'with-detail' : ''}`}>
-        {expanded ? (
-          <aside className="rail">
-            <h1 className="wordmark">{t('app.name')}</h1>
-            <div onFocus={() => setSearching(true)}>{search}</div>
-            <ShelfTabs
-              active={searchActive ? null : shelf}
-              counts={counts}
-              orientation="vertical"
-              onSelect={(s) => {
-                setSearching(false);
-                setQuery('');
-                goTo(s);
-              }}
-            />
-            <button className="rail-link" onClick={() => setVault(true)}>
-              <Archive size={18} strokeWidth={1.5} aria-hidden />
-              {t('vault.title')}
-            </button>
-            <div className="rail-actions">
-              <button className="button primary" onClick={() => setAdding(true)}>
-                <Plus size={18} strokeWidth={2} aria-hidden />
-                {t('app.add')}
-              </button>
-              {pending.length > 0 && (
-                <button
-                  className="icon-button inbox-button"
-                  onClick={() => setInbox(true)}
-                  aria-label={t('inbox.open', { n: pending.length })}
-                >
-                  <InboxIcon size={20} strokeWidth={1.5} />
-                  <span className="badge">{pending.length}</span>
-                </button>
-              )}
-              <button
-                className="icon-button"
-                onClick={() => setSettings({ ai: false })}
-                aria-label={t('app.settings')}
-              >
-                <Settings2 size={20} strokeWidth={1.5} />
-              </button>
-            </div>
-          </aside>
-        ) : (
+        <NavBar
+          tabs={[
+            { id: 'library', icon: LibraryBig, badge: pending.length },
+            { id: 'search', icon: Search },
+            { id: 'vault', icon: Archive },
+            { id: 'settings', icon: Settings2 },
+          ]}
+          active={tab}
+          onSelect={go}
+          label={(id) => t(`tab.${id}`)}
+          onAdd={() => setAdding(true)}
+          addLabel={t('app.add')}
+        />
+
+        <div className="screen">
           <header className="topbar">
-            <div className="topbar-row">
-              {searching ? (
-                search
-              ) : (
-                <>
-                  <h1 className="wordmark">{t('app.name')}</h1>
-                  {pending.length > 0 && (
-                    <button
-                      className="icon-button inbox-button"
-                      onClick={() => setInbox(true)}
-                      aria-label={t('inbox.open', { n: pending.length })}
-                    >
-                      <InboxIcon size={20} strokeWidth={1.5} />
-                      <span className="badge">{pending.length}</span>
-                    </button>
-                  )}
-                  <button
-                    className="icon-button"
-                    onClick={() => setVault(true)}
-                    aria-label={t('vault.openVault')}
-                  >
-                    <Archive size={20} strokeWidth={1.5} />
-                  </button>
-                  <button
-                    className="icon-button"
-                    onClick={() => setSearching(true)}
-                    aria-label={t('app.search')}
-                  >
-                    <Search size={20} strokeWidth={1.5} />
-                  </button>
-                  <button
-                    className="icon-button"
-                    onClick={() => setSettings({ ai: false })}
-                    aria-label={t('app.settings')}
-                  >
-                    <Settings2 size={20} strokeWidth={1.5} />
-                  </button>
-                </>
-              )}
-            </div>
-            {!searchActive && <ShelfTabs active={shelf} counts={counts} onSelect={goTo} />}
+            {tab === 'library' ? (
+              <ShelfTabs active={shelf} counts={counts} onSelect={goTo} />
+            ) : (
+              <h1 className="screen-title">{t(`tab.${tab}`)}</h1>
+            )}
           </header>
-        )}
-
-        <main className="main">
-          {toolbar}
-          <AnimatePresence mode="wait" initial={false} custom={direction}>
-            <motion.div
-              key={searchActive ? 'search' : shelf}
-              className="shelf-page"
-              custom={direction}
-              variants={{
-                enter: (d: number) => ({ opacity: 0, x: d * 28 }),
-                center: { opacity: 1, x: 0 },
-                exit: (d: number) => ({ opacity: 0, x: d * -28, transition: { duration: 0.12 } }),
-              }}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={spring.sheet}
-              {...(!expanded &&
-                !searchActive && {
-                  drag: 'x' as const,
-                  dragDirectionLock: true,
-                  dragConstraints: { left: 0, right: 0 },
-                  dragElastic: 0.18,
-                  dragSnapToOrigin: true,
-                  onDragEnd: onSwipe,
-                })}
-            >
-              {content}
-            </motion.div>
-          </AnimatePresence>
-        </main>
-
-        {!expanded && books.length > 0 && (
-          <motion.button
-            className="fab"
-            onClick={() => setAdding(true)}
-            aria-label={t('app.add')}
-            whileTap={{ scale: 0.92 }}
-            transition={spring.snappy}
-          >
-            <Plus size={24} strokeWidth={2} />
-          </motion.button>
-        )}
+          <main className="main">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={tab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                transition={spring.sheet}
+              >
+                {screens[tab]}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
 
         <AnimatePresence>
           {openBook &&
@@ -457,19 +430,8 @@ function Shell({
               onAdded={(message, addedTo) => {
                 setAdding(false);
                 showToast(message);
-                setSearching(false);
-                setQuery('');
+                setTab('library');
                 goTo(addedTo);
-              }}
-            />
-          )}
-          {vault && (
-            <Vault
-              onClose={() => setVault(false)}
-              toast={showToast}
-              onOpenBook={(b) => {
-                setVault(false);
-                onOpen(b);
               }}
             />
           )}
@@ -478,20 +440,9 @@ function Shell({
               onClose={() => setInbox(false)}
               onOpenAi={() => {
                 setInbox(false);
-                setSettings({ ai: true });
+                setAiFocus(true);
+                setTab('settings');
               }}
-            />
-          )}
-          {settings && (
-            <Settings
-              aiFocus={settings.ai}
-              theme={theme}
-              setTheme={setTheme}
-              lang={lang}
-              setLang={setLang}
-              onClose={() => setSettings(false)}
-              toast={showToast}
-              onLoadSample={loadSample}
             />
           )}
         </AnimatePresence>
@@ -502,55 +453,41 @@ function Shell({
   );
 }
 
-function SearchField({
-  query,
-  setQuery,
-  autoFocus,
-  onClose,
-}: {
-  query: string;
-  setQuery: (q: string) => void;
-  autoFocus: boolean;
-  onClose: () => void;
-}) {
+function SearchField({ query, setQuery }: { query: string; setQuery: (q: string) => void }) {
   const { t } = useI18n();
   return (
-    <motion.div
-      className="search"
-      initial={autoFocus ? { opacity: 0, scaleX: 0.92 } : false}
-      animate={{ opacity: 1, scaleX: 1 }}
-      transition={spring.snappy}
-      style={{ originX: 1 }}
-    >
+    <div className="search search-screen">
       <Search size={18} strokeWidth={1.5} aria-hidden />
       <input
         type="search"
         value={query}
         placeholder={t('app.search')}
         aria-label={t('app.search')}
-        autoFocus={autoFocus}
+        autoFocus
         enterKeyHint="search"
         onChange={(e) => setQuery(e.target.value)}
       />
-      {(autoFocus || query) && (
-        <button className="icon-button small" onClick={onClose} aria-label={t('app.closeSearch')}>
+      {query && (
+        <button
+          className="icon-button small"
+          onClick={() => setQuery('')}
+          aria-label={t('app.closeSearch')}
+        >
           <X size={18} strokeWidth={1.5} />
         </button>
       )}
-    </motion.div>
+    </div>
   );
 }
 
 function Toolbar({
   count,
-  searchActive,
   view,
   setView,
   sort,
   setSort,
 }: {
   count: number;
-  searchActive: boolean;
   view: View;
   setView: (v: View) => void;
   sort: Sort;
@@ -562,13 +499,9 @@ function Toolbar({
   return (
     <div className="toolbar">
       <span className="toolbar-count">
-        {searchActive
-          ? t('app.results', { n: count })
-          : count === 1
-            ? t('app.book')
-            : t('app.books', { n: count })}
+        {count === 1 ? t('app.book') : t('app.books', { n: count })}
       </span>
-      {!searchActive && (
+      {
         <>
           <button
             className="icon-button"
@@ -629,7 +562,7 @@ function Toolbar({
             </AnimatePresence>
           </div>
         </>
-      )}
+      }
     </div>
   );
 }

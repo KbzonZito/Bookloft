@@ -1,6 +1,7 @@
 // Portada de un libro: la imagen de Open Library o, si no hay, una tela de encuadernación con el título
 import { memo, useEffect, useState } from 'react';
 import type { Book } from '../data';
+import { localCoverSrc } from '../sources/covers';
 
 // Telas apagadas, para que las portadas sin imagen no griten más que las reales
 const CLOTH = [
@@ -30,13 +31,27 @@ export function coverSrc(url: string | null, size: 'M' | 'L' = 'M') {
   return sized.includes('?') ? sized : `${sized}?default=false`;
 }
 
+/** La portada que se muestra: la propia (imagen del teléfono) gana sobre la de internet */
+export function bookCover(book: Pick<Book, 'cover_url' | 'cover_path'>, size: 'M' | 'L' = 'M') {
+  return localCoverSrc(book.cover_path ?? null) ?? coverSrc(book.cover_url, size);
+}
+
+/**
+ * Solo las fuentes conocidas responden con CORS: con ellas se pide la imagen "anónima" para poder
+ * leer su color. Un link pegado de otro sitio se muestra igual, sin tinte.
+ */
+const CORS_HOSTS =
+  /^(https:\/\/(covers\.openlibrary\.org|archive\.org|[\w-]+\.mzstatic\.com|localhost)\/|data:)/;
+const crossOriginFor = (src: string) => (CORS_HOSTS.test(src) ? 'anonymous' : undefined);
+
 // Color dominante de cada portada, calculado una vez por sesión
 const colors = new Map<string, Promise<string | null>>();
 
 /** Promedio de la imagen, pesando más los píxeles con color: así el gris del fondo no gana */
 export function coverColor(book: Book): Promise<string | null> {
-  const src = coverSrc(book.cover_url);
+  const src = bookCover(book);
   if (!src) return Promise.resolve(clothColor(book.title));
+  if (!crossOriginFor(src)) return Promise.resolve(null);
   let p = colors.get(src);
   if (!p) {
     p = new Promise((resolve) => {
@@ -83,7 +98,7 @@ export function useCoverColor(book: Book) {
     return () => {
       alive = false;
     };
-  }, [book.cover_url, book.title]);
+  }, [book.cover_url, book.cover_path, book.title]);
   return color;
 }
 
@@ -96,12 +111,16 @@ export const Cover = memo(function Cover({
   size?: 'M' | 'L';
   eager?: boolean;
 }) {
-  const src = coverSrc(book.cover_url, size);
-  const [failed, setFailed] = useState(false);
+  const src = bookCover(book, size);
+  // Por URL: si se cambia la portada, la nueva vuelve a intentarse aunque la anterior fallara
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const failed = failedSrc === src;
   // La L tarda en llegar: mientras tanto se muestra la M que ya está en caché
-  const [loaded, setLoaded] = useState(size === 'M');
+  const loaded = size === 'M' || loadedSrc === src;
   const showImage = src && !failed;
-  const placeholder = size === 'L' ? coverSrc(book.cover_url, 'M') : null;
+  const medium = bookCover(book, 'M');
+  const placeholder = size === 'L' && medium !== src ? medium : null;
 
   return (
     <div
@@ -112,17 +131,24 @@ export const Cover = memo(function Cover({
       {showImage ? (
         <>
           {placeholder && !loaded && (
-            <img src={placeholder} alt="" draggable={false} crossOrigin="anonymous" />
+            <img
+              src={placeholder}
+              alt=""
+              draggable={false}
+              crossOrigin={crossOriginFor(placeholder)}
+            />
           )}
           <img
             src={src}
             alt=""
             draggable={false}
-            crossOrigin="anonymous"
+            crossOrigin={crossOriginFor(src)}
             loading={eager ? 'eager' : 'lazy'}
             decoding="async"
-            onError={() => setFailed(true)}
-            onLoad={(e) => (e.currentTarget.naturalWidth < 10 ? setFailed(true) : setLoaded(true))}
+            onError={() => setFailedSrc(src)}
+            onLoad={(e) =>
+              e.currentTarget.naturalWidth < 10 ? setFailedSrc(src) : setLoadedSrc(src)
+            }
             style={loaded ? undefined : { opacity: 0 }}
           />
         </>

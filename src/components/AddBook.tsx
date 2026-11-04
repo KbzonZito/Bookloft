@@ -9,6 +9,7 @@ import { SHELVES } from '../app/shelves';
 import type { Candidate, Status } from '../data';
 import { useI18n } from '../i18n';
 import { byIsbn, search } from '../sources/openlibrary';
+import { ensureCover } from '../sources/covers';
 import { canScan, scanIsbn } from '../sources/scan';
 import { findIsbns, findUrls } from '../sources/text';
 import { fade } from '../ui/motion';
@@ -188,6 +189,7 @@ export function AddBook({
                 },
                 { status },
               );
+              if (!duplicate) void ensureCover(lib, book);
               onAdded(
                 duplicate
                   ? t('add.duplicate', { title: book.title })

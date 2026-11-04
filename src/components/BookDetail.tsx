@@ -1,14 +1,16 @@
 // Ficha del libro. La portada llega volando desde la cuadrícula (mismo layoutId) y la página
 // toma un tinte del color de esa portada.
-import { Paperclip, X } from 'lucide-react';
-import { motion } from 'motion/react';
+import { ImageUp, Paperclip, PenLine, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { useLibrary } from '../app/library';
 import { SHELVES } from '../app/shelves';
 import { STATUSES, type Book, type BookPatch } from '../data';
 import { useI18n } from '../i18n';
 import { fade, spring } from '../ui/motion';
 import { Rating, Segmented } from './Controls';
+import { CoverPicker, EditBook } from './BookEdit';
 import { Cover, useCoverColor } from './Cover';
 import { Sheet } from './Sheet';
 import { ACCEPT, FileRow, useFiles, useImport } from './Vault';
@@ -107,6 +109,8 @@ function Body({
     return () => clearTimeout(id);
   }, [note]);
   useEffect(() => setNote(book.note ?? ''), [book.id]);
+
+  const [editing, setEditing] = useState<'cover' | 'data' | null>(null);
 
   const [tag, setTag] = useState('');
   const addTag = () => {
@@ -207,6 +211,28 @@ function Body({
       </section>
 
       <BookFiles book={book} toast={toast} />
+
+      <section className="detail-edit">
+        <button className="button quiet" onClick={() => setEditing('cover')}>
+          <ImageUp size={16} strokeWidth={1.5} aria-hidden />
+          {t('cover.change')}
+        </button>
+        <button className="button quiet" onClick={() => setEditing('data')}>
+          <PenLine size={16} strokeWidth={1.5} aria-hidden />
+          {t('edit.title')}
+        </button>
+      </section>
+      {createPortal(
+        <AnimatePresence>
+          {editing === 'cover' && (
+            <CoverPicker key="cover" book={book} onClose={() => setEditing(null)} />
+          )}
+          {editing === 'data' && (
+            <EditBook key="data" book={book} toast={toast} onClose={() => setEditing(null)} />
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
 
       <dl className="facts">
         {facts.map(([k, v]) => (

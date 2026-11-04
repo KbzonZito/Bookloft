@@ -8,6 +8,7 @@ import type { Book, Candidate, Status } from '../data';
 import { normalize } from '../data/text';
 import { useI18n } from '../i18n';
 import { spring } from '../ui/motion';
+import { ensureCover } from '../sources/covers';
 import { Cover } from './Cover';
 
 const keyOf = (c: Candidate) =>
@@ -48,7 +49,8 @@ export function Candidates({
 
   async function add(c: Candidate) {
     haptic.tap();
-    const { book } = await lib.addBook(c, { status, source_url: sourceUrl ?? null });
+    const { book, duplicate } = await lib.addBook(c, { status, source_url: sourceUrl ?? null });
+    if (!duplicate) void ensureCover(lib, book);
     setAdded((s) => new Set(s).add(keyOf(c)));
     onAdded?.(book);
   }

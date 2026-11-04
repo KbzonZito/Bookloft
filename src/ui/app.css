@@ -14,7 +14,8 @@
 }
 
 .main {
-  padding: 0 var(--gutter) calc(112px + var(--safe-bottom));
+  /* Espacio para que la barra flotante no tape lo último */
+  padding: 0 var(--gutter) calc(120px + var(--safe-bottom));
 }
 
 .shelf-page {
@@ -28,7 +29,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  padding-top: var(--safe-top);
+  padding-top: calc(var(--safe-top) + 14px);
   background: color-mix(in srgb, var(--paper) 88%, transparent);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
@@ -350,6 +351,8 @@
   scrollbar-width: none;
   scroll-snap-type: x proximity;
   scroll-padding-inline: var(--gutter);
+  /* Al llegar al final de la tira, el impulso no mueve la pantalla ni cambia de estante */
+  overscroll-behavior-x: contain;
 }
 
 .series-strip::-webkit-scrollbar {
@@ -358,25 +361,6 @@
 
 .series-strip .book-cell {
   scroll-snap-align: start;
-}
-
-/* ---------- Botón flotante ---------- */
-
-.fab {
-  position: fixed;
-  right: 20px;
-  bottom: calc(24px + var(--safe-bottom));
-  z-index: 15;
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 20px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.12),
-    0 10px 24px -8px color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
 /* ---------- Búsqueda ---------- */
@@ -492,8 +476,14 @@
   font-weight: 450;
 }
 
-.form-sheet .add-form,
-.form-sheet .settings {
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding-top: 4px;
+}
+
+.form-sheet .add-form {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -845,45 +835,22 @@
 @media (min-width: 840px) {
   .app.expanded {
     display: grid;
-    grid-template-columns: 260px minmax(0, 1fr) 0;
+    grid-template-columns: 96px minmax(0, 1fr) 0;
     height: 100dvh;
     overflow: hidden;
   }
 
   .app.expanded.with-detail {
-    grid-template-columns: 260px minmax(0, 1fr) minmax(360px, 34vw);
+    grid-template-columns: 96px minmax(0, 1fr) minmax(360px, 34vw);
   }
 
-  .rail {
-    display: flex;
-    flex-direction: column;
-    padding: calc(28px + var(--safe-top)) 20px 20px 24px;
-    border-right: 1px solid var(--line);
-  }
-
-  .rail .wordmark {
-    flex: 0;
-    margin-bottom: 20px;
-    font-size: var(--t-xl);
-    color: var(--ink);
-  }
-
-  .rail .search {
-    background: var(--surface);
-    border: 1px solid var(--line);
-  }
-
-  .rail-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: auto;
+  .app.expanded .screen {
+    height: 100dvh;
+    overflow-y: auto;
   }
 
   .app.expanded .main {
-    height: 100dvh;
-    overflow-y: auto;
-    padding: calc(16px + var(--safe-top)) 32px 48px;
+    padding: 0 32px 48px;
   }
 
   .app.expanded .book-grid {
@@ -913,7 +880,7 @@
 
   .toast-layer {
     justify-content: flex-start;
-    left: 260px;
+    left: 96px;
     padding-left: 32px;
   }
 }
@@ -1375,20 +1342,10 @@
   color: var(--ink-2);
 }
 
-.rail-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-  padding: 8px 0 8px 18px;
-  font-family: var(--serif);
-  font-size: var(--t-lg);
-  color: var(--ink-2);
-}
-
 /* ---------- Respaldos ---------- */
 
-.backup-settings {
+.backup-settings,
+.library-tools {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -1414,4 +1371,323 @@
 
 .backup-actions .button {
   gap: 8px;
+}
+
+/* ---------- Barra de navegación (adaptada de Printer Hub) ---------- */
+
+.tabbar {
+  position: fixed;
+  z-index: 25;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 14px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  padding: 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 14px 34px -12px rgba(0, 0, 0, 0.4);
+}
+
+.tabbar button {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  min-width: 48px;
+  padding: 0 clamp(11px, 3.4vw, 15px);
+  border-radius: 999px;
+  color: var(--ink-2);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  transition: color 0.25s ease;
+}
+
+.tabbar button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tabbar button.active {
+  color: var(--accent);
+}
+
+.tabbar button.active::before {
+  opacity: 1;
+}
+
+.tabbar button svg {
+  flex-shrink: 0;
+}
+
+/* El nombre crece de 0 a su ancho medido (--label-w, lo pone NavBar.tsx) */
+.tab-label {
+  display: block;
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    max-width 0.4s cubic-bezier(0.2, 0, 0, 1),
+    margin-left 0.4s cubic-bezier(0.2, 0, 0, 1),
+    opacity 0.15s linear;
+}
+
+.tab-label > span {
+  /* ResizeObserver no mira elementos inline: así se vuelve a medir cuando carga la fuente */
+  display: inline-block;
+}
+
+.tabbar button.active .tab-label {
+  max-width: var(--label-w, 6em);
+  margin-left: 8px;
+  opacity: 1;
+  transition:
+    max-width 0.4s cubic-bezier(0.2, 0, 0, 1),
+    margin-left 0.4s cubic-bezier(0.2, 0, 0, 1),
+    opacity 0.3s linear 0.1s;
+}
+
+.tab-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.tabbar .tab-add {
+  margin-left: 4px;
+  width: 50px;
+  padding: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: transform 0.15s;
+}
+
+.tabbar .tab-add:active {
+  transform: scale(0.92);
+}
+
+/* ---------- Título de la pantalla actual ---------- */
+
+.screen-title {
+  margin: 0;
+  padding: 0 var(--gutter) 18px;
+  font-family: var(--serif);
+  font-size: var(--t-2xl);
+  font-weight: 420;
+  font-variation-settings: 'opsz' 60;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.search-screen {
+  flex: none;
+  height: 48px;
+  margin-bottom: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.search-hint {
+  margin: 8px 2px;
+}
+
+.search-count {
+  display: block;
+  margin: 0 0 10px;
+}
+
+.inbox-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 2px 0 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--ink);
+  font-size: var(--t-sm);
+  font-weight: 550;
+  text-align: left;
+}
+
+.inbox-banner svg {
+  color: var(--accent);
+}
+
+/* Que nada empuje la página hacia los lados (deslizar estantes, tiras de sagas) */
+html,
+body {
+  overflow-x: clip;
+}
+
+@media (min-width: 840px) {
+  .tabbar {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    gap: 10px;
+    width: 96px;
+    max-width: none;
+    height: 100dvh;
+    padding: calc(var(--safe-top) + 24px) 0 24px;
+    border-radius: 0;
+    background: var(--paper);
+    backdrop-filter: none;
+    box-shadow: none;
+    border-right: 1px solid var(--line);
+  }
+
+  .tabbar button {
+    flex-direction: column;
+    height: auto;
+    padding: 8px 0;
+    width: 72px;
+    gap: 4px;
+  }
+
+  .tab-label,
+  .tabbar button.active .tab-label {
+    max-width: none;
+    margin-left: 0;
+    opacity: 1;
+    font-size: var(--t-xs);
+  }
+
+  .tabbar .tab-add {
+    order: -1;
+    width: 56px;
+    height: 56px;
+    margin: 0 0 14px;
+    border-radius: 18px;
+  }
+
+  .app.expanded .main {
+    padding-bottom: 48px;
+  }
+}
+
+/* ---------- Editar libro y cambiar portada ---------- */
+
+.detail-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-edit .button {
+  gap: 6px;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.field-label.number {
+  width: 96px;
+}
+
+.field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.field-row .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-sheet .add-form > .button.primary {
+  margin-top: 6px;
+}
+
+.cover-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cover-actions .button {
+  gap: 8px;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.cover-link input {
+  flex: 1;
+  min-width: 0;
+}
+
+.cover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 14px 12px;
+}
+
+.cover-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cover-option .cover {
+  width: 100%;
+  border-radius: 4px;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.2s;
+}
+
+.cover-option.current .cover {
+  outline-color: var(--accent);
+}
+
+.cover-source {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.complete-toggle {
+  align-self: center;
+  gap: 6px;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findIsbns, guessQueries, isbn10to13, similarTitle, titleLines } from './text';
+import { findIsbns, guessQueries, isbn10to13, similarTitle, splitSeries, titleLines } from './text';
 
 describe('ISBN', () => {
   it('encuentra ISBN-13 e ISBN-10 válidos y los deja en 13 dígitos', () => {
@@ -71,5 +71,32 @@ describe('títulos parecidos', () => {
     ).toBe(false);
     expect(similarTitle('Dune', 'Dune Messiah')).toBe(true);
     expect(similarTitle('It', 'It')).toBe(true);
+  });
+});
+
+describe('saga en el título', () => {
+  it('separa los formatos comunes', () => {
+    expect(splitSeries('The Final Empire (Mistborn, #1)')).toEqual({
+      title: 'The Final Empire',
+      series: 'Mistborn',
+      index: 1,
+    });
+    expect(splitSeries('Golden Son (Red Rising Saga, Book 2)')).toEqual({
+      title: 'Golden Son',
+      series: 'Red Rising Saga',
+      index: 2,
+    });
+    expect(splitSeries('El pozo de la ascensión (Nacidos de la bruma 2)')).toEqual({
+      title: 'El pozo de la ascensión',
+      series: 'Nacidos de la bruma',
+      index: 2,
+    });
+    expect(splitSeries('Edgedancer (The Stormlight Archive #2.5)').index).toBe(2.5);
+  });
+
+  it('no toca títulos sin saga', () => {
+    expect(splitSeries('Piranesi').series).toBeNull();
+    expect(splitSeries('1984').series).toBeNull();
+    expect(splitSeries('Sapiens (edición ilustrada)').series).toBeNull();
   });
 });
