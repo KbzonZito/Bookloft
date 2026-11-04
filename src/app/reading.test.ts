@@ -19,6 +19,9 @@ function book(title: string, over: Partial<Book> = {}): Book {
     year: null,
     pages: 400,
     description: null,
+    up_next: null,
+    current_page: null,
+    info: null,
     status: 'to_read' as Status,
     priority: 0,
     position: n,
@@ -110,7 +113,7 @@ describe('qué leo ahora', () => {
     expect(titles).toEqual(['Imprescindible', 'Otro de Le Guin', 'Corto']);
   });
 
-  it('si no hay nada por leer, mira la lista de deseos', () => {
-    expect(suggestNext([book('Deseo', { status: 'wishlist' })], NOW)[0].book.title).toBe('Deseo');
+  it('sin nada por leer, no propone nada', () => {
+    expect(suggestNext([book('Leído', { status: 'read' })], NOW)).toEqual([]);
   });
 });

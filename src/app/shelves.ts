@@ -2,7 +2,7 @@
 import type { Book, Status } from '../data';
 import { normalize } from '../data/text';
 
-export const SHELVES: Status[] = ['reading', 'to_read', 'wishlist', 'read', 'abandoned'];
+export const SHELVES: Status[] = ['reading', 'to_read', 'read', 'abandoned'];
 
 export const SORTS = ['mine', 'recent', 'title', 'author'] as const;
 export type Sort = (typeof SORTS)[number];

@@ -85,7 +85,12 @@ function applyMarkers(book: ImportedBook): ImportedBook {
   if (star) note = note.replace(star[0], '');
   const statusEntry = Object.entries(STATUS_TAGS).find(([, t]) => tags.includes(t!));
   const priority = PRIORITY_TAGS.findIndex((t, i) => i > 0 && tags.includes(t));
-  const known = new Set<string>([...Object.values(STATUS_TAGS), ...PRIORITY_TAGS] as string[]);
+  // #deseo venía de exportaciones hasta la v0.7: ahora es simplemente por leer
+  const known = new Set<string>([
+    ...Object.values(STATUS_TAGS),
+    ...PRIORITY_TAGS,
+    'deseo',
+  ] as string[]);
   return {
     ...book,
     status: statusEntry ? (statusEntry[0] as Status) : book.status,
@@ -258,7 +263,8 @@ const STATUS_ALIASES: Record<string, Status> = {
   dnf: 'abandoned',
   sin_terminar: 'abandoned',
   'did-not-finish': 'abandoned',
-  lo_quiero: 'wishlist',
+  lo_quiero: 'to_read',
+  wishlist: 'to_read',
 };
 
 const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -379,6 +385,9 @@ export async function importBooks(lib: Library, items: ImportedBook[]): Promise<
         year: item.year,
         pages: item.pages ?? null,
         description: null,
+        up_next: null,
+        current_page: null,
+        info: null,
         status: item.status,
         priority: item.priority,
         position,

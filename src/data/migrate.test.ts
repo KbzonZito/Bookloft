@@ -30,6 +30,32 @@ describe('migraciones', () => {
     expect(await db.all("SELECT name FROM sqlite_master WHERE type = 'table'")).toEqual([]);
   });
 
+  it('la versión 4 pasa la lista de deseos a por leer y agrega las columnas nuevas', async () => {
+    const db = fresh();
+    await migrate(db, MIGRATIONS.slice(0, 3));
+    const insert = (id: string, status: string) =>
+      db.run(
+        `INSERT INTO books (id, title, status, added_at, updated_at, search_text)
+         VALUES (?, 'Libro', ?, '2026-01-01T00:00:00.000Z', '2026-01-01T00:00:00.000Z', 'libro')`,
+        [id, status],
+      );
+    await insert('d', 'wishlist');
+    await insert('r', 'read');
+    await migrate(db);
+    const rows = await db.all<{ id: string; status: string; updated_at: string; up_next: null }>(
+      'SELECT id, status, updated_at, up_next, current_page, info FROM books ORDER BY id',
+    );
+    expect(rows.map((r) => [r.id, r.status])).toEqual([
+      ['d', 'to_read'],
+      ['r', 'read'],
+    ]);
+    // El cambio cuenta como edición (gana al fusionar respaldos) y deja la fecha en formato ISO
+    expect(rows[0].updated_at > '2026-01-01').toBe(true);
+    expect(rows[0].updated_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(rows[1].updated_at).toBe('2026-01-01T00:00:00.000Z');
+    expect(rows[0].up_next).toBeNull();
+  });
+
   it('migra una base de la versión 1 sin perder la bandeja', async () => {
     const db = fresh();
     await migrate(db, MIGRATIONS.slice(0, 1));

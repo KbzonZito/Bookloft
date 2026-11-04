@@ -4,9 +4,10 @@ import { splitSql } from './sql';
 import init from './migrations/0001_init.sql?raw';
 import inboxIdentify from './migrations/0002_inbox_identify.sql?raw';
 import bookDescription from './migrations/0003_book_description.sql?raw';
+import readingInfo from './migrations/0004_reading_info.sql?raw';
 
 // Solo se agregan al final; nunca se edita una migración ya publicada
-export const MIGRATIONS = [init, inboxIdentify, bookDescription];
+export const MIGRATIONS = [init, inboxIdentify, bookDescription, readingInfo];
 
 export async function migrate(db: Db, migrations = MIGRATIONS) {
   await db.exec('PRAGMA foreign_keys = ON');
@@ -34,6 +35,9 @@ const REQUIRED: Record<string, string[]> = {
     'id',
     'title',
     'description',
+    'up_next',
+    'current_page',
+    'info',
     'status',
     'position',
     'search_text',

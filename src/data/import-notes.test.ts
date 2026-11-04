@@ -195,7 +195,7 @@ describe('exportar a Obsidian e importar de vuelta', () => {
       series_index: 2,
       status: 'reading',
     });
-    await add('Elantris', { year: 2005, status: 'wishlist', priority: 1, tags: ['Por publicar'] });
+    await add('Elantris', { year: 2005, priority: 1, tags: ['Por publicar'] });
     await add('Piranesi', { authors: ['Susanna Clarke'], status: 'abandoned', priority: 2 });
     await add('Anónimo', { authors: [], status: 'to_read' });
 
@@ -204,7 +204,7 @@ describe('exportar a Obsidian e importar de vuelta', () => {
       '- [x] 1. El imperio final (2006) — Mi favorito (de lejos) ★★★★½ #Cosmere',
     );
     expect(md).toContain(
-      '- [ ] **Elantris (2005)** — Brandon Sanderson · #deseo #prioridad-alta #Por-publicar',
+      '- [ ] **Elantris (2005)** — Brandon Sanderson · #prioridad-alta #Por-publicar',
     );
 
     const back = parseMarkdown(md, 'Biblioteca.md');
@@ -222,7 +222,7 @@ describe('exportar a Obsidian e importar de vuelta', () => {
     });
     expect(by('El pozo de la ascensión')).toMatchObject({ status: 'reading', series_index: 2 });
     expect(by('Elantris')).toMatchObject({
-      status: 'wishlist',
+      status: 'to_read',
       priority: 1,
       tags: ['Por publicar'],
       year: 2005,

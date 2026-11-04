@@ -123,6 +123,10 @@ export async function importJson(lib: Library, data: unknown): Promise<ImportRes
 
     const toWrite: { book: Book; isNew: boolean }[] = [];
     for (const incoming of backup.books) {
+      // Respaldos hasta la v0.7: la lista de deseos ya no existe, esos libros quedan por leer
+      if ((incoming as { status?: string })?.status === 'wishlist') {
+        (incoming as { status: string }).status = 'to_read';
+      }
       if (!validBook(incoming)) {
         result.invalid++;
         continue;

@@ -135,4 +135,15 @@ describe('importar muchos libros', () => {
     // Volver a importar no cambia nada
     expect(await importJson(target, backup)).toMatchObject({ added: 0, updated: 0, skipped: 94 });
   });
+
+  it('un respaldo viejo con lista de deseos se importa como por leer', async () => {
+    const a = await openTestLibrary();
+    const { book } = await a.addBook(candidate('Deseado'));
+    const backup = await exportJson(a);
+    (backup.books[0] as { status: string }).status = 'wishlist';
+    const b = await openTestLibrary();
+    const r = await importJson(b, backup);
+    expect(r.added).toBe(1);
+    expect((await b.getBook(book.id))?.status).toBe('to_read');
+  });
 });

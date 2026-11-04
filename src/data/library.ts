@@ -27,6 +27,9 @@ export const BOOK_COLUMNS = [
   'year',
   'pages',
   'description',
+  'up_next',
+  'current_page',
+  'info',
   'status',
   'priority',
   'position',
@@ -65,6 +68,7 @@ export function toBook(r: Row): Book {
     ...(rest as unknown as Book),
     authors: json(r.authors, []),
     tags: json(r.tags, []),
+    info: json(r.info ?? null, null),
   };
 }
 
@@ -72,6 +76,7 @@ function bookRow(b: Book): Value[] {
   return BOOK_COLUMNS.map((c) => {
     if (c === 'search_text') return searchText(b);
     if (c === 'authors' || c === 'tags') return JSON.stringify(b[c]);
+    if (c === 'info') return b.info ? JSON.stringify(b.info) : null;
     return b[c] ?? null;
   });
 }
@@ -202,6 +207,9 @@ export class Library {
         year: c.year,
         pages: c.pages,
         description: null,
+        up_next: null,
+        current_page: null,
+        info: null,
         status,
         priority: 0,
         position: await this.endPosition(tx, status),

@@ -19,7 +19,6 @@ export const EXPORT_MARK = 'formato: biblioteca';
 
 export const STATUS_TAGS: Partial<Record<Status, string>> = {
   reading: 'leyendo',
-  wishlist: 'deseo',
   abandoned: 'sin-terminar',
 };
 export const PRIORITY_TAGS = ['', 'prioridad-alta', 'imprescindible'];

@@ -21,7 +21,7 @@ export function Inbox({ onClose, onOpenAi }: { onClose: () => void; onOpenAi: ()
   const items = usePendingInbox();
   const books = useAllBooks() ?? [];
   // Lo que llega desde Instagram suele ser algo que todavía no tengo
-  const [status, setStatus] = useState<Status>('wishlist');
+  const [status, setStatus] = useState<Status>('to_read');
 
   return (
     <Sheet label={t('inbox.title')} onClose={onClose} className="form-sheet inbox-sheet">

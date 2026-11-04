@@ -39,7 +39,7 @@ describe('Library', () => {
     const lib = await openTestLibrary();
     await lib.addBook(candidate('Cien años de soledad', 'Gabriel García Márquez'));
     await lib.addBook(candidate('Mistborn', 'Brandon Sanderson'), {
-      status: 'wishlist',
+      status: 'abandoned',
       tags: ['Cosmere'],
     });
 
@@ -47,7 +47,9 @@ describe('Library', () => {
     expect((await lib.listBooks({ query: 'ANOS soledad' })).length).toBe(1);
     expect((await lib.listBooks({ query: 'cosmere' }))[0].title).toBe('Mistborn');
     expect((await lib.listBooks({ query: '100%' })).length).toBe(0);
-    expect((await lib.listBooks({ status: 'wishlist' })).map((b) => b.title)).toEqual(['Mistborn']);
+    expect((await lib.listBooks({ status: 'abandoned' })).map((b) => b.title)).toEqual([
+      'Mistborn',
+    ]);
   });
 
   it('al actualizar cambia updated_at y marca fechas de lectura', async () => {

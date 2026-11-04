@@ -34,7 +34,7 @@ export function seriesProgress(books: Book[]): Map<string, SeriesProgress> {
     const read = list.filter((b) => b.status === 'read').length;
     const reading = list.filter((b) => b.status === 'reading').length;
     // Los abandonados no cuentan como pendientes de la saga
-    const pending = list.filter((b) => b.status === 'to_read' || b.status === 'wishlist');
+    const pending = list.filter((b) => b.status === 'to_read');
     const started = read + reading > 0;
     // Lo que sigue es lo primero sin leer después del último leído: si leíste el libro 1, la
     // precuela (libro 0) no "sigue"; solo se propone cuando no queda nada más adelante
@@ -107,8 +107,7 @@ export function rankCandidates(books: Book[], now = Date.now()): Suggestion[] {
     }
   }
 
-  let pool = books.filter((b) => b.status === 'to_read');
-  if (!pool.length) pool = books.filter((b) => b.status === 'wishlist');
+  const pool = books.filter((b) => b.status === 'to_read');
 
   const scored: Suggestion[] = [];
   for (const book of pool) {

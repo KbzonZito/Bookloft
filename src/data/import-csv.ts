@@ -54,8 +54,8 @@ const STATUS: Record<string, Status> = {
   dnf: 'abandoned',
   abandoned: 'abandoned',
   'sin terminar': 'abandoned',
-  wishlist: 'wishlist',
-  deseo: 'wishlist',
+  wishlist: 'to_read',
+  deseo: 'to_read',
 };
 
 const norm = (h: string) =>

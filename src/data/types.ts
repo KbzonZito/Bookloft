@@ -1,6 +1,7 @@
 // Tipos de la biblioteca local
 
-export const STATUSES = ['wishlist', 'to_read', 'reading', 'read', 'abandoned'] as const;
+// 'wishlist' existió hasta la v0.7; la migración 0004 los pasó a 'to_read'
+export const STATUSES = ['to_read', 'reading', 'read', 'abandoned'] as const;
 export type Status = (typeof STATUSES)[number];
 
 export interface Book {
@@ -17,6 +18,12 @@ export interface Book {
   pages: number | null;
   /** Reseña breve. null: no se ha buscado; '': se buscó y no hay */
   description: string | null;
+  /** Orden en Próximos (dentro de Leyendo); null = no está en la lista */
+  up_next: number | null;
+  /** Página en que voy */
+  current_page: number | null;
+  /** Datos de Open Library para la pestaña Información */
+  info: BookInfo | null;
   status: Status;
   priority: number; // 0 normal, 1 alta, 2 imprescindible
   position: number | null;
@@ -29,6 +36,16 @@ export interface Book {
   finished_at: string | null;
   updated_at: string;
   deleted_at: string | null;
+}
+
+export interface BookInfo {
+  subjects?: string[];
+  ratings_average?: number;
+  ratings_count?: number;
+  publishers?: string[];
+  first_publish_year?: number;
+  editions?: number;
+  languages?: string[];
 }
 
 /** Lo que el usuario puede cambiar de un libro */
