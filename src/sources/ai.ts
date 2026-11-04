@@ -1,6 +1,7 @@
 // Leer pantallazos y textos con Claude, usando la API key de cada usuario.
 // La key vive en el Keystore de Android / Keychain de iOS: nunca en SQLite ni en los respaldos.
-import Anthropic from '@anthropic-ai/sdk';
+// El SDK pesa más que el resto de la app junto: se carga recién la primera vez que se usa la IA
+import type Anthropic from '@anthropic-ai/sdk';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 
 // Haiku 5.5: ~0,0003 USD por pantallazo; el más barato que lee bien portadas y lomos.
@@ -68,12 +69,17 @@ export class AiError extends Error {
   }
 }
 
-function client(apiKey: string) {
+let SDK: typeof Anthropic | null = null;
+
+async function client(apiKey: string) {
+  SDK ??= (await import('@anthropic-ai/sdk')).default;
   // La key es del propio usuario y solo viaja a api.anthropic.com desde su dispositivo
-  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true, maxRetries: 1, timeout: 45_000 });
+  return new SDK({ apiKey, dangerouslyAllowBrowser: true, maxRetries: 1, timeout: 45_000 });
 }
 
 function toAiError(error: unknown): AiError {
+  const Anthropic = SDK;
+  if (!Anthropic) return new AiError('other', String(error));
   if (
     error instanceof Anthropic.AuthenticationError ||
     error instanceof Anthropic.PermissionDeniedError
@@ -106,7 +112,9 @@ export async function extractBooks(apiKey: string, input: ExtractInput): Promise
   });
 
   try {
-    const response = await client(apiKey).messages.create({
+    const response = await (
+      await client(apiKey)
+    ).messages.create({
       model: AI_MODEL,
       max_tokens: 4000,
       system: SYSTEM,
@@ -131,7 +139,9 @@ export async function extractBooks(apiKey: string, input: ExtractInput): Promise
 /** Comprueba una key con la llamada más barata posible */
 export async function testApiKey(apiKey: string): Promise<void> {
   try {
-    await client(apiKey).messages.create({
+    await (
+      await client(apiKey)
+    ).messages.create({
       model: AI_MODEL,
       max_tokens: 16,
       output_config: { effort: 'low' },
@@ -185,7 +195,9 @@ export async function inferSeries(
     const chunk = books.slice(i, i + 60);
     const list = chunk.map((b) => `${b.id} | ${b.title} | ${b.author ?? '?'}`).join('\n');
     try {
-      const response = await client(apiKey).messages.create({
+      const response = await (
+        await client(apiKey)
+      ).messages.create({
         model: AI_MODEL,
         max_tokens: 8000,
         system: SERIES_SYSTEM,

@@ -1,50 +1,57 @@
 # 📚 Biblioteca
 
-App local y sin cuentas para llevar tu biblioteca: wishlist, por leer, leyendo, leídos y una bóveda de EPUB. Android (teléfono y tablet) primero; luego iOS y escritorio.
+Tu biblioteca personal en el teléfono: estantes, sagas, notas y una bóveda de EPUB y PDF. **Sin cuentas ni servidores**: todo queda en tu dispositivo y tú decides dónde respaldarlo.
 
-Nombre provisional. El plan completo está en [PLAN.md](PLAN.md).
+Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ es un nombre provisional.
 
-## Desarrollo en el Mac
+## Qué hace
+
+- **Estantes**: Leyendo, Por leer, Deseos, Leídos y Abandonados, con calificación, prioridad, etiquetas y notas.
+- **Por autor y saga**: cada autor con sus sagas en orden y los libros sueltos al final.
+- **Agregar libros como prefieras**: buscando en Open Library, escaneando el ISBN, con una foto (portadas o lomos en una repisa) o **compartiendo** un post o pantallazo desde otra app.
+- **IA opcional con tu propia API key** de Anthropic (Claude Haiku): lee pantallazos y fotos, y ordena tus libros en sagas. Sin key, la app lee el texto de la imagen en el mismo teléfono.
+- **Portadas** en el idioma en que buscas; puedes elegir otra edición, pegar un link o usar una foto tuya.
+- **Importar** tus notas de Obsidian (`.md`) o una lista en JSON, sin duplicar lo que ya tienes.
+- **Bóveda**: tus EPUB y PDF vinculados a cada libro, que se abren en tu lector favorito.
+- **Respaldos** en ZIP (solo la biblioteca o con la bóveda) para guardar en Drive o donde quieras, y restaurarlos fusionando sin perder nada.
+- Modo día y noche, en español e inglés.
+
+## Instalar
+
+Descarga el último `biblioteca-X.Y.Z.apk` desde [Releases](https://github.com/KbzonZito/library_app/releases) y ábrelo en el teléfono (Android pide permitir instalar desde el navegador o el gestor de archivos).
+
+Las versiones nuevas se instalan **encima** de la anterior: no hace falta desinstalar y la biblioteca se mantiene.
+
+## Privacidad
+
+No hay servidor propio ni cuentas. La app solo se conecta a:
+
+- **Open Library** y **Apple Books**, para buscar libros y portadas.
+- **Anthropic**, solo si conectas tu API key (que se guarda cifrada en el Keystore del teléfono, nunca en los respaldos).
+- Donde **tú** compartas un respaldo (Drive, correo, archivos).
+
+## Desarrollo
+
+Requisitos: Node 24, y para Android el JDK 21 y las herramientas de línea de comandos de Android (`brew install openjdk@21 android-commandlinetools`).
 
 ```bash
 npm install
-npm run dev            # http://localhost:5180 — la app completa en el navegador, con SQLite en WASM
-npm run check          # tipos, lint, formato y tests
+npm run dev        # http://localhost:5180 — la app completa en el navegador (SQLite en WebAssembly)
+npm run check      # tipos, lint, formato, código sin usar (knip) y tests
 ```
+
+En el navegador, Ajustes → Desarrollo → «Cargar biblioteca de ejemplo» agrega ~60 clásicos para probar.
 
 ### Android sin instalar APK
 
-Una sola vez, instala el emulador y crea los dispositivos "Telefono" y "Tablet" (~2 GB):
-
 ```bash
-npm run emulators
+npm run emulators                 # una vez: emuladores "Telefono" y "Tablet" (~2 GB)
+npm run android:live              # con `npm run dev` corriendo: la app en el emulador, con recarga en vivo
+npm run android:live -- Tablet    # en la tablet
+npm run android:live -- --phone   # en tu teléfono por USB o depuración Wi-Fi
 ```
 
-Con `npm run dev` corriendo en otra terminal:
-
-```bash
-npm run android:live              # emulador Telefono
-npm run android:live -- Tablet    # emulador Tablet
-npm run android:live -- --phone   # tu teléfono por USB o depuración Wi-Fi
-```
-
-Cada cambio guardado aparece al instante en el emulador. Solo hay que volver a correr el comando al agregar un plugin nativo.
-
-Los emuladores usan la GPU del Mac (`-gpu host`). Si se ven trabados, revisa que `hw.gpu.enabled=yes` esté en `~/.android/avd/<nombre>.avd/config.ini`: sin GPU, el WebView dibuja por CPU. Con la ventana del emulador oculta, macOS también le baja el ritmo.
-
-### Diseñar con datos reales
-
-```bash
-npm run seed           # convierte ~/dev/book_app/seed a seed/biblioteca-dev.json (no se sube: el repo es público)
-```
-
-Después, en la app: Ajustes → Desarrollo → «Cargar biblioteca de ejemplo».
-
-## Agregar libros
-
-- Buscar en Open Library, escanear el ISBN, elegir una imagen o pegar el texto o el link de un post.
-- Desde otra app: Compartir → Biblioteca. Llega a la bandeja.
-- IA opcional: Ajustes → «Leer pantallazos con IA», con la API key de Anthropic de cada usuario (Claude Haiku 5.5, ~0,03 USD cada 100 pantallazos).
+Solo hay que volver a correrlo al agregar un plugin nativo. Si el emulador se ve trabado, revisa que tenga `hw.gpu.enabled=yes` en `~/.android/avd/<nombre>.avd/config.ini`.
 
 Para probar «compartir» en el emulador:
 
@@ -52,21 +59,34 @@ Para probar «compartir» en el emulador:
 adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT 'Terminé «Piranesi»' -n dev.martinvergara.biblioteca/.MainActivity
 ```
 
-Compartir una imagen con `adb` falla por permisos (el shell no puede prestar acceso a la galería); pruébalo con «Desde una imagen» o compartiendo desde la app Fotos.
+### APK y versiones
 
-## Bóveda
+```bash
+npm run apk                # APK firmado de prueba en builds/ (lo instala si hay un teléfono conectado)
+npm run release -- 0.4.0   # pasa [Unreleased] del CHANGELOG a la versión, crea la etiqueta y la sube
+```
 
-EPUB y PDF guardados en el teléfono, vinculados a los libros. Se agregan desde la bóveda, desde la ficha de un libro o compartiéndolos a la app. En el emulador no hay lector instalado: «Abrir» avisa que falta uno (instala KOReader para probarlo).
+GitHub Actions compila el APK de cada etiqueta `v*` y lo publica en Releases. La firma se configura una vez con `scripts/setup-signing.sh` (la llave queda en `~/.config/biblioteca`, fuera del repo; respáldala).
 
-## Respaldos
+### Estructura
 
-Ajustes → Respaldo: «Respaldar la biblioteca» (liviano) o «Respaldo completo» (con los EPUB/PDF). Se guarda donde elijas en la hoja de compartir (Drive, Gmail, Archivos). «Restaurar un respaldo» acepta el ZIP o el JSON antiguo y fusiona sin borrar nada.
+```
+src/
+  data/       capa de datos: SQLite (nativo, WASM y tests), migraciones, respaldo JSON, importar notas
+  sources/    lo que viene de afuera: Open Library, Apple Books, IA, OCR, EPUB, respaldos ZIP
+  app/        estado compartido de la UI: biblioteca, bandeja, estantes, completar datos
+  components/ pantallas y componentes de React
+  ui/         tema, estilos y animaciones
+android/      proyecto nativo de Capacitor
+scripts/      emuladores, APK, firma y releases
+```
 
-Para probar en el emulador sin que la recarga en vivo interrumpa (pasa al volver de un selector de archivos), en modo desarrollo la biblioteca queda en `window.__lib` y se puede restaurar por las herramientas de Chrome.
+- La UI solo habla con `Library` (`src/data/library.ts`). El mismo SQL corre en Android, en el navegador y en los tests.
+- Migraciones en `src/data/migrations/`, numeradas con `PRAGMA user_version`. **Nunca se edita una migración publicada**: se agrega una nueva.
+- Respaldos: exportar incluye los borrados; importar fusiona por UUID y gana el cambio más nuevo.
 
-## Datos
+Más detalles: [docs/DECISIONES.md](docs/DECISIONES.md) (arquitectura, diseño, negocio) y [PLAN.md](PLAN.md) (hoja de ruta).
 
-- `src/data/`: capa de datos. La UI solo usa `Library` (`src/data/library.ts`).
-- SQLite nativo en Android/iOS (`@capacitor-community/sqlite`), sql.js en el navegador y en los tests: el mismo SQL en todas partes.
-- Migraciones en `src/data/migrations/`, numeradas con `PRAGMA user_version`. **Nunca se edita una migración publicada**: se agrega una nueva. Se ejecutan de a una sentencia (`src/data/sql.ts`): el plugin nativo se salta sentencias si recibe varias con comentarios `--`. Al abrir, `checkSchema` verifica que estén todas las columnas.
-- Respaldo JSON v1 (`src/data/backup.ts`): exportar incluye los borrados; importar fusiona por UUID y gana el `updated_at` más nuevo.
+## Licencia
+
+[GPL-3.0](LICENSE). Puedes usar, estudiar, modificar y compartir la app; si publicas una versión modificada, su código también tiene que ser abierto.

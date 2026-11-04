@@ -20,11 +20,25 @@ export function useAllBooks(): Book[] | null {
   const [books, setBooks] = useState<Book[] | null>(null);
   useEffect(() => {
     let alive = true;
-    const load = () => void lib.listBooks().then((b) => alive && setBooks(b));
+    let last = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const load = () => {
+      last = performance.now();
+      void lib.listBooks().then((b) => alive && setBooks(b));
+    };
+    // Un cambio del usuario se ve al tiro; una ráfaga (completar portadas de cientos de libros)
+    // recarga a lo más cada 400 ms en vez de redibujar toda la biblioteca por cada libro
+    const onChange = () => {
+      if (timer) return;
+      const wait = 400 - (performance.now() - last);
+      if (wait <= 0) load();
+      else timer = setTimeout(() => ((timer = undefined), load()), wait);
+    };
     load();
-    const stop = lib.onChange(load);
+    const stop = lib.onChange(onChange);
     return () => {
       alive = false;
+      clearTimeout(timer);
       stop();
     };
   }, [lib]);
