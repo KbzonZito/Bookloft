@@ -1,0 +1,125 @@
+// Reseña y páginas de un libro, que se buscan la primera vez que se abre su ficha.
+// Reseña: Apple Books primero, porque la tiene en el idioma del título ("El imperio final" en
+// español); si no, la de la obra en Open Library (casi siempre en inglés).
+// Páginas: Open Library (la mediana de sus ediciones); Apple Books no las da para ebooks.
+import type { Book, Library } from '../data';
+import { completeBook } from './covers';
+import { similarTitle } from './text';
+
+const MAX = 1200;
+
+/** HTML de Apple (o Markdown de Open Library) a texto plano con párrafos */
+export function plainText(raw: string): string {
+  const html = raw
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li)>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '');
+  const text = new DOMParser().parseFromString(html, 'text/html').documentElement.textContent ?? '';
+  return text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [texto](link)
+    .replace(/\(\[[^\]]*\]\[\d+\]\)/g, '') // ([fuente][1])
+    .replace(/^\s*\[\d+\]:.*$/gm, '') // notas al pie de los links
+    .replace(/^-{3,}[\s\S]*$/m, '') // "----------" y lo que sigue (ver también, contenidos)
+    .replace(/^\s*An Apple Books .{0,40}edition\.?\s*$/gim, '') // aviso fijo de Apple
+    .replace(/\*\*?([^*]+)\*\*?/g, '$1')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n\s*(\n\s*)+/g, '\n\n')
+    .trim();
+}
+
+/** Corta en un final de oración cerca del máximo, para que la ficha no sea un muro de texto */
+function clip(text: string) {
+  if (text.length <= MAX) return text;
+  const cut = text.slice(0, MAX);
+  const end = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.\n'));
+  return (end > MAX * 0.5 ? cut.slice(0, end + 1) : `${cut.trimEnd()}…`).trim();
+}
+
+/** La tienda de Apple del país del teléfono ("es-CL" → CL): ahí están las ediciones locales */
+function country() {
+  const region = navigator.language.split('-')[1];
+  return region && /^[A-Za-z]{2}$/.test(region) ? region.toUpperCase() : 'US';
+}
+
+interface AppleBook {
+  trackName?: string;
+  artistName?: string;
+  description?: string;
+}
+
+async function appleDescription(book: Book): Promise<string | null> {
+  const url = new URL('https://itunes.apple.com/search');
+  url.searchParams.set('term', [book.title, book.authors[0]].filter(Boolean).join(' '));
+  url.searchParams.set('media', 'ebook');
+  url.searchParams.set('limit', '5');
+  url.searchParams.set('country', country());
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) return null;
+  const { results = [] } = (await res.json()) as { results?: AppleBook[] };
+  const surname = book.authors[0]?.split(' ').at(-1)?.toLowerCase();
+  const hit = results.find(
+    (r) =>
+      r.description &&
+      r.trackName &&
+      similarTitle(r.trackName, book.title) &&
+      (!surname || !r.artistName || r.artistName.toLowerCase().includes(surname)),
+  );
+  return hit?.description ? plainText(hit.description) : null;
+}
+
+async function openLibraryDetails(book: Book) {
+  if (!book.ol_key?.startsWith('/works/')) return { description: null, pages: null };
+  const base = `https://openlibrary.org${book.ol_key}`;
+  const [work, editions] = await Promise.all([
+    fetch(`${base}.json`, { signal: AbortSignal.timeout(10_000) }).then((r) =>
+      r.ok ? r.json() : null,
+    ) as Promise<{ description?: string | { value?: string } } | null>,
+    book.pages
+      ? null
+      : (fetch(`${base}/editions.json?limit=50&fields=number_of_pages`, {
+          signal: AbortSignal.timeout(10_000),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null) as Promise<{ entries?: { number_of_pages?: number }[] } | null>),
+  ]);
+  const raw = typeof work?.description === 'string' ? work.description : work?.description?.value;
+  const counts = (editions?.entries ?? [])
+    .map((e) => e.number_of_pages ?? 0)
+    .filter((n) => n > 20 && n < 5000)
+    .sort((a, b) => a - b);
+  return {
+    description: raw ? plainText(raw) : null,
+    pages: counts.length ? counts[Math.floor(counts.length / 2)] : null,
+  };
+}
+
+const inflight = new Set<string>();
+
+/** Completa reseña y páginas si faltan. Sin internet no hace nada (se reintenta la próxima vez). */
+export async function ensureDetails(lib: Library, book: Book) {
+  if (book.description !== null && book.pages) return;
+  if (!navigator.onLine || inflight.has(book.id)) return;
+  inflight.add(book.id);
+  try {
+    // Sin ficha de Open Library no hay de dónde sacar las páginas: primero se completa el libro
+    if (!book.ol_key) {
+      await completeBook(lib, book).catch(() => 0);
+      book = (await lib.getBook(book.id)) ?? book;
+    }
+    const [apple, ol] = await Promise.allSettled([
+      book.description === null ? appleDescription(book) : Promise.resolve(null),
+      openLibraryDetails(book),
+    ]);
+    const appleText = apple.status === 'fulfilled' ? apple.value : null;
+    const olDetails = ol.status === 'fulfilled' ? ol.value : null;
+    const found = appleText || olDetails?.description;
+    // "No hay reseña" solo se guarda si las dos fuentes respondieron; si una falló, se reintenta
+    const sure = apple.status === 'fulfilled' && ol.status === 'fulfilled';
+    const patch: Partial<Book> = {};
+    if (book.description === null && (found || sure)) patch.description = clip(found || '');
+    if (!book.pages && olDetails?.pages) patch.pages = olDetails.pages;
+    if (Object.keys(patch).length) await lib.updateBook(book.id, patch);
+  } finally {
+    inflight.delete(book.id);
+  }
+}

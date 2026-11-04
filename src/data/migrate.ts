@@ -3,9 +3,10 @@ import type { Db } from './driver';
 import { splitSql } from './sql';
 import init from './migrations/0001_init.sql?raw';
 import inboxIdentify from './migrations/0002_inbox_identify.sql?raw';
+import bookDescription from './migrations/0003_book_description.sql?raw';
 
 // Solo se agregan al final; nunca se edita una migración ya publicada
-export const MIGRATIONS = [init, inboxIdentify];
+export const MIGRATIONS = [init, inboxIdentify, bookDescription];
 
 export async function migrate(db: Db, migrations = MIGRATIONS) {
   await db.exec('PRAGMA foreign_keys = ON');
@@ -29,7 +30,16 @@ export async function migrate(db: Db, migrations = MIGRATIONS) {
 
 // Columnas que el código usa. Si una migración quedó a medias, mejor fallar al abrir que perder datos.
 const REQUIRED: Record<string, string[]> = {
-  books: ['id', 'title', 'status', 'position', 'search_text', 'updated_at', 'deleted_at'],
+  books: [
+    'id',
+    'title',
+    'description',
+    'status',
+    'position',
+    'search_text',
+    'updated_at',
+    'deleted_at',
+  ],
   files: ['id', 'book_id', 'sha256', 'updated_at', 'deleted_at'],
   inbox: ['id', 'kind', 'candidates', 'state', 'method', 'queries', 'identified_at', 'error'],
   settings: ['key', 'value', 'updated_at'],

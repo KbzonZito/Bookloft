@@ -13,9 +13,9 @@ export const haptic = {
   tick: () => void (native && Haptics.selectionChanged().catch(() => {})),
 };
 
-export function setSystemBars(dark: boolean) {
+export async function setSystemBars(dark: boolean) {
   if (!native) return;
-  void SystemBars.setStyle({ style: dark ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(
+  await SystemBars.setStyle({ style: dark ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(
     () => {},
   );
 }

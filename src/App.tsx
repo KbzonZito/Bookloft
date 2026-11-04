@@ -32,36 +32,48 @@ import { importBooks, parseMarkdown, type Book, type Status } from './data';
 import { I18nProvider, systemLang, useI18n } from './i18n';
 import { daysSinceBackup } from './sources/backup-zip';
 import { fade, spring } from './ui/motion';
+import { applyPalette, paintWindow, useSystemPalette, type PaletteId } from './app/palette';
+import type { PaletteControl } from './components/PalettePicker';
 
 type View = 'covers' | 'authors';
 type Tab = 'library' | 'search' | 'vault' | 'settings';
 
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 
-function useTheme(setting: ThemeSetting) {
+function useTheme(setting: ThemeSetting, palette: PaletteId) {
   const [systemDark, setSystemDark] = useState(darkQuery.matches);
   useEffect(() => {
     const on = () => setSystemDark(darkQuery.matches);
     darkQuery.addEventListener('change', on);
     return () => darkQuery.removeEventListener('change', on);
   }, []);
+  const system = useSystemPalette();
   const dark = setting === 'dark' || (setting === 'auto' && systemDark);
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    applyPalette(palette, dark, system);
     const paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim();
     document.querySelector('meta[name=theme-color]')?.setAttribute('content', paper);
-    setSystemBars(dark);
-  }, [dark]);
+    void setSystemBars(dark).then(() => paintWindow(paper));
+  }, [dark, palette, system]);
+  return { dark, system };
 }
 
 export function App() {
   const [theme, setTheme] = useSetting<ThemeSetting>('theme', 'auto');
   const [lang, setLang] = useSetting<LangSetting>('language', 'auto');
-  useTheme(theme);
+  const [palette, setPalette] = useSetting<PaletteId>('palette', 'library');
+  const { dark, system } = useTheme(theme, palette);
   return (
     <I18nProvider lang={lang === 'auto' ? systemLang() : lang}>
       <MotionConfig reducedMotion="user">
-        <Shell theme={theme} setTheme={setTheme} lang={lang} setLang={setLang} />
+        <Shell
+          theme={theme}
+          setTheme={setTheme}
+          lang={lang}
+          setLang={setLang}
+          palette={{ value: palette, set: setPalette, dark, system }}
+        />
       </MotionConfig>
     </I18nProvider>
   );
@@ -75,11 +87,13 @@ function Shell({
   setTheme,
   lang,
   setLang,
+  palette,
 }: {
   theme: ThemeSetting;
   setTheme: (t: ThemeSetting) => void;
   lang: LangSetting;
   setLang: (l: LangSetting) => void;
+  palette: PaletteControl;
 }) {
   const lib = useLibrary();
   const { t } = useI18n();
@@ -352,6 +366,7 @@ function Shell({
         setTheme={setTheme}
         lang={lang}
         setLang={setLang}
+        palette={palette}
         toast={showToast}
         onLoadSample={loadSample}
       />

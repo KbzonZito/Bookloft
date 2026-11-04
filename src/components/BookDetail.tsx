@@ -10,6 +10,7 @@ import { STATUSES, type Book, type BookPatch } from '../data';
 import { useI18n } from '../i18n';
 import { fade, spring } from '../ui/motion';
 import { Rating, Segmented } from './Controls';
+import { ensureDetails } from '../sources/details';
 import { CoverPicker, EditBook } from './BookEdit';
 import { Cover, useCoverColor } from './Cover';
 import { Sheet } from './Sheet';
@@ -119,6 +120,9 @@ function Body({
 
   const [editing, setEditing] = useState<'cover' | 'data' | null>(null);
 
+  // La reseña y las páginas se buscan la primera vez que se abre la ficha
+  useEffect(() => void ensureDetails(lib, book), [book.id]);
+
   const [tag, setTag] = useState('');
   const addTag = () => {
     const value = tag.trim();
@@ -139,6 +143,8 @@ function Body({
       exit={{ opacity: 0, transition: fade }}
       transition={{ ...spring.sheet, delay: 0.1 }}
     >
+      {book.description && <Description text={book.description} />}
+
       <section>
         <h2 className="detail-label">{t('book.status')}</h2>
         <Segmented
@@ -254,6 +260,24 @@ function Body({
         {t('book.delete')}
       </button>
     </motion.div>
+  );
+}
+
+/** La reseña, cortada en unas líneas; se despliega entera al tocarla */
+function Description({ text }: { text: string }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const long = text.length > 280;
+  return (
+    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={fade}>
+      <h2 className="detail-label">{t('book.description')}</h2>
+      <p className={`description ${long && !open ? 'clamped' : ''}`}>{text}</p>
+      {long && (
+        <button className="link-button" onClick={() => setOpen(!open)}>
+          {open ? t('book.less') : t('book.more')}
+        </button>
+      )}
+    </motion.section>
   );
 }
 

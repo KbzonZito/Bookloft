@@ -15,6 +15,8 @@ export interface Book {
   cover_path: string | null;
   year: number | null;
   pages: number | null;
+  /** Reseña breve. null: no se ha buscado; '': se buscó y no hay */
+  description: string | null;
   status: Status;
   priority: number; // 0 normal, 1 alta, 2 imprescindible
   position: number | null;

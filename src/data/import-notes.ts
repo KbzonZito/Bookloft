@@ -321,6 +321,7 @@ export async function importBooks(lib: Library, items: ImportedBook[]): Promise<
         cover_path: null,
         year: item.year,
         pages: null,
+        description: null,
         status: item.status,
         priority: item.priority,
         position,

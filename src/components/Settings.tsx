@@ -5,6 +5,7 @@ import { BackupSettings } from './BackupSettings';
 import { Segmented } from './Controls';
 import { LibraryTools } from './LibraryTools';
 import { OfflineCoversSetting } from './OfflineCoversSetting';
+import { PalettePicker, type PaletteControl } from './PalettePicker';
 
 export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type LangSetting = 'auto' | Lang;
@@ -14,6 +15,7 @@ export function Settings({
   setTheme,
   lang,
   setLang,
+  palette,
   toast,
   onLoadSample,
   aiFocus = false,
@@ -22,6 +24,7 @@ export function Settings({
   setTheme: (t: ThemeSetting) => void;
   lang: LangSetting;
   setLang: (l: LangSetting) => void;
+  palette: PaletteControl;
   toast: (message: string) => void;
   onLoadSample?: () => void;
   /** Abrir directo en conectar la IA (por ejemplo, desde un error en la bandeja) */
@@ -43,6 +46,8 @@ export function Settings({
           onChange={setTheme}
         />
       </section>
+
+      <PalettePicker {...palette} />
 
       <section>
         <h2 className="detail-label">{t('settings.language')}</h2>
