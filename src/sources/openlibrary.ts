@@ -1,4 +1,4 @@
-// Búsqueda en Open Library (adaptado de book_app/src/worker/openlibrary.ts).
+// Búsqueda en Open Library.
 // Open Library responde con CORS abierto, así que se consulta directo desde la app.
 import type { Candidate } from '../data';
 import { similarTitle, splitSeries } from './text';

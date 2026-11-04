@@ -28,7 +28,7 @@ import { Vault } from './components/Vault';
 import { Settings, type LangSetting, type ThemeSetting } from './components/Settings';
 import { ShelfTabs } from './components/ShelfTabs';
 import { Toast, type ToastMessage } from './components/Toast';
-import { importJson, type Book, type Status } from './data';
+import { importBooks, parseMarkdown, type Book, type Status } from './data';
 import { I18nProvider, systemLang, useI18n } from './i18n';
 import { daysSinceBackup } from './sources/backup-zip';
 import { fade, spring } from './ui/motion';
@@ -227,15 +227,17 @@ function Shell({
     });
   };
 
+  // Solo en desarrollo: una biblioteca de ejemplo para probar (el import dinámico no llega al APK)
   const loadSample = import.meta.env.DEV
     ? async () => {
-        const res = await fetch('/seed/biblioteca-dev.json');
-        if (!res.ok) return showToast('Falta seed/: npm run seed');
-        const r = await importJson(lib, await res.json());
+        const [{ SAMPLE_NOTES }, { enrichBooks }] = await Promise.all([
+          import('./dev/sample'),
+          import('./app/enrich'),
+        ]);
+        const r = await importBooks(lib, parseMarkdown(SAMPLE_NOTES, 'Ejemplo.md'));
+        enrichBooks(lib, r.added);
         setTab('library');
-        showToast(
-          t('settings.imported', { added: r.added, updated: r.updated, invalid: r.invalid }),
-        );
+        showToast(t('tools.imported', { added: r.added.length, skipped: r.skipped }));
       }
     : undefined;
 

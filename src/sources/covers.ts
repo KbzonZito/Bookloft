@@ -40,7 +40,7 @@ export async function appleCovers(title: string, author?: string | null, limit =
 }
 
 /** Las portadas de todas las ediciones de una obra de Open Library, sin repetir */
-export async function editionCovers(olKey: string | null, limit = 60): Promise<CoverOption[]> {
+async function editionCovers(olKey: string | null, limit = 60): Promise<CoverOption[]> {
   if (!olKey?.startsWith('/works/')) return [];
   const url = `https://openlibrary.org${olKey}/editions.json?limit=${limit}&fields=covers`;
   const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });

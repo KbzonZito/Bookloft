@@ -1,0 +1,19 @@
+name: Checks
+
+# En los pull requests solo se comprueba el código; el APK se compila en android.yml (main y etiquetas)
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # Tipos, lint, formato, código sin usar (knip) y tests
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build

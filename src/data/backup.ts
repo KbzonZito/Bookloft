@@ -1,4 +1,4 @@
-// Respaldo JSON v1: el mismo formato sirve para exportar, restaurar y migrar desde Cloudflare
+// Respaldo JSON v1: el mismo formato sirve para exportar, restaurar y fusionar bibliotecas
 import type { Db } from './driver';
 import { BOOK_COLUMNS, toBook, type Library } from './library';
 import { now } from './ids';

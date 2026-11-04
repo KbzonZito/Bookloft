@@ -41,7 +41,7 @@ export const BOOK_COLUMNS = [
   'deleted_at',
 ] as const;
 
-export const FILE_COLUMNS = [
+const FILE_COLUMNS = [
   'id',
   'book_id',
   'path',
@@ -67,7 +67,7 @@ export function toBook(r: Row): Book {
   };
 }
 
-export function bookRow(b: Book): Value[] {
+function bookRow(b: Book): Value[] {
   return BOOK_COLUMNS.map((c) => {
     if (c === 'search_text') return searchText(b);
     if (c === 'authors' || c === 'tags') return JSON.stringify(b[c]);

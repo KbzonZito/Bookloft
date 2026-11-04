@@ -6,4 +6,4 @@ builds/
 *.jks
 *.keystore
 *.p12
-seed/
+.claude/

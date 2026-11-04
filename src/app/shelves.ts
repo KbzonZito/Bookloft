@@ -1,4 +1,4 @@
-// Ordenar, filtrar y agrupar libros (agrupación adaptada de book_app/src/web/shelves.ts)
+// Ordenar, filtrar y agrupar libros (por estante, por autor y saga)
 import type { Book, Status } from '../data';
 import { normalize } from '../data/text';
 

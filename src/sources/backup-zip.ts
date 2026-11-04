@@ -13,7 +13,7 @@ const JSON_NAME = 'biblioteca.json';
 // Los EPUB ya vienen comprimidos: se guardan tal cual, sin perder tiempo comprimiendo
 const FLUSH_BYTES = 512 * 1024;
 
-export const LAST_BACKUP = 'last_backup_at';
+const LAST_BACKUP = 'last_backup_at';
 
 /** Dónde se va escribiendo el ZIP: un archivo en la caché del teléfono o un Blob en el navegador */
 interface Sink {
@@ -64,7 +64,7 @@ export interface BackupFile {
   missing: number;
 }
 
-export function backupName(withFiles: boolean, date = new Date()) {
+function backupName(withFiles: boolean, date = new Date()) {
   return `biblioteca-${withFiles ? 'completo-' : ''}${date.toISOString().slice(0, 10)}.zip`;
 }
 

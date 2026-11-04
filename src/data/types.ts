@@ -1,4 +1,4 @@
-// Tipos de la biblioteca local (adaptados de book_app/src/shared/types.ts)
+// Tipos de la biblioteca local
 
 export const STATUSES = ['wishlist', 'to_read', 'reading', 'read', 'abandoned'] as const;
 export type Status = (typeof STATUSES)[number];

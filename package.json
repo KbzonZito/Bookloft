@@ -2,6 +2,12 @@
   "name": "biblioteca",
   "private": true,
   "version": "0.2.0",
+  "description": "Tu biblioteca personal en el teléfono: estantes, sagas, bóveda de EPUB y respaldos, sin cuentas ni servidores.",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KbzonZito/library_app.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -14,10 +20,10 @@
     "lint": "oxlint",
     "format": "prettier --write src scripts",
     "format:check": "prettier --check src scripts",
-    "check": "tsc --noEmit && npm run lint && npm run format:check && npm test",
-    "seed": "node scripts/seed-from-book-app.mjs",
+    "check": "tsc --noEmit && npm run lint && npm run format:check && npm run knip && npm test",
     "apk": "scripts/build-apk.sh",
-    "release": "scripts/release.sh"
+    "release": "scripts/release.sh",
+    "knip": "knip"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.4.0",
@@ -49,6 +55,7 @@
     "@types/react-dom": "^19.3.0",
     "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^6.2.1",
+    "knip": "^6.44.1",
     "oxlint": "^1.91.0",
     "prettier": "^3.9.10",
     "typescript": "^7.0.2",

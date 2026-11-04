@@ -1,5 +1,5 @@
 // Importar libros desde notas Markdown (como las de Obsidian) o desde un JSON, sin duplicar.
-// Los formatos de las notas vienen de book_app/scripts/import-obsidian.mjs:
+// Formatos que reconoce (los de las notas de lectura en Obsidian, más listas simples):
 //   Ruta numerada:  - [x] **12 · Título** — nota                  (autor = nombre del archivo, saga en ### _Saga_)
 //   Sagas:          # Autor / ## Saga / ### Subserie / - [ ] 1. Título (2026) — nota
 //   Independientes: # Ficción / ## Género / ### Prioridad alta / - [ ] **Título** — Autor (extra) ⏱️

@@ -17,7 +17,6 @@ const es = {
   'status.read': 'Leído',
   'status.abandoned': 'Abandonado',
 
-  'app.name': 'Biblioteca',
   'tab.library': 'Biblioteca',
   'tab.search': 'Buscar',
   'tab.vault': 'Bóveda',
@@ -28,7 +27,6 @@ const es = {
   'app.search': 'Buscar en toda la biblioteca',
   'app.closeSearch': 'Cerrar búsqueda',
   'app.add': 'Agregar libro',
-  'app.settings': 'Ajustes',
   'app.loading': 'Abriendo la biblioteca…',
   'app.dbError': 'No se pudo abrir la base de datos: {msg}',
   'app.books': '{n} libros',
@@ -54,7 +52,6 @@ const es = {
   'empty.sample': 'Cargar biblioteca de ejemplo',
 
   'book.close': 'Cerrar',
-  'book.by': 'de {authors}',
   'book.series': 'Libro {n} de {series}',
   'book.seriesNoIndex': 'Saga {series}',
   'book.status': 'Estado',
@@ -97,7 +94,6 @@ const es = {
   'add.scannerInstalling': 'Descargando el lector de códigos (solo la primera vez)…',
 
   'inbox.title': 'Bandeja',
-  'inbox.open': 'Abrir la bandeja ({n})',
   'inbox.addTo': 'Agregar a',
   'inbox.empty':
     'Nada por revisar. Desde Instagram, comparte un post, un link o un pantallazo a la app.',
@@ -204,7 +200,6 @@ const es = {
   'book.files': 'Archivos',
   'book.attach': 'Adjuntar EPUB o PDF',
 
-  'settings.title': 'Ajustes',
   'settings.theme': 'Apariencia',
   'theme.auto': 'Automática',
   'theme.light': 'Día',
@@ -212,7 +207,6 @@ const es = {
   'settings.language': 'Idioma',
   'lang.auto': 'Del sistema',
   'settings.backup': 'Respaldo',
-  'settings.imported': '{added} nuevos, {updated} actualizados, {invalid} con errores',
   'share.failed':
     'Android no pudo abrir la hoja de compartir. Cierra la app y vuelve a intentarlo.',
   'backup.never': 'Nunca has respaldado tu biblioteca.',
@@ -252,7 +246,6 @@ const en: Record<MessageKey, string> = {
   'status.read': 'Read',
   'status.abandoned': 'Abandoned',
 
-  'app.name': 'Library',
   'tab.library': 'Library',
   'tab.search': 'Search',
   'tab.vault': 'Vault',
@@ -263,7 +256,6 @@ const en: Record<MessageKey, string> = {
   'app.search': 'Search your whole library',
   'app.closeSearch': 'Close search',
   'app.add': 'Add book',
-  'app.settings': 'Settings',
   'app.loading': 'Opening the library…',
   'app.dbError': 'Could not open the database: {msg}',
   'app.books': '{n} books',
@@ -290,7 +282,6 @@ const en: Record<MessageKey, string> = {
   'empty.sample': 'Load a sample library',
 
   'book.close': 'Close',
-  'book.by': 'by {authors}',
   'book.series': 'Book {n} of {series}',
   'book.seriesNoIndex': '{series} series',
   'book.status': 'Status',
@@ -333,7 +324,6 @@ const en: Record<MessageKey, string> = {
   'add.scannerInstalling': 'Downloading the code scanner (first time only)…',
 
   'inbox.title': 'Inbox',
-  'inbox.open': 'Open the inbox ({n})',
   'inbox.addTo': 'Add to',
   'inbox.empty':
     'Nothing to review. From Instagram, share a post, a link or a screenshot to the app.',
@@ -438,7 +428,6 @@ const en: Record<MessageKey, string> = {
   'book.files': 'Files',
   'book.attach': 'Attach EPUB or PDF',
 
-  'settings.title': 'Settings',
   'settings.theme': 'Appearance',
   'theme.auto': 'Automatic',
   'theme.light': 'Day',
@@ -446,7 +435,6 @@ const en: Record<MessageKey, string> = {
   'settings.language': 'Language',
   'lang.auto': 'System',
   'settings.backup': 'Backup',
-  'settings.imported': '{added} new, {updated} updated, {invalid} with errors',
   'share.failed': 'Android could not open the share sheet. Close the app and try again.',
   'backup.never': 'You have never backed up your library.',
   'backup.last': 'Last backup: {when}.',

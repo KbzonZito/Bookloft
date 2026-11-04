@@ -1,0 +1,20 @@
+name: Algo no funciona
+description: Cuéntanos qué pasó para poder arreglarlo
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Qué pasó
+      description: Qué hiciste, qué esperabas y qué pasó en cambio. Si puedes, agrega una captura.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión de la app
+      description: Está al final de Ajustes (por ejemplo 0.3.0).
+  - type: input
+    id: device
+    attributes:
+      label: Teléfono o tablet y versión de Android

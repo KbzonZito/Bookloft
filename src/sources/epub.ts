@@ -1,4 +1,4 @@
-// Metadatos y huella de un EPUB o PDF (adaptado de book_app/src/web/epub.ts)
+// Metadatos y huella de un EPUB o PDF
 import { sha256 as sha256Bytes } from '@noble/hashes/sha2.js';
 import { bytesToHex } from '@noble/hashes/utils.js';
 import { unzipSync } from 'fflate';

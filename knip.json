@@ -1,0 +1,20 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/**/*.test.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}"
+  ],
+  "ignoreDependencies": [
+    "@fontsource-variable/.+"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "include": [
+    "files",
+    "dependencies",
+    "unlisted",
+    "exports",
+    "duplicates"
+  ]
+}

@@ -1,10 +1,10 @@
-// Leer pantallazos y textos con Claude, usando la API key de cada usuario (adaptado de book_app/src/worker/ai.ts).
+// Leer pantallazos y textos con Claude, usando la API key de cada usuario.
 // La key vive en el Keystore de Android / Keychain de iOS: nunca en SQLite ni en los respaldos.
 import Anthropic from '@anthropic-ai/sdk';
 import { SecureStorage } from '@aparajita/capacitor-secure-storage';
 
-// Haiku 5.5: ~0,0003 USD por pantallazo. Lo eligió el usuario en book_app por costo.
-export const AI_MODEL = 'claude-haiku-5-5';
+// Haiku 5.5: ~0,0003 USD por pantallazo; el más barato que lee bien portadas y lomos.
+const AI_MODEL = 'claude-haiku-5-5';
 const KEY_NAME = 'anthropic_api_key';
 
 export interface ExtractedBook {

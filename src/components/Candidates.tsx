@@ -15,7 +15,7 @@ const keyOf = (c: Candidate) =>
   c.ol_key ?? `${normalize(c.title)}|${normalize(c.authors[0] ?? '')}`;
 
 /** ¿Ya está en la biblioteca? Por Open Library, ISBN o título y autor */
-export function inLibrary(books: Book[], c: Candidate) {
+function inLibrary(books: Book[], c: Candidate) {
   const title = normalize(c.title);
   const author = normalize(c.authors[0] ?? '');
   return books.some(

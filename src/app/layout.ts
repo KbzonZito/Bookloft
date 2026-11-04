@@ -20,6 +20,3 @@ function subscribe(onChange: () => void) {
 }
 
 export const useWindowSize = () => useSyncExternalStore(subscribe, current);
-
-const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-export const prefersReducedMotion = () => reduce.matches;

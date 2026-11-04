@@ -21,10 +21,10 @@ function hash(s: string) {
   return Math.abs(h);
 }
 
-export const clothColor = (title: string) => CLOTH[hash(title) % CLOTH.length];
+const clothColor = (title: string) => CLOTH[hash(title) % CLOTH.length];
 
 /** Open Library devuelve un pixel en blanco si no tiene la portada; con default=false responde 404 */
-export function coverSrc(url: string | null, size: 'M' | 'L' = 'M') {
+function coverSrc(url: string | null, size: 'M' | 'L' = 'M') {
   if (!url) return null;
   if (!url.includes('covers.openlibrary.org')) return url;
   const sized = url.replace(/-[SML]\.jpg/, `-${size}.jpg`);
@@ -48,7 +48,7 @@ const crossOriginFor = (src: string) => (CORS_HOSTS.test(src) ? 'anonymous' : un
 const colors = new Map<string, Promise<string | null>>();
 
 /** Promedio de la imagen, pesando más los píxeles con color: así el gris del fondo no gana */
-export function coverColor(book: Book): Promise<string | null> {
+function coverColor(book: Book): Promise<string | null> {
   const src = bookCover(book);
   if (!src) return Promise.resolve(clothColor(book.title));
   if (!crossOriginFor(src)) return Promise.resolve(null);
