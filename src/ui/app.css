@@ -2461,3 +2461,81 @@ body {
 .info-source {
   font-size: var(--t-xs);
 }
+
+/* ---------- Acciones rápidas ---------- */
+
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 4px;
+}
+
+.quick section {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quick-cover {
+  flex: none;
+  width: 56px;
+}
+
+.quick-titles {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.quick-title {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
+  line-height: 1.25;
+}
+
+.quick-author {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 76px;
+  padding: 8px 6px;
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: var(--t-xs);
+  font-weight: 550;
+  color: var(--ink);
+  text-align: center;
+  transition: transform 0.15s;
+}
+
+.quick-action svg {
+  color: var(--accent);
+}
+
+.quick-action.danger svg,
+.quick-action.danger {
+  color: #b3473b;
+}
+
+.quick-action:active {
+  transform: scale(0.95);
+}

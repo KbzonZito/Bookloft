@@ -31,6 +31,7 @@ import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { NextRead } from './components/NextRead';
 import { UpNext } from './components/UpNext';
+import { QuickActions } from './components/QuickActions';
 import { YearReview } from './components/YearReview';
 import { WhatsNew } from './components/WhatsNew';
 import { changesSince, type ChangelogSection } from './app/whats-new';
@@ -129,6 +130,7 @@ function Shell({
   const [query, setQuery] = useState('');
   const [nextOpen, setNextOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
+  const [quickId, setQuickId] = useState<string | null>(null);
   const [news, setNews] = useState<ChangelogSection[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
@@ -243,6 +245,7 @@ function Shell({
   );
 
   const openBook = books?.find((b) => b.id === openId) ?? null;
+  const quickBook = books?.find((b) => b.id === quickId) ?? null;
   const progress = useMemo(() => seriesProgress(books ?? []), [books]);
   // La portada recibe su layoutId al apoyar el dedo; Motion la mide mientras tanto y al soltar
   // ya puede volar a la ficha. Con teclado no hay "apoyar": se espera a que Motion mida.
@@ -269,6 +272,7 @@ function Shell({
         setActiveId(b.id);
         setOpenId(b.id);
       },
+      quickActions: (b: Book) => setQuickId(b.id),
     }),
     [progress],
   );
@@ -532,6 +536,17 @@ function Shell({
                   toast={showToast}
                 />
               ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {quickBook && (
+              <QuickActions
+                book={quickBook}
+                onClose={() => setQuickId(null)}
+                onDelete={remove}
+                toast={showToast}
+              />
+            )}
           </AnimatePresence>
 
           <AnimatePresence>

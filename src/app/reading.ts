@@ -193,6 +193,8 @@ function diverse(scored: Suggestion[], limit: number) {
 export const ReadingContext = createContext<{
   progress: Map<string, SeriesProgress>;
   openBook: (b: Book) => void;
-}>({ progress: new Map(), openBook: () => {} });
+  /** Acciones rápidas al mantener presionado un libro */
+  quickActions: (b: Book) => void;
+}>({ progress: new Map(), openBook: () => {}, quickActions: () => {} });
 
 export const useReading = () => useContext(ReadingContext);
