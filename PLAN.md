@@ -25,7 +25,7 @@ Flujo de trabajo: commits locales → APK de prueba local → **tú confirmas** 
 
 ### Pendiente antes de publicar (Fase 8)
 
-- **Nombre** (candidatos: Velada, Cinta, Anaquel; Lomo descartado) e **ícono** nuevo. Ver docs/DECISIONES.md.
+- **Nombre** (candidatos: Shelfmark, Bookloft, Spinewise, Shelfnook, Bookhaven, Velada, Anaquel, Cinta; con descripción tipo "Book Tracker & Library") e **ícono** nuevo. Ver docs/DECISIONES.md.
 - **Respaldo automático a Drive**: necesita el nombre y la firma definitivos.
 - Probar en un teléfono real: escáner, compartir desde Instagram, IA con una key real (también "Que elija la IA" en ¿Qué leo ahora?), abrir EPUB en un lector.
 - Compilar la versión de Play con `DISTRIBUTION=play` (sin el link de Ko-fi, que Play no permite).
