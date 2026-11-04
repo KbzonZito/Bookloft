@@ -4,6 +4,8 @@ English version of [CHANGELOG.md](CHANGELOG.md). The app shows this one in What'
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-04
+
 - Welcome the first time you open the app: what Bookloft is, how to add books, bringing your library (Goodreads, StoryGraph, Obsidian or a backup) and choosing language, appearance and colors. You can see it again from Settings.
 - The app is now called **Bookloft** and has a new icon: colorful spines on a shelf with the ribbon bookmark. The launch screen changes too. It installs over the previous version without losing anything.
 - What’s new after an update now follows the app’s language (it was always in Spanish).
