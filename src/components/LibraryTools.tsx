@@ -1,11 +1,13 @@
 // Organizar la biblioteca: importar notas o listas, completar datos y portadas, ordenar en sagas con IA
-import { FileUp, Library as LibraryIcon, Sparkles } from 'lucide-react';
+import { FileDown, FileUp, Library as LibraryIcon, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { enrichBooks, needsData, useEnrichProgress } from '../app/enrich';
 import { useAllBooks, useLibrary } from '../app/library';
 import { importBooks, importJson, parseJsonBooks, parseMarkdown, type ImportedBook } from '../data';
 import { useI18n } from '../i18n';
+import { exportMarkdown } from '../data/export-notes';
 import { AiError, getApiKey, inferSeries } from '../sources/ai';
+import { shareFile } from '../sources/share-file';
 
 export function LibraryTools({
   toast,
@@ -58,6 +60,21 @@ export function LibraryTools({
     }
   }
 
+  async function exportNotes() {
+    try {
+      const md = exportMarkdown(books);
+      const date = new Date().toISOString().slice(0, 10);
+      const shared = await shareFile(
+        `Biblioteca ${date}.md`,
+        new Blob([md], { type: 'text/markdown' }),
+      );
+      if (shared) toast(t('tools.exported', { n: books.length }));
+    } catch (error) {
+      console.error(error);
+      toast(t('share.failed'));
+    }
+  }
+
   async function sortSeries() {
     const key = await getApiKey();
     if (!key) return onNeedAi();
@@ -103,6 +120,12 @@ export function LibraryTools({
             if (list.length) void importFiles(list);
           }}
         />
+        {books.length > 0 && (
+          <button className="button" disabled={!!busy} onClick={() => void exportNotes()}>
+            <FileDown size={18} strokeWidth={1.5} aria-hidden />
+            {t('tools.export')}
+          </button>
+        )}
         {incomplete.length > 0 && !enrich && (
           <button className="button" disabled={!!busy} onClick={() => enrichBooks(lib, incomplete)}>
             <LibraryIcon size={18} strokeWidth={1.5} aria-hidden />

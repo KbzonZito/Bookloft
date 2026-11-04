@@ -162,3 +162,81 @@ describe('guardar sin duplicar', () => {
     expect(again.added).toHaveLength(0);
   });
 });
+
+describe('exportar a Obsidian e importar de vuelta', () => {
+  it('ida y vuelta conserva estado, saga, nota, calificación, prioridad y etiquetas', async () => {
+    const { exportMarkdown } = await import('./export-notes');
+    const a = await openTestLibrary();
+    const add = async (title: string, over: Record<string, unknown>) => {
+      const { book } = await a.addBook({
+        title,
+        authors: (over.authors as string[]) ?? ['Brandon Sanderson'],
+        year: (over.year as number) ?? null,
+        cover_url: null,
+        ol_key: null,
+        isbn: null,
+        pages: null,
+        series: (over.series as string) ?? null,
+        series_index: (over.series_index as number) ?? null,
+      });
+      await a.updateBook(book.id, over);
+    };
+    await add('El imperio final', {
+      series: 'Nacidos de la bruma',
+      series_index: 1,
+      year: 2006,
+      status: 'read',
+      rating: 4.5,
+      note: 'Mi favorito (de lejos)',
+      tags: ['Cosmere'],
+    });
+    await add('El pozo de la ascensión', {
+      series: 'Nacidos de la bruma',
+      series_index: 2,
+      status: 'reading',
+    });
+    await add('Elantris', { year: 2005, status: 'wishlist', priority: 1, tags: ['Por publicar'] });
+    await add('Piranesi', { authors: ['Susanna Clarke'], status: 'abandoned', priority: 2 });
+    await add('Anónimo', { authors: [], status: 'to_read' });
+
+    const md = exportMarkdown(await a.listBooks(), new Date('2026-11-04'));
+    expect(md).toContain(
+      '- [x] 1. El imperio final (2006) — Mi favorito (de lejos) ★★★★½ #Cosmere',
+    );
+    expect(md).toContain(
+      '- [ ] **Elantris (2005)** — Brandon Sanderson · #deseo #prioridad-alta #Por-publicar',
+    );
+
+    const back = parseMarkdown(md, 'Biblioteca.md');
+    const by = (t: string) => back.find((b) => b.title === t)!;
+    expect(back).toHaveLength(5);
+    expect(by('El imperio final')).toMatchObject({
+      authors: ['Brandon Sanderson'],
+      series: 'Nacidos de la bruma',
+      series_index: 1,
+      year: 2006,
+      status: 'read',
+      rating: 4.5,
+      note: 'Mi favorito (de lejos)',
+      tags: ['Cosmere'],
+    });
+    expect(by('El pozo de la ascensión')).toMatchObject({ status: 'reading', series_index: 2 });
+    expect(by('Elantris')).toMatchObject({
+      status: 'wishlist',
+      priority: 1,
+      tags: ['Por publicar'],
+      year: 2005,
+      series: null,
+    });
+    expect(by('Piranesi')).toMatchObject({
+      status: 'abandoned',
+      priority: 2,
+      authors: ['Susanna Clarke'],
+    });
+    expect(by('Anónimo')).toMatchObject({ authors: [], status: 'to_read' });
+
+    // Importarla en la misma biblioteca no duplica nada
+    const again = await importBooks(a, back);
+    expect(again.added).toHaveLength(0);
+  });
+});

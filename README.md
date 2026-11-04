@@ -7,14 +7,17 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 ## Qué hace
 
 - **Estantes**: Leyendo, Por leer, Deseos, Leídos y Sin terminar, con calificación, prioridad, etiquetas y notas.
-- **Por autor y saga**: cada autor con sus sagas en orden y los libros sueltos al final.
+- **Por autor y saga**: cada autor con sus sagas en orden, cuántos llevas leídos y cuál sigue.
+- **¿Qué leo ahora?**: tres propuestas con su razón (la saga que tienes empezada, lo imprescindible, autores que te gustaron); con IA, Claude elige según lo que has leído.
+- **Tu año en libros**: leídos, páginas, mes a mes, autores y los mejor calificados, para compartir como imagen.
 - **Agregar libros como prefieras**: buscando en Open Library, escaneando el ISBN, con una foto (portadas o lomos en una repisa) o **compartiendo** un post o pantallazo desde otra app.
 - **IA opcional con tu propia API key** de Anthropic (Claude Haiku): lee pantallazos y fotos, y ordena tus libros en sagas. Sin key, la app lee el texto de la imagen en el mismo teléfono.
 - **Portadas** en el idioma en que buscas; puedes elegir otra edición, pegar un link o usar una foto tuya.
-- **Importar** tus notas de Obsidian (`.md`) o una lista en JSON, sin duplicar lo que ya tienes.
+- **Importar y exportar** tus notas de Obsidian (`.md`), o importar una lista en JSON, sin duplicar lo que ya tienes.
+- **Cada libro** con su reseña y páginas, en el idioma del título cuando existe.
 - **Bóveda**: tus EPUB y PDF vinculados a cada libro, que se abren en tu lector favorito.
 - **Respaldos** en ZIP (solo la biblioteca o con la bóveda) para guardar en Drive o donde quieras, y restaurarlos fusionando sin perder nada.
-- Modo día y noche, en español e inglés.
+- Paletas de color de día y de noche (o los colores de tu teléfono), portadas sin conexión, en español e inglés.
 
 ## Instalar
 

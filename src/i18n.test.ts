@@ -17,6 +17,7 @@ const DYNAMIC = [
   'lang.',
   'palette.',
   'next.',
+  'year.',
 ];
 
 function sources(dir: string): string[] {

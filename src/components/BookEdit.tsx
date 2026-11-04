@@ -125,6 +125,7 @@ export function EditBook({
   const [series, setSeries] = useState(book.series ?? '');
   const [index, setIndex] = useState(book.series_index?.toString() ?? '');
   const [year, setYear] = useState(book.year?.toString() ?? '');
+  const [finished, setFinished] = useState(book.finished_at?.slice(0, 10) ?? '');
 
   async function save(e: FormEvent) {
     e.preventDefault();
@@ -142,6 +143,10 @@ export function EditBook({
       series: series.trim() || null,
       series_index: series.trim() ? num(index) : null,
       year: num(year),
+      // Mediodía UTC: la fecha no cambia de día por la zona horaria
+      ...(book.status === 'read' && {
+        finished_at: finished ? `${finished}T12:00:00.000Z` : null,
+      }),
     });
     onClose();
   }
@@ -178,6 +183,18 @@ export function EditBook({
             />
           </label>
         </div>
+        {book.status === 'read' && (
+          <label className="field-label">
+            {t('edit.finished')}
+            <input
+              className="field"
+              type="date"
+              value={finished}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => setFinished(e.target.value)}
+            />
+          </label>
+        )}
         <label className="field-label number">
           {t('edit.year')}
           <input

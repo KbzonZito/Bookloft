@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Exportar a Obsidian (Ajustes → Organizar): una nota .md con tus libros por autor y saga, con estado, calificación, prioridad, notas y etiquetas como #tags. Se puede volver a importar sin perder nada ni duplicar.
+- Tu año en libros (en Leídos): libros terminados, páginas, nota promedio, mes a mes, autores, los mejor calificados y sagas terminadas. Se comparte como imagen tipo historia.
+- En "Editar datos" de un libro leído se puede poner la fecha en que lo terminaste (útil para los importados, que no la traen).
+
 - Ajustes → Apoyar la app: link para invitar un café en Ko-fi (solo en la versión de GitHub; Google Play no permite links de donación).
 - La barra de títulos de arriba ahora es opaca: el texto ya no se ve detrás del título al desplazarse.
 

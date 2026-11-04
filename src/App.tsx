@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowDownUp,
+  CalendarHeart,
   Check,
   Inbox as InboxIcon,
   LayoutGrid,
@@ -21,6 +22,7 @@ import { searchBooks, SHELVES, sortBooks, SORTS, type Sort } from './app/shelves
 import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { NextRead } from './components/NextRead';
+import { YearReview } from './components/YearReview';
 import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { ReadingContext, seriesProgress } from './app/reading';
@@ -110,6 +112,7 @@ function Shell({
   const [tab, setTab] = useState<Tab>('library');
   const [query, setQuery] = useState('');
   const [nextOpen, setNextOpen] = useState(false);
+  const [yearOpen, setYearOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -323,6 +326,12 @@ function Shell({
             <span>{t('next.title')}</span>
           </button>
         )}
+        {shelf === 'read' && counts.read > 0 && (
+          <button className="next-banner" onClick={() => setYearOpen(true)}>
+            <CalendarHeart size={16} strokeWidth={1.6} aria-hidden />
+            <span>{t('year.banner', { year: new Date().getFullYear() })}</span>
+          </button>
+        )}
         {books.length > 0 && (
           <Toolbar
             count={shown.length}
@@ -457,6 +466,17 @@ function Shell({
                   toast={showToast}
                 />
               ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {yearOpen && (
+              <YearReview
+                books={books}
+                onClose={() => setYearOpen(false)}
+                onOpenBook={reading.openBook}
+                toast={showToast}
+              />
+            )}
           </AnimatePresence>
 
           <AnimatePresence>

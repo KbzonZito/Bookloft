@@ -5,6 +5,7 @@
 //   Independientes: # Ficción / ## Género / ### Prioridad alta / - [ ] **Título** — Autor (extra) ⏱️
 //   Lista simple:   - Título — Autor   ·   - [ ] Título de Autor   ·   1. Título by Author
 import { uuidv7, now } from './ids';
+import { EXPORT_MARK, PRIORITY_TAGS, STATUS_TAGS } from './export-notes';
 import { toBook, type Library } from './library';
 import { normalize } from './text';
 import { STATUSES, type Book, type Status } from './types';
@@ -65,10 +66,45 @@ function authorFromFile(fileName: string) {
     : null;
 }
 
+/**
+ * En una nota exportada por esta app, los títulos (# Autor, ## Saga) no son etiquetas, y la nota de
+ * cada libro trae la calificación en estrellas y el estado, la prioridad y las etiquetas como #tags.
+ */
+function applyMarkers(book: ImportedBook): ImportedBook {
+  let note = book.note ?? '';
+  const tags: string[] = [];
+  note = note.replace(/(^|\s)#([\p{L}\p{N}_/-]+)/gu, (_, sp: string, tag: string) => {
+    tags.push(tag);
+    return sp;
+  });
+  const star = note.match(/(★+)(½)?/);
+  if (star) note = note.replace(star[0], '');
+  const statusEntry = Object.entries(STATUS_TAGS).find(([, t]) => tags.includes(t!));
+  const priority = PRIORITY_TAGS.findIndex((t, i) => i > 0 && tags.includes(t));
+  const known = new Set<string>([...Object.values(STATUS_TAGS), ...PRIORITY_TAGS] as string[]);
+  return {
+    ...book,
+    status: statusEntry ? (statusEntry[0] as Status) : book.status,
+    priority: priority > 0 ? priority : book.priority,
+    rating: star ? star[1].length + (star[2] ? 0.5 : 0) : (book.rating ?? null),
+    authors: book.authors.filter((a) => a !== 'Sin autor'),
+    tags: tags.filter((t) => !known.has(t)).map((t) => t.replace(/-/g, ' ')),
+    note: oneLine(note.replace(/^[\s·—-]+|[\s·—-]+$/g, '')) || null,
+  };
+}
+
+const oneLine = (s: string) => s.replace(/\s+/g, ' ').trim();
+
 export function parseMarkdown(text: string, fileName = ''): ImportedBook[] {
+  const exported = /^---[\s\S]*?\n---/.test(text) && text.slice(0, 400).includes(EXPORT_MARK);
+  const books = parseLines(text, fileName, exported);
+  return exported ? books.map(applyMarkers) : books;
+}
+
+function parseLines(text: string, fileName: string, exported: boolean): ImportedBook[] {
   const lines = text.replace(/\r/g, '').split('\n');
   const books: ImportedBook[] = [];
-  const fileAuthor = authorFromFile(fileName);
+  const fileAuthor = exported ? null : authorFromFile(fileName);
   let h1 = '';
   let h2 = '';
   let h3 = '';
@@ -112,6 +148,23 @@ export function parseMarkdown(text: string, fileName = ''): ImportedBook[] {
     m = line.match(/^\s*[-*] (?:\[( |x|X)\] )?\*\*(.+?)\*\*\s*(?:—|-|–)\s*(.+)$/);
     if (m) {
       const [, done, rawTitle, rest] = m;
+      if (exported) {
+        // Formato propio: "**Título (año)** — Autor · nota ★★★ #tags" (sin reglas de las notas a mano)
+        const [author, ...noteParts] = rest.split(' · ');
+        const { title, year } = splitTitle(rawTitle);
+        books.push({
+          title,
+          authors: author.trim() && author.trim() !== '?' ? [author.trim()] : [],
+          series: null,
+          series_index: null,
+          year,
+          status: statusOf(done, ''),
+          priority: 0,
+          tags: [],
+          note: noteParts.join(' · ') || null,
+        });
+        continue;
+      }
       const short = /⏱️/.test(rest);
       const authorPart = rest.replace(/⏱️/g, '');
       const extra = authorPart.match(/\(([^)]+)\)/)?.[1];
