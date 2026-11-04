@@ -41,13 +41,17 @@ export const flightFor = (
 ): CoverFlight => (id === openId ? 'away' : id === activeId ? 'shared' : 'still');
 
 /**
- * Mantener presionado: 450 ms sin moverse más de 8 px (si se mueve, es un desplazamiento).
- * Después de dispararse, el clic que sigue al soltar no abre la ficha.
+ * Tocar y mantener presionado, con eventos de puntero propios:
+ * - Toque: soltar antes de 450 ms sin moverse más de 8 px. Abre al soltar, sin esperar el "click"
+ *   del navegador: justo después de un gesto rápido (cerrar la ficha arrastrándola) Chrome en
+ *   Android a veces descarta ese click, y el libro no se abría.
+ * - Mantener: 450 ms quieto.
+ * El click que llega después (si llega) se ignora; el teclado sigue usando el click normal.
  */
-function useLongPress(action: () => void) {
+function usePress(onTap: () => void, onLongPress: () => void) {
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const start = useRef<{ x: number; y: number } | null>(null);
-  const firedAt = useRef(0);
+  const handledAt = useRef(0);
   const cancel = () => {
     clearTimeout(timer.current);
     start.current = null;
@@ -58,18 +62,26 @@ function useLongPress(action: () => void) {
       start.current = { x: e.clientX, y: e.clientY };
       clearTimeout(timer.current);
       timer.current = setTimeout(() => {
-        firedAt.current = Date.now();
+        handledAt.current = Date.now();
         start.current = null;
         haptic.tap();
-        action();
+        onLongPress();
       }, 450);
     },
     onPointerMove: (e: PointerEvent) => {
       const s = start.current;
       if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 8) cancel();
     },
+    onPointerUp: () => {
+      const wasTap = start.current !== null;
+      cancel();
+      if (!wasTap) return;
+      handledAt.current = Date.now();
+      onTap();
+    },
     cancel,
-    fired: () => Date.now() - firedAt.current < 800,
+    /** Ya se atendió con los eventos de puntero: el click que sigue sobra */
+    handled: () => Date.now() - handledAt.current < 800,
   };
 }
 
@@ -93,7 +105,10 @@ export const BookCell = memo(function BookCell({
   const series =
     book.series && book.series_index != null ? `${book.series} ${book.series_index}` : null;
   const { quickActions } = useReading();
-  const press = useLongPress(() => quickActions(book));
+  const press = usePress(
+    () => onOpen(book),
+    () => quickActions(book),
+  );
   return (
     <button
       className="book-cell"
@@ -102,11 +117,11 @@ export const BookCell = memo(function BookCell({
         press.onPointerDown(e);
       }}
       onPointerMove={press.onPointerMove}
-      onPointerUp={press.cancel}
+      onPointerUp={press.onPointerUp}
       onPointerCancel={press.cancel}
       onContextMenu={(e) => e.preventDefault()}
       onClick={() => {
-        if (press.fired()) return;
+        if (press.handled()) return;
         onOpen(book);
       }}
     >

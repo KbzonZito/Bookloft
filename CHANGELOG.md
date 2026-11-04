@@ -8,7 +8,7 @@
 - Mantén presionado un libro para las acciones rápidas: empezar, marcar leído, Próximos, cambiar portada, compartir, calificar, mover o quitar.
 - Descubrir (nueva pestaña): más libros de tus autores favoritos y de los géneros que lees, los más vendidos de Apple Books en tu país (por categoría) y las tendencias de la semana. Toca uno para ver de qué trata y agregarlo.
 
-- Al cerrar la ficha de un libro arrastrándola, ahora sigue hacia abajo (antes rebotaba hacia arriba mientras desaparecía) y la app responde al instante.
+- Al cerrar la ficha de un libro arrastrándola, ahora sigue hacia abajo (antes rebotaba hacia arriba mientras desaparecía), y el libro que tocas justo después siempre se abre (antes a veces el toque se perdía).
 - La ficha se cierra con una flecha atrás, arriba a la izquierda.
 - Vibración: se puede apagar en Ajustes.
 - Respaldo en CSV (Ajustes → Respaldo): con las columnas de Goodreads, para llevar tu biblioteca a StoryGraph, Goodreads o una planilla.

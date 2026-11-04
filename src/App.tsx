@@ -533,7 +533,7 @@ function Shell({
                 />
               ) : (
                 <BookSheet
-                  key="sheet"
+                  key={openBook.id}
                   book={openBook}
                   onClose={close}
                   onDelete={remove}

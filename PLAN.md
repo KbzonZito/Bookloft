@@ -1,6 +1,6 @@
 # Biblioteca — Hoja de ruta
 
-> Estado: **v0.7.0** (en preparación), fases 0 a 6 listas y varias mejoras · Actualizado: 2026-11-04
+> Estado: **v0.8.0** (en preparación), fases 0 a 6 listas y varias mejoras · Actualizado: 2026-11-04
 > Qué está decidido y por qué (arquitectura, diseño, negocio, firma): [docs/DECISIONES.md](docs/DECISIONES.md). Cambios por versión: [CHANGELOG.md](CHANGELOG.md).
 
 Niveles de pensamiento (esfuerzo sugerido para Claude):
@@ -73,6 +73,12 @@ Ideas para después de las fases. Varias venían de la antigua app web.
 | 📖 Reseña ("De qué trata") y páginas en la ficha                                                                                         | 🟡    | ✅ v0.5.0 (Apple Books en el idioma del título, si no Open Library)                                              |
 | 🖼️ Portadas sin conexión (ajuste opcional, ~17 KB por libro)                                                                             | 🟡    | ✅ v0.4.0                                                                                                        |
 | ☕ Ko-fi en la versión de GitHub (Ajustes → Apoyar la app, README, botón Sponsor)                                                        | 🟢    | ✅ v0.7.0                                                                                                        |
+| 🗂️ Estantes nuevos: Estantería (todo, con filtro) y Próximos dentro de Leyendo; sin lista de deseos                                      | 🟠    | ✅ v0.8.0 (migración 0004)                                                                                       |
+| 📖 Ficha en pestañas: Mis notas (páginas leídas, fechas) · Información (Open Library)                                                    | 🟠    | ✅ v0.8.0                                                                                                        |
+| 👆 Acciones rápidas al mantener presionado un libro                                                                                      | 🟡    | ✅ v0.8.0                                                                                                        |
+| 🧭 Descubrir: para ti, más vendidos de Apple Books, tendencias                                                                           | 🟠    | ✅ v0.8.0 (sin IA; falta "si te gustó X" con IA)                                                                 |
+| 📤 Respaldo en CSV (formato Goodreads)                                                                                                   | 🟢    | ✅ v0.8.0                                                                                                        |
+| 📳 Vibración configurable y aviso de novedades tras actualizar                                                                           | 🟢    | ✅ v0.8.0                                                                                                        |
 | 📄 Importar desde Goodreads/StoryGraph (CSV)                                                                                             | 🟢    | ✅ v0.7.0 (también StoryGraph y planillas con `,` o `;`)                                                         |
 
 ## Fase 6: cómo quedó (limpieza y optimización)
@@ -99,4 +105,5 @@ Ideas para después de las fases. Varias venían de la antigua app web.
 - **v0.4.0**: botón ✕ en la ficha, cierre sin bloqueos, "Sin terminar"/DNF, portadas sin conexión.
 - **v0.5.0**: paletas de color y del dispositivo, reseña y páginas en la ficha.
 - **v0.6.0**: ¿Qué leo ahora? y progreso de sagas. Ko-fi y barra de títulos opaca salen en la v0.7.0.
-- **v0.7.0** (en preparación): exportar a Obsidian, resumen del año, Ko-fi y barra de títulos opaca.
+- **v0.7.0**: importar CSV, exportar a Obsidian, resumen del año, Ko-fi y barra de títulos opaca.
+- **v0.8.0** (en preparación): estantes nuevos y Próximos, ficha en pestañas, acciones rápidas, Descubrir, respaldo CSV, vibración configurable, novedades, cerrar la ficha sin rebote ni toques perdidos.

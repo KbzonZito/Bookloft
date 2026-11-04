@@ -6,7 +6,7 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 
 ## Qué hace
 
-- **Estantes**: Leyendo, Por leer, Deseos, Leídos y Sin terminar, con calificación, prioridad, etiquetas y notas.
+- **Estantes**: Leyendo (con tu fila de Próximos), Estantería con todos tus libros, Leídos y Sin terminar; calificación, páginas leídas, fechas, prioridad, etiquetas y notas.
 - **Por autor y saga**: cada autor con sus sagas en orden, cuántos llevas leídos y cuál sigue.
 - **¿Qué leo ahora?**: tres propuestas con su razón (la saga que tienes empezada, lo imprescindible, autores que te gustaron); con IA, Claude elige según lo que has leído.
 - **Tu año en libros**: leídos, páginas, mes a mes, autores y los mejor calificados, para compartir como imagen.
@@ -14,9 +14,10 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 - **IA opcional con tu propia API key** de Anthropic (Claude Haiku): lee pantallazos y fotos, y ordena tus libros en sagas. Sin key, la app lee el texto de la imagen en el mismo teléfono.
 - **Portadas** en el idioma en que buscas; puedes elegir otra edición, pegar un link o usar una foto tuya.
 - **Importar y exportar** tus notas de Obsidian (`.md`), o importar un CSV de Goodreads, StoryGraph o una planilla, o un JSON, sin duplicar lo que ya tienes.
-- **Cada libro** con su reseña y páginas, en el idioma del título cuando existe.
+- **Cada libro** con dos pestañas: lo que escribes tú y lo que dice Open Library (reseña, nota promedio, géneros, editorial). Mantén presionado un libro para las acciones rápidas.
+- **Descubrir**: más de tus autores favoritos, los más vendidos de Apple Books en tu país y las tendencias de la semana.
 - **Bóveda**: tus EPUB y PDF vinculados a cada libro, que se abren en tu lector favorito.
-- **Respaldos** en ZIP (solo la biblioteca o con la bóveda) para guardar en Drive o donde quieras, y restaurarlos fusionando sin perder nada.
+- **Respaldos** en CSV (para Goodreads, StoryGraph o una planilla) y en ZIP (solo la biblioteca o con la bóveda) para guardar en Drive o donde quieras, y restaurarlos fusionando sin perder nada.
 - Paletas de color de día y de noche (o los colores de tu teléfono), portadas sin conexión, en español e inglés.
 
 ## Instalar
