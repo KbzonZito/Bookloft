@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-04
+
 - Importar desde CSV: las exportaciones de Goodreads y StoryGraph (con saga, calificación, nota, páginas y fecha en que lo terminaste) o cualquier planilla con una columna de título. Sin duplicar.
 
 - Exportar a Obsidian (Ajustes → Organizar): una nota .md con tus libros por autor y saga, con estado, calificación, prioridad, notas y etiquetas como #tags. Se puede volver a importar sin perder nada ni duplicar.
