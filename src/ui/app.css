@@ -1350,7 +1350,7 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   max-width: calc(100vw - 16px);
 }
 
@@ -1360,7 +1360,7 @@
   gap: 2px;
   width: max-content;
   min-width: 0;
-  padding: 7px;
+  padding: 6px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(16px) saturate(1.2);
@@ -1376,9 +1376,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 50px;
-  min-width: 48px;
-  padding: 0 clamp(11px, 3.4vw, 15px);
+  height: 48px;
+  min-width: 44px;
+  padding: 0 clamp(10px, 2.7vw, 15px);
   border-radius: 999px;
   color: var(--ink-2);
   font-size: var(--t-sm);
@@ -1456,7 +1456,7 @@
 /* Buscar: el círculo de color al final de la barra */
 .tabbar .tab-featured {
   margin-left: 4px;
-  width: 50px;
+  width: 48px;
   padding: 0;
   background: var(--accent);
   color: var(--accent-ink);
@@ -1483,8 +1483,8 @@
   flex: none;
   display: grid;
   place-items: center;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--accent);
   color: var(--accent-ink);
@@ -2538,4 +2538,102 @@ body {
 
 .quick-action:active {
   transform: scale(0.95);
+}
+
+/* ---------- Descubrir ---------- */
+
+.discover {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discover-section {
+  margin: 18px 0 6px;
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  font-weight: 420;
+}
+
+.discover-section:first-child {
+  margin-top: 0;
+}
+
+.discover-row .series-name {
+  margin-top: 6px;
+}
+
+.discover-cell .cover-wrap {
+  position: relative;
+}
+
+.rank {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.owned {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.cover.skeleton {
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  background: var(--surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.preview-cover {
+  flex: none;
+  width: 120px;
+}
+
+.preview-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.preview-summary.clamped {
+  -webkit-line-clamp: 8;
+}
+
+.preview-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }

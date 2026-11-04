@@ -10,6 +10,7 @@ import {
   Rows3,
   Search,
   Settings2,
+  Store,
   X,
 } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from 'motion/react';
@@ -31,6 +32,7 @@ import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { NextRead } from './components/NextRead';
 import { UpNext } from './components/UpNext';
+import { Discover } from './components/Discover';
 import { QuickActions } from './components/QuickActions';
 import { YearReview } from './components/YearReview';
 import { WhatsNew } from './components/WhatsNew';
@@ -54,7 +56,7 @@ import { applyPalette, paintWindow, useSystemPalette, type PaletteId } from './a
 import type { PaletteControl } from './components/PalettePicker';
 
 type View = 'covers' | 'authors';
-type Tab = 'library' | 'search' | 'vault' | 'settings';
+type Tab = 'library' | 'discover' | 'search' | 'vault' | 'settings';
 
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 
@@ -370,6 +372,7 @@ function Shell({
     );
 
   const screens: Record<Tab, ReactNode> = {
+    discover: <Discover books={books} toast={showToast} />,
     library: (
       <>
         {pending.length > 0 && (
@@ -483,6 +486,7 @@ function Shell({
           <NavBar
             tabs={[
               { id: 'library', icon: LibraryBig, badge: pending.length },
+              { id: 'discover', icon: Store },
               { id: 'vault', icon: Archive },
               { id: 'settings', icon: Settings2 },
               { id: 'search', icon: Search, featured: true },

@@ -52,7 +52,10 @@ const crossOriginFor = (src: string) => (CORS_HOSTS.test(src) ? 'anonymous' : un
 const colors = new Map<string, Promise<string | null>>();
 
 /** Promedio de la imagen, pesando más los píxeles con color: así el gris del fondo no gana */
-function coverColor(book: Book): Promise<string | null> {
+/** Lo único que una portada necesita saber de un libro */
+export type CoverBook = Pick<Book, 'title' | 'authors' | 'cover_url' | 'cover_path'>;
+
+function coverColor(book: CoverBook): Promise<string | null> {
   const src = bookCover(book);
   if (!src) return Promise.resolve(clothColor(book.title));
   if (!crossOriginFor(src)) return Promise.resolve(null);
@@ -94,7 +97,7 @@ function coverColor(book: Book): Promise<string | null> {
   return p;
 }
 
-export function useCoverColor(book: Book) {
+export function useCoverColor(book: CoverBook) {
   const [color, setColor] = useState<string | null>(null);
   useEffect(() => {
     let alive = true;
@@ -111,7 +114,7 @@ export const Cover = memo(function Cover({
   size = 'M',
   eager = false,
 }: {
-  book: Book;
+  book: CoverBook;
   size?: 'M' | 'L';
   eager?: boolean;
 }) {

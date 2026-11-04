@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- Estantes nuevos: Leyendo · Estantería · Leídos · Sin terminar. La Estantería tiene todos tus libros, con filtro por estado.
+- Próximos (dentro de Leyendo): tu fila de lo que quieres leer después. Agrégalos desde la ficha, manteniendo presionado un libro o desde ¿Qué leo ahora?, y ordénalos a mano.
+- La ficha tiene dos pestañas: Mis notas (estado, calificación, páginas leídas, fechas de inicio y término, nota, prioridad, etiquetas) e Información (lo que dice Open Library: nota promedio y votos, géneros, editorial, idiomas, ediciones y de qué trata).
+- Mantén presionado un libro para las acciones rápidas: empezar, marcar leído, Próximos, cambiar portada, compartir, calificar, mover o quitar.
+- Descubrir (nueva pestaña): más libros de tus autores favoritos y de los géneros que lees, los más vendidos de Apple Books en tu país (por categoría) y las tendencias de la semana. Toca uno para ver de qué trata y agregarlo.
+
 - Al cerrar la ficha de un libro arrastrándola, ahora sigue hacia abajo (antes rebotaba hacia arriba mientras desaparecía) y la app responde al instante.
 - La ficha se cierra con una flecha atrás, arriba a la izquierda.
 - Vibración: se puede apagar en Ajustes.
