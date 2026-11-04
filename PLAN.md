@@ -72,7 +72,7 @@ Ideas para después de las fases. Varias venían de la antigua app web.
 | 🎨 Paletas de color (5 cozy + Dispositivo/Material You), de día y de noche                                                               | 🟡    | ✅ v0.5.0                                                                                                        |
 | 📖 Reseña ("De qué trata") y páginas en la ficha                                                                                         | 🟡    | ✅ v0.5.0 (Apple Books en el idioma del título, si no Open Library)                                              |
 | 🖼️ Portadas sin conexión (ajuste opcional, ~17 KB por libro)                                                                             | 🟡    | ✅ v0.4.0                                                                                                        |
-| ☕ Ko-fi en la versión de GitHub (Ajustes → Apoyar la app, README, botón Sponsor)                                                        | 🟢    | ✅ v0.6.1                                                                                                        |
+| ☕ Ko-fi en la versión de GitHub (Ajustes → Apoyar la app, README, botón Sponsor)                                                        | 🟢    | ✅ v0.7.0                                                                                                        |
 | 📄 Importar desde Goodreads/StoryGraph (CSV)                                                                                             | 🟢    | ⏳                                                                                                               |
 
 ## Fase 6: cómo quedó (limpieza y optimización)
