@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-04
+
 - La app pesa la mitad: el APK baja de 81 a 41 MB y abre más liviana (la IA se carga recién al usarla).
 - Con cientos de libros, completar portadas ya no hace que la biblioteca se redibuje por cada libro.
 - Repo ordenado: licencia GPL-3.0, README nuevo, decisiones en docs/ y sin restos de la app web anterior.
