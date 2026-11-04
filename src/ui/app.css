@@ -1375,7 +1375,7 @@
 
 /* ---------- Barra de navegación (adaptada de Printer Hub) ---------- */
 
-.tabbar {
+.navdock {
   position: fixed;
   z-index: 25;
   left: 50%;
@@ -1383,9 +1383,16 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 16px);
+}
+
+.tabbar {
+  display: flex;
+  align-items: center;
   gap: 2px;
   width: max-content;
-  max-width: calc(100vw - 16px);
+  min-width: 0;
   padding: 7px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -1479,16 +1486,49 @@
   line-height: 16px;
 }
 
-.tabbar .tab-add {
+/* Buscar: el círculo de color al final de la barra */
+.tabbar .tab-featured {
   margin-left: 4px;
   width: 50px;
   padding: 0;
   background: var(--accent);
   color: var(--accent-ink);
+  transition:
+    transform 0.15s,
+    box-shadow 0.3s ease;
+}
+
+.tabbar .tab-featured::before {
+  display: none;
+}
+
+.tabbar .tab-featured.active {
+  color: var(--accent-ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.tab-rail-label {
+  display: none;
+}
+
+/* El +: círculo de color afuera de la barra, a la derecha */
+.fab-add {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 14px 30px -10px color-mix(in srgb, var(--accent) 70%, black);
   transition: transform 0.15s;
 }
 
-.tabbar .tab-add:active {
+.tabbar .tab-featured:active,
+.fab-add:active {
   transform: scale(0.92);
 }
 
@@ -1548,20 +1588,29 @@ body {
 }
 
 @media (min-width: 840px) {
-  .tabbar {
+  .navdock {
     position: static;
     transform: none;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
     width: 96px;
     max-width: none;
     height: 100dvh;
     padding: calc(var(--safe-top) + 24px) 0 24px;
-    border-radius: 0;
     background: var(--paper);
-    backdrop-filter: none;
-    box-shadow: none;
     border-right: 1px solid var(--line);
+  }
+
+  .tabbar {
+    flex-direction: column;
+    gap: 10px;
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
   }
 
   .tabbar button {
@@ -1580,11 +1629,35 @@ body {
     font-size: var(--t-xs);
   }
 
-  .tabbar .tab-add {
+  /* En el riel, Buscar es una pestaña más y el + va arriba */
+  .tabbar .tab-featured {
+    order: -1;
+    width: 72px;
+    margin: 0;
+    padding: 8px 0;
+    background: none;
+    color: var(--ink-2);
+  }
+
+  .tabbar .tab-featured::before {
+    display: block;
+  }
+
+  .tabbar .tab-featured.active {
+    color: var(--accent);
+    box-shadow: none;
+  }
+
+  .tab-rail-label {
+    display: block;
+    font-size: var(--t-xs);
+  }
+
+  .fab-add {
     order: -1;
     width: 56px;
     height: 56px;
-    margin: 0 0 14px;
+    margin-bottom: 6px;
     border-radius: 18px;
   }
 

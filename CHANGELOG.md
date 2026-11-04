@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Barra de navegación: Buscar pasa a ser el círculo de color de la barra, y el + queda afuera, a la derecha, siempre a la misma distancia.
+
 ## [0.2.0] - 2026-11-04
 
 - Navegación abajo: barra flotante con Biblioteca, Buscar, Bóveda, Ajustes y el botón + fijo (ya no se corre al cambiar de estante). Arriba queda el título de cada pantalla.

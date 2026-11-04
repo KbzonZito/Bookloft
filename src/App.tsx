@@ -362,9 +362,9 @@ function Shell({
         <NavBar
           tabs={[
             { id: 'library', icon: LibraryBig, badge: pending.length },
-            { id: 'search', icon: Search },
             { id: 'vault', icon: Archive },
             { id: 'settings', icon: Settings2 },
+            { id: 'search', icon: Search, featured: true },
           ]}
           active={tab}
           onSelect={go}

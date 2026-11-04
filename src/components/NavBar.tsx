@@ -1,5 +1,7 @@
 // Barra de navegación flotante (adaptada de Printer Hub). Los íconos inactivos van solos; el activo
-// crece hasta ícono + nombre y la barra se acomoda alrededor. En tablet horizontal es un riel vertical.
+// crece hasta ícono + nombre y la barra se acomoda alrededor. La pestaña destacada (Buscar) va al final
+// como círculo de color, y el + queda afuera, a la derecha, siempre a la misma distancia de la barra.
+// En tablet horizontal todo es un riel vertical.
 import { Plus, type LucideIcon } from 'lucide-react';
 import { useLayoutEffect, useRef } from 'react';
 import { haptic } from '../app/native';
@@ -12,7 +14,8 @@ export function NavBar<T extends string>({
   onAdd,
   addLabel,
 }: {
-  tabs: { id: T; icon: LucideIcon; badge?: number }[];
+  /** La última que tenga `featured` se dibuja como círculo de color al final de la barra */
+  tabs: { id: T; icon: LucideIcon; badge?: number; featured?: boolean }[];
   active: T;
   onSelect: (id: T) => void;
   label: (id: T) => string;
@@ -44,28 +47,35 @@ export function NavBar<T extends string>({
   }, [labels]);
 
   return (
-    <nav className="tabbar" ref={barRef}>
-      {tabs.map(({ id, icon: Icon, badge }) => (
-        <button
-          key={id}
-          className={active === id ? 'active' : ''}
-          aria-current={active === id ? 'page' : undefined}
-          aria-label={label(id)}
-          onClick={() => {
-            if (id !== active) haptic.tick();
-            onSelect(id);
-          }}
-        >
-          <Icon size={22} strokeWidth={1.6} aria-hidden />
-          <span className="tab-label" aria-hidden>
-            <span>{label(id)}</span>
-          </span>
-          {!!badge && <span className="tab-badge">{badge}</span>}
-        </button>
-      ))}
-      <button className="tab-add" onClick={onAdd} aria-label={addLabel}>
-        <Plus size={24} strokeWidth={2} aria-hidden />
+    <div className="navdock">
+      <nav className="tabbar" ref={barRef}>
+        {tabs.map(({ id, icon: Icon, badge, featured }) => (
+          <button
+            key={id}
+            className={[featured && 'tab-featured', active === id && 'active']
+              .filter(Boolean)
+              .join(' ')}
+            aria-current={active === id ? 'page' : undefined}
+            aria-label={label(id)}
+            onClick={() => {
+              if (id !== active) haptic.tick();
+              onSelect(id);
+            }}
+          >
+            <Icon size={22} strokeWidth={featured ? 2 : 1.6} aria-hidden />
+            {!featured && (
+              <span className="tab-label" aria-hidden>
+                <span>{label(id)}</span>
+              </span>
+            )}
+            {featured && <span className="tab-rail-label">{label(id)}</span>}
+            {!!badge && <span className="tab-badge">{badge}</span>}
+          </button>
+        ))}
+      </nav>
+      <button className="fab-add" onClick={onAdd} aria-label={addLabel}>
+        <Plus size={26} strokeWidth={2} aria-hidden />
       </button>
-    </nav>
+    </div>
   );
 }

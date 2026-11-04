@@ -1,7 +1,7 @@
 # Biblioteca (app) — Plan del proyecto
 
 > Estado: **Fases 1 a 5 listas** · Creado: 2026-11-03
-> Origen: la app web familiar en Cloudflare (`~/dev/book_app`). Esta app la **reemplaza**.
+> Origen: la app web familiar en Cloudflare (`~/dev/book_app`). Esta app la **reemplazó**: Cloudflare se eliminó por completo el 2026-11-04.
 
 ## 1. Qué es
 
@@ -169,20 +169,20 @@ Ya tienes `android-commandlinetools` y JDK; falta instalar `emulator`, una image
 Niveles de pensamiento (esfuerzo sugerido para Claude):
 🟢 mecánico (bajo) · 🟡 decisiones locales (medio) · 🟠 diseño con consecuencias (alto) · 🔴 difícil de revertir (máximo + modo plan)
 
-| Fase | Contenido                                                                                                                                   | Nivel | Estado                                                                                                               |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------- |
-| 0    | Base: Vite + React + TS + Capacitor, estructura, lint/format/tests (como Printer Hub), emuladores teléfono y tablet, `android:live`, scrcpy | 🟡    | 🟡 Falta scrcpy y el script de APK                                                                                   |
-| 1    | **Datos locales**: SQLite nativo y WASM, esquema con UUID, migraciones, repositorio, respaldo JSON, tests                                   | 🔴    | ✅                                                                                                                   |
-| 2    | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche                       | 🟠    | ✅ Falta reordenar arrastrando                                                                                       |
-| 3    | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia                              | 🟠    | ✅ Falta probar en un teléfono real: escáner, compartir imagen desde Instagram e IA con una key real                 |
-| 4    | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir          | 🟡    | ✅ Falta probar abrir en un lector real (KOReader, Play Libros) y archivos grandes                                   |
-| 5    | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión                                    | 🟠    | ✅ ZIP + Drive por la hoja de compartir. Falta el respaldo **automático** a Drive (después de elegir nombre y firma) |
-| 6    | **Migración desde Cloudflare**: script que exporta cada persona de D1 + sus EPUB de R2 a un ZIP de la app; importarlo en cada teléfono      | 🟡    | ⏳                                                                                                                   |
-| 7    | **Apagar Cloudflare**: borrar webhook, Workers, Access, D1 y R2 **solo después** de verificar los ZIP de todos                              | 🔴    | ⏳                                                                                                                   |
-| 8    | **Pro y propinas**: Google Play Billing (pago único Pro + propinas), flavor "GitHub" con link a Ko-fi                                       | 🟠    | ⏳                                                                                                                   |
-| 9    | **Publicación**: cuenta Play (25 USD), política de privacidad, ficha, formulario de seguridad de datos, prueba cerrada                      | 🟡    | ⏳                                                                                                                   |
-| 10   | Escritorio Mac/Windows/Linux (Tauri o Electron sobre la misma web)                                                                          | 🟠    | Futuro                                                                                                               |
-| 11   | iOS                                                                                                                                         | 🟠    | Futuro                                                                                                               |
+| Fase  | Contenido                                                                                                                                   | Nivel | Estado                                                                                                               |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------- |
+| 0     | Base: Vite + React + TS + Capacitor, estructura, lint/format/tests (como Printer Hub), emuladores teléfono y tablet, `android:live`, scrcpy | 🟡    | 🟡 Falta scrcpy y el script de APK                                                                                   |
+| 1     | **Datos locales**: SQLite nativo y WASM, esquema con UUID, migraciones, repositorio, respaldo JSON, tests                                   | 🔴    | ✅                                                                                                                   |
+| 2     | **UI**: portar estanterías, ficha, búsqueda, vista autor/saga e i18n; layouts adaptativos teléfono/tablet; modo noche                       | 🟠    | ✅ Falta reordenar arrastrando                                                                                       |
+| 3     | **Agregar libros**: Open Library, escáner ISBN, compartir a la app, bandeja de entrada, OCR, IA con key propia                              | 🟠    | ✅ Falta probar en un teléfono real: escáner, compartir imagen desde Instagram e IA con una key real                 |
+| 4     | **Bóveda EPUB local**: importar desde Archivos, leer metadatos (ya existe `epub.ts`), vincular, abrir en lector externo, compartir          | 🟡    | ✅ Falta probar abrir en un lector real (KOReader, Play Libros) y archivos grandes                                   |
+| 5     | **Respaldos**: ZIP, Auto Backup, Google Drive (proyecto en Google Cloud, OAuth), restauración con fusión                                    | 🟠    | ✅ ZIP + Drive por la hoja de compartir. Falta el respaldo **automático** a Drive (después de elegir nombre y firma) |
+| 6     | **Limpieza y optimización** (ver sección 14): dejar el código y el repo solo con la app actual, documentación profesional, APK más liviano  | 🟡    | ⏭️ **Siguiente**                                                                                                     |
+| ~~7~~ | ~~Migración y apagado de Cloudflare~~                                                                                                       | —     | ✅ No hace falta: Cloudflare ya se eliminó por completo (2026-11-04)                                                 |
+| 8     | **Pro y propinas**: Google Play Billing (pago único Pro + propinas), flavor "GitHub" con link a Ko-fi                                       | 🟠    | Más adelante                                                                                                         |
+| 9     | **Publicación**: cuenta Play (25 USD), política de privacidad, ficha, formulario de seguridad de datos, prueba cerrada                      | 🟡    | Más adelante                                                                                                         |
+| 10    | Escritorio Mac/Windows/Linux (Tauri o Electron sobre la misma web)                                                                          | 🟠    | Futuro                                                                                                               |
+| 11    | iOS                                                                                                                                         | 🟠    | Futuro                                                                                                               |
 
 Flujo de trabajo (igual que Printer Hub): commits locales → APK de prueba local → **tú confirmas** → release numerado en GitHub/Play.
 
@@ -225,7 +225,7 @@ Para que una versión nueva se instale **encima** de la anterior, sin desinstala
 - **La bóveda EPUB y las políticas:** preséntala como "tus archivos". Nada de catálogos públicos ni descargas desde la app, para no parecer una app de piratería.
 - **Nombre y marca:** "Biblioteca" es genérico y no se puede proteger ni encontrar en Play. Elige un nombre propio antes de la Fase 9 (revisa que el dominio y el nombre en Play estén libres).
 - **Política de privacidad obligatoria** (por Drive, cámara y la API key). Al no tener servidor, es corta y honesta: "tus datos no salen de tu dispositivo salvo a los servicios que tú conectas".
-- **Rota la API key** que está en `book_app/.dev.vars` y en tus notas cuando apagues Cloudflare.
+- **Rota la API key** que estaba en `book_app/.dev.vars` y en tus notas (Cloudflare ya se eliminó; ver Fase 6).
 - **Keystore de firma:** respáldala fuera del Mac (gestor de contraseñas). Si la pierdes, no puedes actualizar la app fuera de Play.
 
 ## 12. Preguntas abiertas y respuestas
@@ -263,17 +263,62 @@ Ideas que estaban planeadas para book_app y siguen valiendo aquí. Nivel de pens
 | 🎥 Reels en video sin pantallazo (necesitaría un servidor con `yt-dlp`: choca con "sin servidor")                                        | 🔴    | Descartado por ahora                                                        |
 | 📄 Importar desde Goodreads/StoryGraph (CSV)                                                                                             | 🟢    | ⏳                                                                          |
 
-## 14. Optimización (al final)
+## 14. Limpieza y optimización (Fase 6, la siguiente)
 
-Cosas que no bloquean nada pero conviene hacer antes de publicar:
+Cloudflare ya no existe (se eliminó todo el 2026-11-04), así que la migración y el apagado (antiguas fases 6 y 7) no se hacen. En su lugar, antes de seguir con funciones nuevas, el repo y el código quedan **solo con la app actual** y con aspecto profesional. Pagos, publicación, escritorio e iOS quedan para más adelante.
 
-- **Peso del APK (81 MB en v0.1.0)**: casi todo es el OCR de ML Kit empaquetado para 4 arquitecturas.
+Orden sugerido: primero la limpieza (pasos 1–4, cambian poco y despejan), después la optimización (5–6, se mide antes y después), y al final la documentación (7), que describe lo que quedó.
+
+### 1. Sacar lo que dependía de Cloudflare / book_app 🟢
+
+- Borrar `scripts/seed-from-book-app.mjs` y el script `npm run seed`.
+- La "biblioteca de ejemplo" del modo desarrollo hoy lee `seed/` (tus datos, fuera del repo). Reemplazarla por un **ejemplo sintético** versionado (~60 libros de dominio público o inventados, sin datos personales), para que cualquiera que clone el repo pueda probar.
+- Quitar las referencias en comentarios ("adaptado de book_app/…", "migrar desde Cloudflare") y en el README (`npm run seed`).
+- Reescribir las secciones de PLAN.md que hablan de Cloudflare (1, 2, 3 y parte de 4–7) como historia breve, o moverlas a un archivo de decisiones.
+
+### 2. Código muerto y consistencia 🟡
+
+- Buscar exportaciones, archivos y dependencias sin uso (`knip`) y borrar lo que sobre.
+- Claves de i18n sin uso o que faltan en un idioma: un test que lo compruebe.
+- Revisar los nombres que quedaron de fases anteriores (por ejemplo `Settings` → páginas, restos de hojas) y el CSS sin uso desde que cambió la navegación.
+- Comentarios: un estilo (español, explican el porqué) y encabezado de una línea por archivo.
+
+### 3. Repo profesional 🟡
+
+- **Licencia** (decidir: GPL-3.0 impide clones cerrados en Play; MIT es más simple).
+- **CI en cada push y PR**: `npm run check` además del APK de los tags.
+- Dependabot o Renovate para las dependencias.
+- `.claude/launch.json`: decidir si se versiona (sirve para el preview) o va al `.gitignore`.
+- Plantillas de issues, `CONTRIBUTING` corto y capturas en el README.
+- Historial: revisado el 2026-11-04, nunca se subieron `seed/`, llaves ni `.env`. No hace falta reescribirlo.
+
+### 4. Limpieza local (en el Mac, fuera del repo) 🟢
+
+- `builds/` (155 MB de APK de prueba viejos): dejar solo el último o vaciarla.
+- `seed/` (tus datos y un ZIP de prueba): borrar cuando exista el ejemplo sintético.
+- `~/dev/book_app`: archivar (comprimir en un respaldo) o borrar, ahora que Cloudflare no existe.
+- **Rotar la API key de Anthropic** que estaba en `book_app/.dev.vars` y en tus notas.
+- Respaldar `~/.config/biblioteca` (llave de firma) en el gestor de contraseñas.
+
+### 5. Optimización: peso y arranque 🟠
+
+- **Peso del APK (81 MB)**: casi todo es el OCR de ML Kit empaquetado para 4 arquitecturas.
   - Publicar en Play como **AAB** (cada teléfono descarga solo su arquitectura: ~25 MB).
   - Para GitHub: **APK por arquitectura** (`splits.abi`) o solo `arm64-v8a` (todos los teléfonos actuales).
   - Cambiar al OCR **no empaquetado** de ML Kit (lo descarga Google Play Services la primera vez): la app baja ~20 MB más.
-- **Arranque**: medir el tiempo hasta ver la biblioteca en un teléfono de gama baja; cargar diferidos el SDK de Anthropic, fflate y sql.js (solo se usan al identificar, respaldar o en el navegador).
-- **Listas largas**: con más de ~1.000 libros, virtualizar la cuadrícula y la vista por autor.
+  - Activar `minifyEnabled` y `shrinkResources` en el build de release.
+- **Arranque**: medir el tiempo hasta ver la biblioteca en un teléfono de gama baja; cargar diferidos el SDK de Anthropic, fflate, el importador de notas y sql.js (solo se usan al identificar, respaldar, importar o en el navegador).
+
+### 6. Optimización: uso diario 🟡
+
+- **Listas largas**: con tus ~585 libros importados ya conviene **virtualizar** la cuadrícula y la vista por autor.
 - **Portadas**: caché local de las portadas en el teléfono (hoy dependen de la caché del WebView); miniaturas más chicas en la cuadrícula.
-- **Consultas a Open Library**: caché de búsquedas recientes y un `User-Agent` propio desde HTTP nativo (lo piden en su API).
-- **Base de datos**: índices revisados con `EXPLAIN QUERY PLAN` cuando haya datos reales; `VACUUM` ocasional después de borrar mucho.
+- **Consultas a Open Library**: caché de búsquedas recientes y un `User-Agent` propio desde HTTP nativo (lo piden en su API). Completar portadas de 585 libros toma unos minutos: se podría pausar y retomar al reabrir la app.
+- **Base de datos**: índices revisados con `EXPLAIN QUERY PLAN` con datos reales; `VACUUM` ocasional después de borrar mucho.
 - **Animaciones**: perfilar en un teléfono de gama baja (60 fps al abrir la ficha y al cambiar de estante).
+
+### 7. Documentación 🟢
+
+- **README** para quien llega al repo: qué es, capturas, cómo instalar el APK, cómo desarrollar (`npm run dev`, `android:live`, `apk`, `release`).
+- **PLAN.md** pasa a ser solo la hoja de ruta (fases pendientes y mejoras de la sección 13); las decisiones ya tomadas van a `docs/DECISIONES.md`.
+- Verificación final: `npm run check`, APK en el emulador y una release de prueba.
