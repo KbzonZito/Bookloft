@@ -61,6 +61,18 @@ export function googleCover(v: GoogleVolume): string | null {
     .replace(/zoom=\d/, 'zoom=1');
 }
 
+/** Los autores que cargan las editoriales pequeñas vienen raros: "luke schulz", "Luke Schulz Schulz" */
+export function cleanAuthor(name: string) {
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((w, i, all) => w.toLowerCase() !== all[i - 1]?.toLowerCase());
+  const fixed = words.join(' ');
+  return fixed === fixed.toLowerCase()
+    ? fixed.replace(/(^|[\s.-])\p{L}/gu, (c) => c.toUpperCase())
+    : fixed;
+}
+
 export function toCandidate(v: GoogleVolume): Candidate {
   const i = v.volumeInfo;
   const ids = i.industryIdentifiers ?? [];
@@ -74,7 +86,7 @@ export function toCandidate(v: GoogleVolume): Candidate {
   const index = Number.parseFloat(i.seriesInfo?.bookDisplayNumber ?? '');
   return {
     title: split.title,
-    authors: i.authors?.slice(0, 3) ?? [],
+    authors: i.authors?.slice(0, 3).map(cleanAuthor) ?? [],
     year: Number.parseInt(i.publishedDate?.slice(0, 4) ?? '', 10) || null,
     cover_url: googleCover(v),
     ol_key: null,
@@ -116,4 +128,3 @@ export async function googleLookup(
     categories: hit.volumeInfo.categories ?? [],
   };
 }
-

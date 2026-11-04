@@ -4,7 +4,7 @@ vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: () => false },
   CapacitorHttp: {},
 }));
-const { toCandidate, googleCover } = await import('./googlebooks');
+const { toCandidate, googleCover, cleanAuthor } = await import('./googlebooks');
 const { mergeSources } = await import('./books');
 
 const volume = {
@@ -39,6 +39,10 @@ describe('Google Books', () => {
       series_index: 2,
     });
     expect(googleCover({ id: 'y', volumeInfo: {} })).toBeNull();
+    expect(cleanAuthor('luke schulz')).toBe('Luke Schulz');
+    expect(cleanAuthor('Luke Schulz Schulz')).toBe('Luke Schulz');
+    expect(cleanAuthor('l.r. schulz')).toBe('L.R. Schulz');
+    expect(cleanAuthor('Ursula K. Le Guin')).toBe('Ursula K. Le Guin');
   });
 
   it('al unir fuentes, Open Library va primero y no se repite el mismo libro', () => {

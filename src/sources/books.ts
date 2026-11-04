@@ -28,6 +28,16 @@ export function mergeSources(primary: Candidate[], extra: Candidate[]): Candidat
   return out;
 }
 
+/** Cuántas palabras de la búsqueda aparecen en el título o el autor (de 0 a 1) */
+function relevance(q: string, c: Candidate) {
+  const words = normalize(q)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((w) => w.length > 2);
+  if (!words.length) return 0;
+  const text = normalize([c.title, ...c.authors].join(' '));
+  return words.filter((w) => text.includes(w)).length / words.length;
+}
+
 /** Búsqueda libre ("piranesi clarke"): si una fuente falla, quedan los de la otra */
 export async function searchBooks(
   q: string,
@@ -39,7 +49,13 @@ export async function searchBooks(
   const a = ol.status === 'fulfilled' ? ol.value : [];
   const b = google.status === 'fulfilled' ? google.value : [];
   if (ol.status === 'rejected' && google.status === 'rejected') throw ol.reason;
-  return mergeSources(a, b).slice(0, limit + 4);
+  // Primero lo que calza con lo que se escribió; a igual calce, el orden de las fuentes
+  const merged = mergeSources(a, b);
+  return merged
+    .map((c, i) => ({ c, i, r: relevance(q, c) }))
+    .sort((x, y) => y.r - x.r || x.i - y.i)
+    .map((x) => x.c)
+    .slice(0, limit + 4);
 }
 
 export async function findByIsbn(isbn: string, signal?: AbortSignal): Promise<Candidate | null> {
