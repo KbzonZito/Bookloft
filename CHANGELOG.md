@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-04
+
 - Estantes nuevos: Leyendo · Estantería · Leídos · Sin terminar. La Estantería tiene todos tus libros, con filtro por estado.
 - Próximos (dentro de Leyendo): tu fila de lo que quieres leer después. Agrégalos desde la ficha, manteniendo presionado un libro o desde ¿Qué leo ahora?, y ordénalos a mano.
 - La ficha tiene dos pestañas: Mis notas (estado, calificación, páginas leídas, fechas de inicio y término, nota, prioridad, etiquetas) e Información (lo que dice Open Library: nota promedio y votos, géneros, editorial, idiomas, ediciones y de qué trata).
