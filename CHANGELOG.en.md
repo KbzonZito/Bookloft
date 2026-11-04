@@ -4,6 +4,7 @@ English version of [CHANGELOG.md](CHANGELOG.md). The app shows this one in What'
 
 ## [Unreleased]
 
+- The app is now called **Bookloft** and has a new icon: colorful spines on a shelf with the ribbon bookmark. The launch screen changes too. It installs over the previous version without losing anything.
 - What’s new after an update now follows the app’s language (it was always in Spanish).
 
 ## [0.8.0] - 2026-11-04

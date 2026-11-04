@@ -1,4 +1,4 @@
-# Biblioteca — Hoja de ruta
+# Bookloft — Hoja de ruta
 
 > Estado: **v0.8.0** (en preparación), fases 0 a 6 listas y varias mejoras · Actualizado: 2026-11-04
 > Qué está decidido y por qué (arquitectura, diseño, negocio, firma): [docs/DECISIONES.md](docs/DECISIONES.md). Cambios por versión: [CHANGELOG.md](CHANGELOG.md).
@@ -25,7 +25,7 @@ Flujo de trabajo: commits locales → APK de prueba local → **tú confirmas** 
 
 ### Pendiente antes de publicar (Fase 8)
 
-- **Nombre** (candidatos: Shelfmark, Bookloft, Spinewise, Shelfnook, Bookhaven, Velada, Anaquel, Cinta; con descripción tipo "Book Tracker & Library") e **ícono** nuevo. Ver docs/DECISIONES.md.
+- ~~Nombre e ícono~~: **Bookloft**, con ícono propio (2026-11-04). Falta revisar la marca en INAPI y el dominio antes de Play.
 - **Respaldo automático a Drive**: necesita el nombre y la firma definitivos.
 - Probar en un teléfono real: escáner, compartir desde Instagram, IA con una key real (también "Que elija la IA" en ¿Qué leo ahora?), abrir EPUB en un lector.
 - Compilar la versión de Play con `DISTRIBUTION=play` (sin el link de Ko-fi, que Play no permite).
@@ -35,7 +35,7 @@ Flujo de trabajo: commits locales → APK de prueba local → **tú confirmas** 
 Para que el Kindle (con KOReader) y la app se hablen sin servidor en internet: el teléfono hace de servidor en el Wi‑Fi mientras la app está abierta.
 
 1. **Servidor local + catálogo OPDS** 🟠: plugin nativo con un servidor HTTP chico. En Ajustes, "Compartir bóveda" muestra la dirección (`http://192.168.x.x:8080/opds`); KOReader la agrega como catálogo y descarga los EPUB por estante o autor.
-2. **Respaldo del Kindle a la app** 🟠: plugin de KOReader (Lua) "Enviar a Biblioteca" que sube a la bóveda los EPUB nuevos del Kindle (recuerda cuáles mandó, reintenta cuando el teléfono vuelve a estar). La bóveda ya evita duplicados y los une a cada libro; con el respaldo completo (o el automático a Drive) quedan a salvo si le pasa algo al Kindle.
+2. **Respaldo del Kindle a la app** 🟠: plugin de KOReader (Lua) "Enviar a Bookloft" que sube a la bóveda los EPUB nuevos del Kindle (recuerda cuáles mandó, reintenta cuando el teléfono vuelve a estar). La bóveda ya evita duplicados y los une a cada libro; con el respaldo completo (o el automático a Drive) quedan a salvo si le pasa algo al Kindle.
 3. **Sincronizar la página** 🟠: el mismo servidor responde el protocolo kosync que KOReader ya trae ("Progress sync"); la ficha muestra el porcentaje. Hay que calcular la huella MD5 parcial que usa KOReader para reconocer cada archivo.
 4. **Plugin propio, después** 🟡: encontrar el teléfono solo, avisar "terminé" (pasa a Leídos con fecha y nota), subrayados y notas a la ficha.
 
@@ -46,7 +46,7 @@ Mientras tanto: script para copiar por USB los EPUB nuevos del Kindle a una carp
 Ya funciona (Fase 3): compartir texto, links, imágenes, EPUB o PDF abre la Bandeja. Mejoras posibles:
 
 - Agregar solo cuando hay una coincidencia clara, con aviso para deshacer.
-- Accesos directos en la hoja de compartir ("Biblioteca · Por leer").
+- Accesos directos en la hoja de compartir ("Bookloft · Por leer").
 
 ## Mejoras pendientes
 

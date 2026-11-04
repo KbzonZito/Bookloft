@@ -33,6 +33,6 @@ done
 
 git add package.json package-lock.json CHANGELOG.md CHANGELOG.en.md
 git commit -m "Release v$VERSION"
-git tag -a "v$VERSION" -m "Biblioteca $VERSION"
+git tag -a "v$VERSION" -m "Bookloft $VERSION"
 git push origin main "v$VERSION"
 echo "Publicado v$VERSION. GitHub Actions creará la release con el APK en unos minutos."

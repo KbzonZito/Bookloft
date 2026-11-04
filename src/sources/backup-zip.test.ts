@@ -75,7 +75,7 @@ describe('respaldo ZIP', () => {
   it('el completo lleva la bóveda y se restaura entero en un teléfono nuevo', async () => {
     const { lib, book, file, bytes } = await libraryWithFile();
     const backup = await createBackup(lib, { withFiles: true });
-    expect(backup.name).toMatch(/^biblioteca-completo-\d{4}-\d{2}-\d{2}\.zip$/);
+    expect(backup.name).toMatch(/^bookloft-completo-\d{4}-\d{2}-\d{2}\.zip$/);
     expect(backup.missing).toBe(0);
 
     // "Teléfono nuevo": base vacía y sin archivos

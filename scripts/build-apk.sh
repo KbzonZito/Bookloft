@@ -28,7 +28,7 @@ npx cap sync android
 (cd android && ./gradlew assembleRelease --quiet)
 
 mkdir -p builds
-APK="builds/biblioteca-$VERSION$SUFFIX.apk"
+APK="builds/bookloft-$VERSION$SUFFIX.apk"
 cp android/app/build/outputs/apk/release/app-release.apk "$APK"
 echo
 echo "APK de prueba: $APK"

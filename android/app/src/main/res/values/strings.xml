@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Biblioteca</string>
-    <string name="title_activity_main">Biblioteca</string>
+    <string name="app_name">Bookloft</string>
+    <string name="title_activity_main">Bookloft</string>
     <string name="package_name">dev.martinvergara.biblioteca</string>
     <string name="custom_url_scheme">dev.martinvergara.biblioteca</string>
 </resources>

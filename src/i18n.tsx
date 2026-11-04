@@ -349,7 +349,7 @@ const es = {
   'support.explain':
     'La hace una persona en Chile: gratis, sin anuncios y sin pedirte datos. Si te sirve, puedes invitarme un café.',
   'support.kofi': 'Invitar un café en Ko-fi',
-  'settings.version': 'Versión {v}',
+  'settings.version': 'Bookloft {v}',
 } as const;
 
 export type MessageKey = keyof typeof es;
@@ -693,7 +693,7 @@ const en: Record<MessageKey, string> = {
   'support.explain':
     'Made by one person in Chile: free, no ads and no data collection. If it helps you, you can buy me a coffee.',
   'support.kofi': 'Buy me a coffee on Ko-fi',
-  'settings.version': 'Version {v}',
+  'settings.version': 'Bookloft {v}',
 };
 
 const DICTS: Record<Lang, Record<MessageKey, string>> = { es, en };

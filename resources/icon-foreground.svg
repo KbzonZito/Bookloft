@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+<g transform="translate(54 55) scale(1.2) translate(-54 -55)">
+  <!-- Bookloft: cinco lomos en una repisa y la cinta marcapáginas. Todo dentro de la zona segura (66/108) -->
+  <!-- 1 · terracota -->
+  <rect x="34" y="42" width="7" height="26" rx="0.6" fill="#C8644B"/>
+  <rect x="38.2" y="42" width="2.8" height="26" fill="#000" opacity="0.10"/>
+  <rect x="35.4" y="45.2" width="4.2" height="0.9" rx="0.45" fill="#F2B49A"/>
+  <rect x="35.4" y="47.2" width="4.2" height="0.9" rx="0.45" fill="#F2B49A"/>
+  <rect x="35.4" y="64.6" width="4.2" height="0.9" rx="0.45" fill="#F2B49A"/>
+  <!-- 2 · mostaza -->
+  <rect x="41.5" y="35" width="6.5" height="33" rx="0.6" fill="#D9A441"/>
+  <rect x="45.4" y="35" width="2.6" height="33" fill="#000" opacity="0.08"/>
+  <rect x="41.5" y="38.4" width="6.5" height="1" fill="#A97A24"/>
+  <!-- 3 · salvia, con etiqueta -->
+  <rect x="48.5" y="40" width="6.5" height="28" rx="0.6" fill="#8EA98A"/>
+  <rect x="52.6" y="40" width="2.4" height="28" fill="#000" opacity="0.08"/>
+  <rect x="50.4" y="45" width="2.8" height="6" rx="0.4" fill="#EFE6CE"/>
+  <!-- 4 · oliva, delgado -->
+  <rect x="55.5" y="36" width="4" height="32" rx="0.5" fill="#A59B6C"/>
+  <rect x="57.9" y="36" width="1.6" height="32" fill="#000" opacity="0.10"/>
+  <!-- 5 · crema, apoyado -->
+  <g transform="rotate(20 67.5 68)">
+    <rect x="61" y="37" width="6.5" height="31" rx="0.6" fill="#E9DDC2"/>
+    <rect x="65.2" y="37" width="2.3" height="31" fill="#000" opacity="0.07"/>
+    <rect x="61" y="40.4" width="6.5" height="0.8" fill="#B8A57E"/>
+    <rect x="61" y="42" width="6.5" height="0.8" fill="#B8A57E"/>
+    <rect x="61" y="62.8" width="6.5" height="0.8" fill="#B8A57E"/>
+    <rect x="61" y="64.4" width="6.5" height="0.8" fill="#B8A57E"/>
+  </g>
+  <!-- repisa -->
+  <rect x="31" y="68" width="46" height="1.6" rx="0.8" fill="#D9CDB1"/>
+  <!-- cinta -->
+  <path d="M55.9 69.6 H59.1 V75 L57.5 73.6 L55.9 75 Z" fill="#E2603F"/>
+</g>
+</svg>

@@ -1,8 +1,10 @@
-# 📚 Biblioteca
+<img src="resources/icon-512.png" alt="" width="96" align="right">
+
+# Bookloft
 
 Tu biblioteca personal en el teléfono: estantes, sagas, notas y una bóveda de EPUB y PDF. **Sin cuentas ni servidores**: todo queda en tu dispositivo y tú decides dónde respaldarlo.
 
-Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ es un nombre provisional.
+Android (teléfono y tablet). iOS y escritorio vendrán después.
 
 ## Qué hace
 
@@ -22,7 +24,7 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 
 ## Instalar
 
-Descarga el último `biblioteca-X.Y.Z.apk` desde [Releases](https://github.com/KbzonZito/library_app/releases) y ábrelo en el teléfono (Android pide permitir instalar desde el navegador o el gestor de archivos).
+Descarga el último `bookloft-X.Y.Z.apk` desde [Releases](https://github.com/KbzonZito/library_app/releases) y ábrelo en el teléfono (Android pide permitir instalar desde el navegador o el gestor de archivos).
 
 Las versiones nuevas se instalan **encima** de la anterior: no hace falta desinstalar y la biblioteca se mantiene.
 
@@ -77,6 +79,14 @@ npm run release -- 0.4.0   # pasa [Unreleased] del CHANGELOG a la versión, crea
 ```
 
 GitHub Actions compila el APK de cada etiqueta `v*` y lo publica en Releases. La firma se configura una vez con `scripts/setup-signing.sh` (la llave queda en `~/.config/biblioteca`, fuera del repo; respáldala).
+
+### Ícono
+
+La fuente está en `resources/icon-*.svg`. Para regenerar los íconos y la pantalla de inicio de Android:
+
+```bash
+PLAYWRIGHT=/ruta/a/node_modules/@playwright/test node scripts/icons.mjs
+```
 
 ### Estructura
 

@@ -65,7 +65,7 @@ export interface BackupFile {
 }
 
 function backupName(withFiles: boolean, date = new Date()) {
-  return `biblioteca-${withFiles ? 'completo-' : ''}${date.toISOString().slice(0, 10)}.zip`;
+  return `bookloft-${withFiles ? 'completo-' : ''}${date.toISOString().slice(0, 10)}.zip`;
 }
 
 /** Arma el ZIP. Con withFiles incluye los EPUB/PDF de la bóveda (puede pesar mucho). */

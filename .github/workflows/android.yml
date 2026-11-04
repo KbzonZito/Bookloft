@@ -77,13 +77,13 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
           mv app/build/outputs/apk/release/app-release.apk \
-            "$GITHUB_WORKSPACE/biblioteca-${{ steps.version.outputs.version }}.apk"
+            "$GITHUB_WORKSPACE/bookloft-${{ steps.version.outputs.version }}.apk"
 
       # Un push a main solo comprueba que compila (el APK queda como artefacto del workflow)
       - uses: actions/upload-artifact@v4
         with:
-          name: biblioteca-apk
-          path: biblioteca-*.apk
+          name: bookloft-apk
+          path: bookloft-*.apk
           retention-days: 14
 
       # Las etiquetas de versión (v1.2.3) publican una release con su parte del CHANGELOG
@@ -101,5 +101,5 @@ jobs:
           }
           # Español primero y después inglés, como en la app
           { section CHANGELOG.md; printf '\n---\n\n**English**\n'; section CHANGELOG.en.md; } > notes.md
-          gh release create "$GITHUB_REF_NAME" "biblioteca-$VERSION.apk" \
-            --title "Biblioteca $VERSION" --notes-file notes.md --latest
+          gh release create "$GITHUB_REF_NAME" "bookloft-$VERSION.apk" \
+            --title "Bookloft $VERSION" --notes-file notes.md --latest

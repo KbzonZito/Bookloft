@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- La app se llama **Bookloft** y tiene ícono nuevo: lomos de colores en una repisa con la cinta marcapáginas. También cambia la pantalla de inicio. Se instala encima de la versión anterior, sin perder nada.
 - Las novedades después de actualizar aparecen en el idioma de la app (antes salían siempre en español).
 
 ## [0.8.0] - 2026-11-04

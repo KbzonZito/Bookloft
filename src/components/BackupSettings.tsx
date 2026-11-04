@@ -68,7 +68,7 @@ export function BackupSettings({ toast }: { toast: (m: string) => void }) {
     try {
       const date = new Date().toISOString().slice(0, 10);
       const csv = new Blob([exportCsv(books)], { type: 'text/csv' });
-      if (await shareFile(`Biblioteca ${date}.csv`, csv)) {
+      if (await shareFile(`Bookloft ${date}.csv`, csv)) {
         toast(t('backup.csvDone', { n: books.length }));
       }
     } catch (error) {

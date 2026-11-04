@@ -63,7 +63,7 @@ export function exportMarkdown(books: Book[], date = new Date()): string {
     `libros: ${live.length}`,
     '---',
     '',
-    '> Exportado desde Biblioteca. `[x]` leído · `#leyendo` · `#deseo` · `#sin-terminar` · sin marca: por leer.',
+    '> Exportado desde Bookloft. `[x]` leído · `#leyendo` · `#deseo` · `#sin-terminar` · sin marca: por leer.',
     '',
   ];
   const unknown = 'Sin autor';

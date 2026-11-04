@@ -68,7 +68,7 @@ export function LibraryTools({
       const md = exportMarkdown(books);
       const date = new Date().toISOString().slice(0, 10);
       const shared = await shareFile(
-        `Biblioteca ${date}.md`,
+        `Bookloft ${date}.md`,
         new Blob([md], { type: 'text/markdown' }),
       );
       if (shared) toast(t('tools.exported', { n: books.length }));
