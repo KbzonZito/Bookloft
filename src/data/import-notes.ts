@@ -198,6 +198,9 @@ const STATUS_ALIASES: Record<string, Status> = {
   leido: 'read',
   leído: 'read',
   abandonado: 'abandoned',
+  dnf: 'abandoned',
+  sin_terminar: 'abandoned',
+  'did-not-finish': 'abandoned',
   lo_quiero: 'wishlist',
 };
 

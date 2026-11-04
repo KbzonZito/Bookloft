@@ -1,6 +1,7 @@
 // Portada de un libro: la imagen de Open Library o, si no hay, una tela de encuadernación con el título
 import { memo, useEffect, useState } from 'react';
 import type { Book } from '../data';
+import { offlineCoverSrc } from '../app/offline-covers';
 import { localCoverSrc } from '../sources/covers';
 
 // Telas apagadas, para que las portadas sin imagen no griten más que las reales
@@ -33,7 +34,10 @@ function coverSrc(url: string | null, size: 'M' | 'L' = 'M') {
 
 /** La portada que se muestra: la propia (imagen del teléfono) gana sobre la de internet */
 export function bookCover(book: Pick<Book, 'cover_url' | 'cover_path'>, size: 'M' | 'L' = 'M') {
-  return localCoverSrc(book.cover_path ?? null) ?? coverSrc(book.cover_url, size);
+  // La copia sin conexión es chica: sirve para la cuadrícula siempre, y para la ficha solo sin internet
+  const offline =
+    book.cover_url && (size === 'M' || !navigator.onLine) ? offlineCoverSrc(book.cover_url) : null;
+  return localCoverSrc(book.cover_path ?? null) ?? offline ?? coverSrc(book.cover_url, size);
 }
 
 /**

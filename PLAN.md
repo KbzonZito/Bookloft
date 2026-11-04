@@ -64,6 +64,6 @@ Ideas para después de las fases. Varias venían de la antigua app web.
 
 - **AAB en Play** (~25 MB por teléfono) y OCR de ML Kit **no empaquetado** (requiere parchear el plugin): solo vale la pena al publicar.
 - `minifyEnabled`/`shrinkResources`: ~3 MB, pero hay que probar cada plugin con reglas de ProGuard.
-- Caché local de portadas para verlas sin internet; retomar "completar datos" si se cierra la app a mitad.
+- Retomar "completar datos" si se cierra la app a mitad. (Las portadas sin conexión ya están: v0.4.0, ~17 KB por libro, medido con 515 portadas = 8,5 MB.)
 - `User-Agent` propio hacia Open Library (piden identificarse) usando HTTP nativo.
 - Perfilar animaciones en un teléfono de gama baja real (el emulador no es representativo).

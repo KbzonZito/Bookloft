@@ -6,4 +6,5 @@
     <include domain="file" path="." />
     <exclude domain="file" path="vault/" />
     <exclude domain="file" path="inbox/" />
+    <exclude domain="file" path="cover-cache/" />
 </full-backup-content>

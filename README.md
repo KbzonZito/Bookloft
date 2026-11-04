@@ -6,7 +6,7 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 
 ## Qué hace
 
-- **Estantes**: Leyendo, Por leer, Deseos, Leídos y Abandonados, con calificación, prioridad, etiquetas y notas.
+- **Estantes**: Leyendo, Por leer, Deseos, Leídos y Sin terminar, con calificación, prioridad, etiquetas y notas.
 - **Por autor y saga**: cada autor con sus sagas en orden y los libros sueltos al final.
 - **Agregar libros como prefieras**: buscando en Open Library, escaneando el ISBN, con una foto (portadas o lomos en una repisa) o **compartiendo** un post o pantallazo desde otra app.
 - **IA opcional con tu propia API key** de Anthropic (Claude Haiku): lee pantallazos y fotos, y ordena tus libros en sagas. Sin key, la app lee el texto de la imagen en el mismo teléfono.

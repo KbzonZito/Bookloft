@@ -1,5 +1,6 @@
 // Hoja que sube desde abajo en el teléfono (y se cierra arrastrándola) o un diálogo centrado en tablet
-import { motion, useDragControls, type PanInfo } from 'motion/react';
+import { X } from 'lucide-react';
+import { motion, useDragControls, useIsPresent, type PanInfo } from 'motion/react';
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { useBack } from '../app/native';
 import { fade, spring } from '../ui/motion';
@@ -12,6 +13,7 @@ export function Sheet({
   className = '',
   style,
   variant = 'rise',
+  closeLabel,
 }: {
   label: string;
   onClose: () => void;
@@ -25,25 +27,30 @@ export function Sheet({
    * stage: solo el fondo aparece; el contenido anima por su cuenta (la portada que vuela no se desvanece).
    */
   variant?: 'rise' | 'stage';
+  /** Con un texto, muestra una X para cerrar (además de arrastrar, tocar afuera o atrás) */
+  closeLabel?: string;
 }) {
   const controls = useDragControls();
-  useBack(true, onClose);
+  // Mientras se cierra (la animación de salida), la hoja ya no está: no atrapa toques ni el botón
+  // atrás, y la página de atrás se puede tocar y desplazar al tiro
+  const present = useIsPresent();
+  useBack(present, onClose);
 
-  // Mientras la hoja está abierta, la página de atrás no se desplaza
   useEffect(() => {
+    if (!present) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, []);
+  }, [present]);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.y > 110 || info.velocity.y > 550) onClose();
   };
 
   return (
-    <div className="sheet-layer">
+    <div className="sheet-layer" style={present ? undefined : { pointerEvents: 'none' }}>
       <motion.div
         className="scrim"
         onClick={onClose}
@@ -80,6 +87,19 @@ export function Sheet({
             exit={{ opacity: 0 }}
             transition={fade}
           />
+        )}
+        {closeLabel && (
+          <motion.button
+            className="icon-button sheet-close"
+            onClick={onClose}
+            aria-label={closeLabel}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            transition={fade}
+          >
+            <X size={20} strokeWidth={1.75} />
+          </motion.button>
         )}
         {/* El desplazamiento va por dentro: así el fondo (y su tinte) cubre siempre toda la hoja */}
         <div className="sheet-scroll">

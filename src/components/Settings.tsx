@@ -4,6 +4,7 @@ import { AiSettings } from './AiSettings';
 import { BackupSettings } from './BackupSettings';
 import { Segmented } from './Controls';
 import { LibraryTools } from './LibraryTools';
+import { OfflineCoversSetting } from './OfflineCoversSetting';
 
 export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type LangSetting = 'auto' | Lang;
@@ -56,6 +57,8 @@ export function Settings({
           onChange={setLang}
         />
       </section>
+
+      <OfflineCoversSetting />
 
       <AiSettings startEditing={aiFocus} />
 

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+- Botón ✕ para cerrar la ficha de un libro (además de deslizar hacia abajo o tocar afuera).
+- Al cerrar la ficha se puede tocar otro libro al instante (antes la app parecía trabarse unos segundos).
+- Si el libro cambió de estante, su portada se desvanece al cerrar en vez de quedarse quieta.
+- "Abandonados" ahora se llama "Sin terminar" (DNF en inglés).
+- Portadas sin conexión (Ajustes, opcional): guarda una copia chica de cada portada en el teléfono. Unos 17 KB por libro (≈9 MB con 500 portadas).
+
 ## [0.3.0] - 2026-11-04
 
 - La app pesa la mitad: el APK baja de 81 a 41 MB y abre más liviana (la IA se carga recién al usarla).

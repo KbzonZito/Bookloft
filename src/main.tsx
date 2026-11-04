@@ -5,6 +5,7 @@ import { listenForShares } from './app/inbox';
 import { LibraryProvider } from './app/library';
 import { openLibrary } from './data';
 import { systemLang, translate } from './i18n';
+import { initOfflineCovers, syncOfflineCovers } from './app/offline-covers';
 import { initLocalCovers } from './sources/covers';
 import { purgeDeletedFiles } from './sources/vault';
 import './ui/theme.css';
@@ -15,10 +16,19 @@ const root = createRoot(document.getElementById('root')!);
 root.render(<p className="loading">{translate(systemLang(), 'app.loading')}</p>);
 
 Promise.all([openLibrary(), initLocalCovers()]).then(
-  ([lib]) => {
+  async ([lib]) => {
+    await initOfflineCovers(lib).catch(() => {});
     // Lo antes posible: si la app se abrió desde "Compartir", el plugin entrega lo compartido ahora
     listenForShares(lib);
     void purgeDeletedFiles(lib);
+    // Portadas sin conexión: al abrir (sin apurar el arranque) y unos segundos después de cada cambio
+    let sync: ReturnType<typeof setTimeout> | undefined;
+    const later = (ms: number) => {
+      clearTimeout(sync);
+      sync = setTimeout(() => void syncOfflineCovers(lib), ms);
+    };
+    later(4000);
+    lib.onChange(() => later(5000));
     // Para probar desde las herramientas de desarrollo (emulador por CDP); nunca en la app publicada
     if (import.meta.env.DEV) Object.assign(window, { __lib: lib });
     root.render(

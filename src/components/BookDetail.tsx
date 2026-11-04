@@ -60,7 +60,14 @@ function Head({ book }: { book: Book }) {
   const { t } = useI18n();
   return (
     <div className="detail-head">
-      <motion.div className="detail-cover" layoutId={`cover-${book.id}`} transition={spring.cover}>
+      {/* Si el libro ya no está en la pantalla de atrás (cambió de estante), la portada no tiene a
+          dónde volar: se desvanece en vez de quedarse quieta hasta que se cierra la hoja */}
+      <motion.div
+        className="detail-cover"
+        layoutId={`cover-${book.id}`}
+        transition={spring.cover}
+        exit={{ opacity: 0, scale: 0.94, transition: fade }}
+      >
         <Cover book={book} size="L" eager />
       </motion.div>
       <motion.div
@@ -262,6 +269,7 @@ export function BookSheet({
   onDelete: (b: Book) => void;
   toast: Toast;
 }) {
+  const { t } = useI18n();
   return (
     <Sheet
       label={book.title}
@@ -270,6 +278,7 @@ export function BookSheet({
       variant="stage"
       style={useTint(book)}
       header={<Head book={book} />}
+      closeLabel={t('book.close')}
     >
       <Body book={book} onDelete={onDelete} toast={toast} />
     </Sheet>
