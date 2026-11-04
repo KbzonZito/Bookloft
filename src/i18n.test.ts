@@ -16,6 +16,8 @@ const DYNAMIC = [
   'vault.',
   'lang.',
   'palette.',
+  'welcome.src.',
+  'welcome.way',
   'detail.',
   'next.',
   'year.',

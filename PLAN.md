@@ -79,6 +79,7 @@ Ideas para después de las fases. Varias venían de la antigua app web.
 | 🧭 Descubrir: para ti, más vendidos de Apple Books, tendencias                                                                           | 🟠    | ✅ v0.8.0 (sin IA; falta "si te gustó X" con IA)                                                                 |
 | 📤 Respaldo en CSV (formato Goodreads)                                                                                                   | 🟢    | ✅ v0.8.0                                                                                                        |
 | 📳 Vibración configurable y aviso de novedades tras actualizar                                                                           | 🟢    | ✅ v0.8.0                                                                                                        |
+| 👋 Bienvenida la primera vez (qué es, agregar libros, importar, a tu gusto)                                                              | 🟡    | ✅ v0.9.0                                                                                                        |
 | 📄 Importar desde Goodreads/StoryGraph (CSV)                                                                                             | 🟢    | ✅ v0.7.0 (también StoryGraph y planillas con `,` o `;`)                                                         |
 
 ## Fase 6: cómo quedó (limpieza y optimización)

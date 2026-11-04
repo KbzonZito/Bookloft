@@ -24,6 +24,8 @@ Android (teléfono y tablet). iOS y escritorio vendrán después.
 
 ## Instalar
 
+La primera vez, una bienvenida corta explica la app y ofrece traer tu biblioteca de Goodreads, StoryGraph, Obsidian o un respaldo.
+
 Descarga el último `bookloft-X.Y.Z.apk` desde [Releases](https://github.com/KbzonZito/library_app/releases) y ábrelo en el teléfono (Android pide permitir instalar desde el navegador o el gestor de archivos).
 
 Las versiones nuevas se instalan **encima** de la anterior: no hace falta desinstalar y la biblioteca se mantiene.

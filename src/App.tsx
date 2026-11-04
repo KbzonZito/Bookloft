@@ -1,6 +1,7 @@
 import {
   Archive,
   ArrowDownUp,
+  FileUp,
   CalendarHeart,
   Check,
   Inbox as InboxIcon,
@@ -36,6 +37,8 @@ import { Discover } from './components/Discover';
 import { QuickActions } from './components/QuickActions';
 import { YearReview } from './components/YearReview';
 import { WhatsNew } from './components/WhatsNew';
+import { Welcome, type WelcomeExit } from './components/Welcome';
+import { ONBOARDED, shouldShowOnboarding } from './app/onboarding';
 import { changesSince } from './app/whats-new';
 import changelogEs from '../CHANGELOG.md?raw';
 import changelogEn from '../CHANGELOG.en.md?raw';
@@ -134,6 +137,8 @@ function Shell({
   const [nextOpen, setNextOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
   const [quickId, setQuickId] = useState<string | null>(null);
+  // Paso en que se abre la bienvenida (null: cerrada)
+  const [welcome, setWelcome] = useState<number | null>(null);
   // Desde qué versión mostrar novedades (undefined: no hay nada que mostrar)
   const [newsSince, setNewsSince] = useState<string | null | undefined>(undefined);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -203,6 +208,13 @@ function Shell({
     if (!books || newsChecked.current) return;
     newsChecked.current = true;
     void (async () => {
+      // Primero la bienvenida: en una instalación nueva reemplaza a las novedades
+      const onboarded = await lib.getSetting<boolean | null>(ONBOARDED, null);
+      if (shouldShowOnboarding(books.length, onboarded)) {
+        setWelcome(0);
+        return;
+      }
+      if (!onboarded) await lib.setSetting(ONBOARDED, true); // ya tenía libros: conoce la app
       const seen = await lib.getSetting<string | null>('last_seen_version', null);
       if (seen === __APP_VERSION__) return;
       // Las dos versiones del CHANGELOG tienen las mismas secciones: basta con mirar una
@@ -327,6 +339,18 @@ function Shell({
   // Atrás en otra pestaña vuelve a la biblioteca
   useBack(tab !== 'library' && openId === null, () => setTab('library'));
 
+  const finishWelcome = async (exit: WelcomeExit) => {
+    setWelcome(null);
+    await lib.setSetting(ONBOARDED, true);
+    await lib.setSetting('last_seen_version', __APP_VERSION__);
+    setTab(exit === 'discover' ? 'discover' : 'library');
+    if (exit === 'add') setAdding(true);
+    if (exit === 'library') {
+      const all = await lib.listBooks();
+      setShelf(all.some((b) => b.status === 'reading') ? 'reading' : 'shelf');
+    }
+  };
+
   const go = (next: Tab) => {
     setAiFocus(false);
     if (next === tab && next === 'library') window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -359,7 +383,11 @@ function Shell({
     );
   const libraryContent =
     books.length === 0 ? (
-      <EmptyLibrary onAdd={() => setAdding(true)} onSample={loadSample} />
+      <EmptyLibrary
+        onAdd={() => setAdding(true)}
+        onImport={() => setWelcome(2)}
+        onSample={loadSample}
+      />
     ) : (
       <>
         {shelfBody}
@@ -478,6 +506,7 @@ function Shell({
         palette={palette}
         toast={showToast}
         onLoadSample={loadSample}
+        onWelcome={() => setWelcome(0)}
       />
     ),
   };
@@ -552,6 +581,20 @@ function Shell({
                 onClose={() => setQuickId(null)}
                 onDelete={remove}
                 toast={showToast}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {welcome !== null && (
+              <Welcome
+                initialStep={welcome}
+                theme={theme}
+                setTheme={setTheme}
+                lang={lang}
+                setLang={setLang}
+                palette={palette}
+                onFinish={(exit) => void finishWelcome(exit)}
               />
             )}
           </AnimatePresence>
@@ -746,7 +789,15 @@ function Toolbar({
   );
 }
 
-function EmptyLibrary({ onAdd, onSample }: { onAdd: () => void; onSample?: () => void }) {
+function EmptyLibrary({
+  onAdd,
+  onImport,
+  onSample,
+}: {
+  onAdd: () => void;
+  onImport: () => void;
+  onSample?: () => void;
+}) {
   const { t } = useI18n();
   return (
     <div className="empty-library">
@@ -754,6 +805,10 @@ function EmptyLibrary({ onAdd, onSample }: { onAdd: () => void; onSample?: () =>
       <button className="button primary" onClick={onAdd}>
         <Plus size={18} strokeWidth={2} aria-hidden />
         {t('empty.addFirst')}
+      </button>
+      <button className="button" onClick={onImport}>
+        <FileUp size={18} strokeWidth={1.6} aria-hidden />
+        {t('welcome.importMine')}
       </button>
       {onSample && (
         <button className="button quiet" onClick={onSample}>

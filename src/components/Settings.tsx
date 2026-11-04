@@ -20,6 +20,7 @@ export function Settings({
   palette,
   toast,
   onLoadSample,
+  onWelcome,
   aiFocus = false,
 }: {
   theme: ThemeSetting;
@@ -29,6 +30,8 @@ export function Settings({
   palette: PaletteControl;
   toast: (message: string) => void;
   onLoadSample?: () => void;
+  /** Volver a ver la bienvenida */
+  onWelcome: () => void;
   /** Abrir directo en conectar la IA (por ejemplo, desde un error en la bandeja) */
   aiFocus?: boolean;
 }) {
@@ -92,6 +95,12 @@ export function Settings({
       />
 
       <BackupSettings toast={toast} />
+
+      <section>
+        <button className="button quiet" onClick={onWelcome}>
+          {t('welcome.again')}
+        </button>
+      </section>
 
       {onLoadSample && (
         <section>

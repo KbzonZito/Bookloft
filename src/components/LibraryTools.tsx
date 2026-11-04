@@ -2,11 +2,10 @@
 import { FileDown, FileUp, Library as LibraryIcon, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { enrichBooks, needsData, useEnrichProgress } from '../app/enrich';
+import { IMPORT_ACCEPT, importFromFiles } from '../app/import-files';
 import { useAllBooks, useLibrary } from '../app/library';
-import { importBooks, importJson, parseJsonBooks, parseMarkdown, type ImportedBook } from '../data';
 import { useI18n } from '../i18n';
 import { exportMarkdown } from '../data/export-notes';
-import { parseCsvBooks } from '../data/import-csv';
 import { AiError, getApiKey, inferSeries } from '../sources/ai';
 import { shareFile } from '../sources/share-file';
 
@@ -30,31 +29,9 @@ export function LibraryTools({
   async function importFiles(files: File[]) {
     setBusy(t('tools.importing'));
     try {
-      const items: ImportedBook[] = [];
-      let restored = 0;
-      for (const f of files) {
-        const text = await f.text();
-        if (/\.(csv|tsv)$/i.test(f.name)) {
-          items.push(...parseCsvBooks(text));
-        } else if (/\.json$/i.test(f.name) || /^\s*[[{]/.test(text)) {
-          const data: unknown = JSON.parse(text);
-          // Un respaldo de esta app se fusiona como respaldo (por id, gana lo más nuevo)
-          if (data && typeof data === 'object' && 'format' in data) {
-            const r = await importJson(lib, data);
-            restored += r.added;
-          } else items.push(...parseJsonBooks(data));
-        } else items.push(...parseMarkdown(text, f.name));
-      }
-      if (!items.length && !restored) return toast(t('tools.nothingFound'));
-      const r = await importBooks(lib, items);
-      toast(
-        t('tools.imported', {
-          added: r.added.length + restored,
-          skipped: r.skipped,
-        }),
-      );
-      // Portadas, autores y años, de a poco y sin bloquear
-      enrichBooks(lib, r.added);
+      const r = await importFromFiles(lib, files);
+      if (!r.added && !r.skipped) return toast(t('tools.nothingFound'));
+      toast(t('tools.imported', { added: r.added, skipped: r.skipped }));
     } catch (error) {
       console.error(error);
       toast(t('tools.importFailed'));
@@ -115,7 +92,7 @@ export function LibraryTools({
           ref={input}
           type="file"
           multiple
-          accept=".md,.markdown,.txt,.json,.csv,text/markdown,text/plain,text/csv,application/json"
+          accept={IMPORT_ACCEPT}
           hidden
           onChange={(e) => {
             const list = [...(e.target.files ?? [])];

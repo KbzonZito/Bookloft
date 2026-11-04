@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+- Bienvenida la primera vez que se abre la app: qué es Bookloft, cómo agregar libros, traer tu biblioteca (Goodreads, StoryGraph, Obsidian o un respaldo) y elegir idioma, apariencia y colores. Se puede volver a ver desde Ajustes.
 - La app se llama **Bookloft** y tiene ícono nuevo: lomos de colores en una repisa con la cinta marcapáginas. También cambia la pantalla de inicio. Se instala encima de la versión anterior, sin perder nada.
 - Las novedades después de actualizar aparecen en el idioma de la app (antes salían siempre en español).
 
