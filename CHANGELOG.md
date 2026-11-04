@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-04
+
 - Botón ✕ para cerrar la ficha de un libro (además de deslizar hacia abajo o tocar afuera).
 - Al cerrar la ficha se puede tocar otro libro al instante (antes la app parecía trabarse unos segundos).
 - Si el libro cambió de estante, su portada se desvanece al cerrar en vez de quedarse quieta.
