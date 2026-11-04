@@ -22,6 +22,10 @@ export interface ImportedBook {
   note: string | null;
   isbn?: string | null;
   rating?: number | null;
+  /** ISO; si viene (Goodreads/StoryGraph), cuenta en el resumen del año */
+  finished_at?: string | null;
+  added_at?: string | null;
+  pages?: number | null;
 }
 
 const stripMd = (s: string) =>
@@ -373,7 +377,7 @@ export async function importBooks(lib: Library, items: ImportedBook[]): Promise<
         cover_url: null,
         cover_path: null,
         year: item.year,
-        pages: null,
+        pages: item.pages ?? null,
         description: null,
         status: item.status,
         priority: item.priority,
@@ -382,9 +386,9 @@ export async function importBooks(lib: Library, items: ImportedBook[]): Promise<
         note: item.note,
         rating: item.rating ?? null,
         source_url: null,
-        added_at: t,
+        added_at: item.added_at ?? t,
         started_at: item.status === 'reading' ? t : null,
-        finished_at: null,
+        finished_at: item.finished_at ?? null,
         updated_at: t,
         deleted_at: null,
       });

@@ -13,7 +13,7 @@ Android (teléfono y tablet). iOS y escritorio vendrán después. _Biblioteca_ e
 - **Agregar libros como prefieras**: buscando en Open Library, escaneando el ISBN, con una foto (portadas o lomos en una repisa) o **compartiendo** un post o pantallazo desde otra app.
 - **IA opcional con tu propia API key** de Anthropic (Claude Haiku): lee pantallazos y fotos, y ordena tus libros en sagas. Sin key, la app lee el texto de la imagen en el mismo teléfono.
 - **Portadas** en el idioma en que buscas; puedes elegir otra edición, pegar un link o usar una foto tuya.
-- **Importar y exportar** tus notas de Obsidian (`.md`), o importar una lista en JSON, sin duplicar lo que ya tienes.
+- **Importar y exportar** tus notas de Obsidian (`.md`), o importar un CSV de Goodreads, StoryGraph o una planilla, o un JSON, sin duplicar lo que ya tienes.
 - **Cada libro** con su reseña y páginas, en el idioma del título cuando existe.
 - **Bóveda**: tus EPUB y PDF vinculados a cada libro, que se abren en tu lector favorito.
 - **Respaldos** en ZIP (solo la biblioteca o con la bóveda) para guardar en Drive o donde quieras, y restaurarlos fusionando sin perder nada.

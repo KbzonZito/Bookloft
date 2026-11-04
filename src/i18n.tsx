@@ -246,8 +246,8 @@ const es = {
   'offline.size': '{n} portadas guardadas · {size}',
   'tools.title': 'Organizar',
   'tools.explain':
-    'Importa o exporta tus notas de Obsidian (.md), o importa una lista en JSON. Lo que ya tienes no se duplica; después se buscan portadas y datos de a poco.',
-  'tools.import': 'Importar notas o JSON',
+    'Importa o exporta tus notas de Obsidian (.md), o importa un CSV (Goodreads, StoryGraph o una planilla) o un JSON. Lo que ya tienes no se duplica; después se buscan portadas y datos de a poco.',
+  'tools.import': 'Importar notas, CSV o JSON',
   'tools.export': 'Exportar a Obsidian (.md)',
   'tools.exported': 'Exporté {n} libros. Esa nota se puede volver a importar.',
   'tools.importing': 'Leyendo los archivos…',
@@ -542,8 +542,8 @@ const en: Record<MessageKey, string> = {
   'offline.size': '{n} covers saved · {size}',
   'tools.title': 'Organize',
   'tools.explain':
-    'Import or export your Obsidian notes (.md), or import a JSON list. Books you already have aren’t duplicated; covers and details are fetched gradually afterwards.',
-  'tools.import': 'Import notes or JSON',
+    'Import or export your Obsidian notes (.md), or import a CSV (Goodreads, StoryGraph or a spreadsheet) or JSON. Books you already have aren’t duplicated; covers and details are fetched gradually afterwards.',
+  'tools.import': 'Import notes, CSV or JSON',
   'tools.export': 'Export to Obsidian (.md)',
   'tools.exported': 'Exported {n} books. That note can be imported back.',
   'tools.importing': 'Reading the files…',

@@ -6,6 +6,7 @@ import { useAllBooks, useLibrary } from '../app/library';
 import { importBooks, importJson, parseJsonBooks, parseMarkdown, type ImportedBook } from '../data';
 import { useI18n } from '../i18n';
 import { exportMarkdown } from '../data/export-notes';
+import { parseCsvBooks } from '../data/import-csv';
 import { AiError, getApiKey, inferSeries } from '../sources/ai';
 import { shareFile } from '../sources/share-file';
 
@@ -33,7 +34,9 @@ export function LibraryTools({
       let restored = 0;
       for (const f of files) {
         const text = await f.text();
-        if (/\.json$/i.test(f.name) || /^\s*[[{]/.test(text)) {
+        if (/\.(csv|tsv)$/i.test(f.name)) {
+          items.push(...parseCsvBooks(text));
+        } else if (/\.json$/i.test(f.name) || /^\s*[[{]/.test(text)) {
           const data: unknown = JSON.parse(text);
           // Un respaldo de esta app se fusiona como respaldo (por id, gana lo más nuevo)
           if (data && typeof data === 'object' && 'format' in data) {
@@ -112,7 +115,7 @@ export function LibraryTools({
           ref={input}
           type="file"
           multiple
-          accept=".md,.markdown,.txt,.json,text/markdown,text/plain,application/json"
+          accept=".md,.markdown,.txt,.json,.csv,text/markdown,text/plain,text/csv,application/json"
           hidden
           onChange={(e) => {
             const list = [...(e.target.files ?? [])];
