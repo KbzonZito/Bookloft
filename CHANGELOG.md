@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-03
+
 Primera versión de prueba para el teléfono.
 
 - Biblioteca local en el teléfono (SQLite), sin cuentas: estantes Leyendo, Por leer, Deseos, Leídos y Abandonados.
