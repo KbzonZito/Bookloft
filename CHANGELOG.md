@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+- Colores: cinco paletas (Biblioteca, Té con leche, Bosque, Crepúsculo, Niebla) y "Dispositivo", que toma los colores de tu fondo de pantalla (Android 12+). Todas con versión de día y de noche; las barras del sistema siguen a la paleta.
+- La ficha de cada libro muestra de qué trata (en el idioma del título cuando Apple Books lo tiene; si no, Open Library) y completa las páginas.
+- El botón + ya no tiene sombra.
+
 ## [0.4.0] - 2026-11-04
 
 - Botón ✕ para cerrar la ficha de un libro (además de deslizar hacia abajo o tocar afuera).
