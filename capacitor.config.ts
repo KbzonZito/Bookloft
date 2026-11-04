@@ -5,6 +5,10 @@ const config: CapacitorConfig = {
   appId: 'dev.martinvergara.biblioteca',
   appName: 'Biblioteca',
   webDir: 'dist',
+  android: {
+    // Solo para diagnosticar un APK de producción desde chrome://inspect: WEBVIEW_DEBUG=1 npm run apk
+    webContentsDebuggingEnabled: process.env.WEBVIEW_DEBUG === '1' || undefined,
+  },
   plugins: {
     CapacitorSQLite: {
       androidIsEncryption: false,

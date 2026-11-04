@@ -10,6 +10,8 @@ import './ui/theme.css';
 import './ui/app.css';
 
 const root = createRoot(document.getElementById('root')!);
+// La primera vez, crear la base tarda unos segundos: que se note que la app está viva
+root.render(<p className="loading">{translate(systemLang(), 'app.loading')}</p>);
 
 openLibrary().then(
   (lib) => {
