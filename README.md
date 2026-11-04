@@ -22,6 +22,12 @@ Descarga el último `biblioteca-X.Y.Z.apk` desde [Releases](https://github.com/K
 
 Las versiones nuevas se instalan **encima** de la anterior: no hace falta desinstalar y la biblioteca se mantiene.
 
+## Apoyar
+
+La app es gratis, sin anuncios y sin cuentas. Si te sirve, puedes invitarme un café:
+
+[![Invítame un café en Ko-fi](https://img.shields.io/badge/Ko--fi-Invitar%20un%20caf%C3%A9-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/kbzonzito)
+
 ## Privacidad
 
 No hay servidor propio ni cuentas. La app solo se conecta a:

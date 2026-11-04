@@ -6,6 +6,7 @@ import { Segmented } from './Controls';
 import { LibraryTools } from './LibraryTools';
 import { OfflineCoversSetting } from './OfflineCoversSetting';
 import { PalettePicker, type PaletteControl } from './PalettePicker';
+import { SupportSetting } from './SupportSetting';
 
 export type ThemeSetting = 'auto' | 'light' | 'dark';
 export type LangSetting = 'auto' | Lang;
@@ -85,6 +86,8 @@ export function Settings({
           </button>
         </section>
       )}
+
+      <SupportSetting />
 
       <p className="hint">{t('settings.version', { v: __APP_VERSION__ })}</p>
     </div>

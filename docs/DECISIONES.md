@@ -172,6 +172,7 @@ Para que una versión nueva se instale **encima** de la anterior, sin desinstala
 **Propinas — ojo con Google Play:**
 
 - Google Play **no permite** links de donación externos dentro de la app (fuera de EE. UU.); hay apps sacadas o advertidas por eso, incluso en 2026 (AnkiDroid). Tampoco permite cobrar "donaciones" con Play Billing.
+- **Implementado (2026-11-04):** Ko-fi `ko-fi.com/kbzonzito` con PayPal (Stripe no abre cuentas en Chile). Se muestra en Ajustes → Apoyar la app solo en la versión de GitHub; `DISTRIBUTION=play npm run build` lo quita para Play.
 - Solución: en la versión de Play, **"Invítame un café"** como compra dentro de la app que da algo a cambio (tema o ícono "mecenas"). En la versión de GitHub y en el README/web: link a **Ko-fi**.
 - **Ko-fi antes que Buy Me a Coffee** para Chile: Ko-fi no cobra comisión en propinas y acepta **PayPal** (que funciona en Chile); Buy Me a Coffee cobra 5 %, depende de Stripe y dejó de soportar varios países. Antes de crear la cuenta, confirma que puedes retirar de PayPal a tu banco.
 - Google Play sí paga a cuentas en Chile (perfil de pagos con cuenta bancaria chilena). Comisión de Google: 15 % del primer millón USD al año.

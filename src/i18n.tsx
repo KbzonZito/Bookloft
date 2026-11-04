@@ -267,6 +267,10 @@ const es = {
   'backup.remind': 'Hace tiempo que no respaldas tu biblioteca.',
   'backup.remindAction': 'Respaldar',
   'settings.dev': 'Desarrollo',
+  'support.title': 'Apoyar la app',
+  'support.explain':
+    'La hace una persona en Chile: gratis, sin anuncios y sin pedirte datos. Si te sirve, puedes invitarme un café.',
+  'support.kofi': 'Invitar un café en Ko-fi',
   'settings.version': 'Versión {v}',
 } as const;
 
@@ -531,6 +535,10 @@ const en: Record<MessageKey, string> = {
   'backup.remind': 'It has been a while since you backed up your library.',
   'backup.remindAction': 'Back up',
   'settings.dev': 'Development',
+  'support.title': 'Support the app',
+  'support.explain':
+    'Made by one person in Chile: free, no ads and no data collection. If it helps you, you can buy me a coffee.',
+  'support.kofi': 'Buy me a coffee on Ko-fi',
   'settings.version': 'Version {v}',
 };
 

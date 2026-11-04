@@ -30,9 +30,8 @@
   top: 0;
   z-index: 10;
   padding-top: calc(var(--safe-top) + 14px);
-  background: color-mix(in srgb, var(--paper) 88%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  /* Opaco: el desenfoque no se dibuja en todos los WebView y el texto se veía encima del título */
+  background: var(--paper);
 }
 
 /* ---------- Estantes ---------- */
@@ -1974,4 +1973,19 @@ body {
   margin-left: 90px;
   gap: 6px;
   font-size: var(--t-sm);
+}
+
+/* ---------- Apoyar ---------- */
+
+.support {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.support-button {
+  gap: 8px;
+  text-decoration: none;
+  color: var(--accent);
 }
