@@ -1,7 +1,14 @@
 // Hoja que sube desde abajo en el teléfono (y se cierra arrastrándola) o un diálogo centrado en tablet
-import { X } from 'lucide-react';
-import { motion, useDragControls, useIsPresent, type PanInfo } from 'motion/react';
-import { useEffect, type CSSProperties, type ReactNode } from 'react';
+import { ArrowLeft } from 'lucide-react';
+import {
+  animate,
+  motion,
+  useDragControls,
+  useIsPresent,
+  useMotionValue,
+  type PanInfo,
+} from 'motion/react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useBack } from '../app/native';
 import { fade, spring } from '../ui/motion';
 
@@ -27,7 +34,7 @@ export function Sheet({
    * stage: solo el fondo aparece; el contenido anima por su cuenta (la portada que vuela no se desvanece).
    */
   variant?: 'rise' | 'stage';
-  /** Con un texto, muestra una X para cerrar (además de arrastrar, tocar afuera o atrás) */
+  /** Con un texto, muestra una flecha atrás para cerrar (además de arrastrar, tocar afuera o atrás) */
   closeLabel?: string;
 }) {
   const controls = useDragControls();
@@ -45,8 +52,19 @@ export function Sheet({
     };
   }, [present]);
 
+  // Al soltar después de arrastrar hacia abajo, la hoja sigue bajando hasta salir. Antes, el límite
+  // elástico del arrastre la devolvía hacia arriba mientras se desvanecía (se veía la manija subir).
+  const y = useMotionValue(0);
+  const [dragClosed, setDragClosed] = useState(false);
   const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 110 || info.velocity.y > 550) onClose();
+    if (info.offset.y <= 110 && info.velocity.y <= 550) return;
+    setDragClosed(true);
+    void animate(y, y.get() + window.innerHeight * 0.45, {
+      type: 'tween',
+      duration: 0.24,
+      ease: [0.4, 0, 1, 1],
+    });
+    onClose();
   };
 
   return (
@@ -64,7 +82,7 @@ export function Sheet({
         aria-modal="true"
         aria-label={label}
         className={`sheet ${className}`}
-        style={style}
+        style={{ ...style, y }}
         drag="y"
         dragControls={controls}
         dragListener={false}
@@ -75,7 +93,10 @@ export function Sheet({
         {...(variant === 'rise' && {
           initial: { y: '8%', opacity: 0 },
           animate: { y: 0, opacity: 1 },
-          exit: { y: '6%', opacity: 0, transition: fade },
+          // Cerrada arrastrando, el desplazamiento ya lo lleva `y`: solo se desvanece
+          exit: dragClosed
+            ? { opacity: 0, transition: fade }
+            : { y: '6%', opacity: 0, transition: fade },
           transition: spring.sheet,
         })}
       >
@@ -90,25 +111,29 @@ export function Sheet({
         )}
         {closeLabel && (
           <motion.button
-            className="icon-button sheet-close"
+            className="icon-button sheet-back"
             onClick={onClose}
             aria-label={closeLabel}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            exit={{ opacity: 0, transition: { duration: 0.08 } }}
             transition={fade}
           >
-            <X size={20} strokeWidth={1.75} />
+            <ArrowLeft size={20} strokeWidth={1.75} />
           </motion.button>
         )}
-        {/* El desplazamiento va por dentro: así el fondo (y su tinte) cubre siempre toda la hoja */}
-        <div className="sheet-scroll">
+        {/* El desplazamiento va por dentro: así el fondo (y su tinte) cubre siempre toda la hoja.
+            En "stage", al cerrar todo se apaga rápido mientras la portada vuela a su lugar. */}
+        <motion.div
+          className="sheet-scroll"
+          {...(variant === 'stage' && { exit: { opacity: 0, transition: { duration: 0.12 } } })}
+        >
           <div className="sheet-drag" onPointerDown={(e) => controls.start(e)}>
             <div className="grab" aria-hidden />
             {header}
           </div>
           <div className="sheet-body">{children}</div>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   );
