@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
 - Navegación abajo: barra flotante con Biblioteca, Buscar, Bóveda, Ajustes y el botón + fijo (ya no se corre al cambiar de estante). Arriba queda el título de cada pantalla.
 - Portadas en el idioma en que buscas ("Red Rising" ya no sale con la tapa de "Amanecer rojo").
 - Cambiar portada: otras ediciones de Open Library, Apple Books, un link o una imagen del teléfono (se incluye en los respaldos).
