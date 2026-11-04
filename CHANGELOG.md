@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-04
+
 - Google Books como tercera fuente: los libros que no están en Open Library ni en Apple Books (autopublicados, recientes) ahora aparecen al buscar, por ISBN, con la IA y al importar, con portada, páginas y de qué trata.
 
 ## [0.9.0] - 2026-11-04

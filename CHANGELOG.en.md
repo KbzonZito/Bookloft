@@ -4,6 +4,8 @@ English version of [CHANGELOG.md](CHANGELOG.md). The app shows this one in What'
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-04
+
 - Google Books as a third source: books missing from Open Library and Apple Books (self-published, recent) now show up when searching, by ISBN, with the AI and when importing, with cover, pages and what they’re about.
 
 ## [0.9.0] - 2026-11-04
