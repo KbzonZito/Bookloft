@@ -2109,3 +2109,36 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
   gap: 12px;
 }
+
+/* ---------- Novedades ---------- */
+
+.news {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.news .sheet-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.news .sheet-title svg {
+  color: var(--accent);
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: var(--t-md);
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.news-list li::marker {
+  color: var(--accent);
+}

@@ -66,3 +66,73 @@ describe('importar CSV', () => {
     expect(parseCsvBooks('foo,bar\n1,2')).toEqual([]);
   });
 });
+
+describe('exportar CSV', () => {
+  it('ida y vuelta con el importador', async () => {
+    const { exportCsv } = await import('./export-csv');
+    const base = {
+      id: 'x',
+      series: 'Nacidos de la bruma',
+      series_index: 1,
+      isbn: '9788466658898',
+      ol_key: null,
+      cover_url: null,
+      cover_path: null,
+      year: 2006,
+      pages: 672,
+      description: null,
+      up_next: null,
+      current_page: null,
+      info: null,
+      priority: 0,
+      position: 1,
+      source_url: null,
+      added_at: '2024-01-02T12:00:00.000Z',
+      started_at: null,
+      updated_at: '2024-01-02T12:00:00.000Z',
+      deleted_at: null,
+    };
+    const csv = exportCsv([
+      {
+        ...base,
+        title: 'El imperio final',
+        authors: ['Brandon Sanderson'],
+        status: 'read',
+        rating: 5,
+        tags: ['Cosmere', 'fantasía'],
+        note: 'Línea 1\nCon "comillas", y coma',
+        finished_at: '2024-03-15T12:00:00.000Z',
+      },
+      {
+        ...base,
+        id: 'y',
+        title: 'Piranesi',
+        authors: ['Susanna Clarke'],
+        series: null,
+        series_index: null,
+        status: 'abandoned',
+        rating: null,
+        tags: [],
+        note: null,
+        finished_at: null,
+      },
+    ]);
+    const [a, b] = parseCsvBooks(csv);
+    expect(a).toMatchObject({
+      title: 'El imperio final',
+      authors: ['Brandon Sanderson'],
+      series: 'Nacidos de la bruma',
+      series_index: 1,
+      status: 'read',
+      rating: 5,
+      pages: 672,
+      year: 2006,
+      isbn: '9788466658898',
+      tags: ['Cosmere', 'fantasía'],
+      note: 'Línea 1\nCon "comillas", y coma',
+      finished_at: '2024-03-15T12:00:00.000Z',
+      added_at: '2024-01-02T12:00:00.000Z',
+    });
+    expect(b).toMatchObject({ title: 'Piranesi', status: 'abandoned', series: null });
+  });
+});

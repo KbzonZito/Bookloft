@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+- Al cerrar la ficha de un libro arrastrándola, ahora sigue hacia abajo (antes rebotaba hacia arriba mientras desaparecía) y la app responde al instante.
+- La ficha se cierra con una flecha atrás, arriba a la izquierda.
+- Vibración: se puede apagar en Ajustes.
+- Respaldo en CSV (Ajustes → Respaldo): con las columnas de Goodreads, para llevar tu biblioteca a StoryGraph, Goodreads o una planilla.
+- Novedades: después de cada actualización, la app muestra lo nuevo una vez.
+- La lista de deseos desaparece: esos libros pasan a Por leer.
+
 ## [0.7.0] - 2026-11-04
 
 - Importar desde CSV: las exportaciones de Goodreads y StoryGraph (con saga, calificación, nota, páginas y fecha en que lo terminaste) o cualquier planilla con una columna de título. Sin duplicar.

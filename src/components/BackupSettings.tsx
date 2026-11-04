@@ -1,7 +1,9 @@
 // Respaldos: guardar un ZIP (solo la biblioteca o completo, con la bóveda) y restaurarlo
-import { DatabaseBackup, FolderArchive, RotateCcw } from 'lucide-react';
+import { DatabaseBackup, FileSpreadsheet, FolderArchive, RotateCcw } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useLibrary } from '../app/library';
+import { useAllBooks, useLibrary } from '../app/library';
+import { exportCsv } from '../data/export-csv';
+import { shareFile } from '../sources/share-file';
 import { useI18n } from '../i18n';
 import {
   createBackup,
@@ -17,6 +19,7 @@ export function BackupSettings({ toast }: { toast: (m: string) => void }) {
   const lib = useLibrary();
   const { t, lang } = useI18n();
   const files = useFiles();
+  const books = useAllBooks() ?? [];
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [days, setDays] = useState<number | null | undefined>(undefined);
@@ -58,6 +61,19 @@ export function BackupSettings({ toast }: { toast: (m: string) => void }) {
       toast(t('backup.failed'));
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function backupCsv() {
+    try {
+      const date = new Date().toISOString().slice(0, 10);
+      const csv = new Blob([exportCsv(books)], { type: 'text/csv' });
+      if (await shareFile(`Biblioteca ${date}.csv`, csv)) {
+        toast(t('backup.csvDone', { n: books.length }));
+      }
+    } catch (error) {
+      console.error(error);
+      toast(t('share.failed'));
     }
   }
 
@@ -104,6 +120,12 @@ export function BackupSettings({ toast }: { toast: (m: string) => void }) {
             ? t('backup.full', { size: formatSize(vaultSize) })
             : t('backup.fullEmpty')}
         </button>
+        {books.length > 0 && (
+          <button className="button" disabled={!!busy} onClick={() => void backupCsv()}>
+            <FileSpreadsheet size={18} strokeWidth={1.5} aria-hidden />
+            {t('backup.csv')}
+          </button>
+        )}
         <button className="button quiet" disabled={!!busy} onClick={() => input.current?.click()}>
           <RotateCcw size={16} strokeWidth={1.5} aria-hidden />
           {t('backup.restore')}

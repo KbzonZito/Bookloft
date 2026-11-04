@@ -1,4 +1,5 @@
 // Ajustes: apariencia, idioma, IA, organizar la biblioteca y respaldos
+import { useSetting } from '../app/library';
 import { useI18n, type Lang } from '../i18n';
 import { AiSettings } from './AiSettings';
 import { BackupSettings } from './BackupSettings';
@@ -32,6 +33,7 @@ export function Settings({
   aiFocus?: boolean;
 }) {
   const { t } = useI18n();
+  const [haptics, setHaptics] = useSetting('haptics', true);
 
   return (
     <div className="settings">
@@ -45,6 +47,19 @@ export function Settings({
             label: t(`theme.${v}`),
           }))}
           onChange={setTheme}
+        />
+      </section>
+
+      <section>
+        <h2 className="detail-label">{t('settings.haptics')}</h2>
+        <Segmented
+          label={t('settings.haptics')}
+          value={haptics ? 'on' : 'off'}
+          options={[
+            { value: 'on', label: t('settings.hapticsOn') },
+            { value: 'off', label: t('settings.hapticsOff') },
+          ]}
+          onChange={(v) => setHaptics(v === 'on')}
         />
       </section>
 

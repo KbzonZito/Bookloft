@@ -17,12 +17,15 @@ import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useAllBooks, useLibrary, useSetting } from './app/library';
 import { useWindowSize } from './app/layout';
-import { haptic, setSystemBars, useBack } from './app/native';
+import { haptic, setHapticsEnabled, setSystemBars, useBack } from './app/native';
 import { searchBooks, SHELVES, sortBooks, SORTS, type Sort } from './app/shelves';
 import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { NextRead } from './components/NextRead';
 import { YearReview } from './components/YearReview';
+import { WhatsNew } from './components/WhatsNew';
+import { changesSince, type ChangelogSection } from './app/whats-new';
+import changelog from '../CHANGELOG.md?raw';
 import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { ReadingContext, seriesProgress } from './app/reading';
@@ -68,6 +71,8 @@ export function App() {
   const [theme, setTheme] = useSetting<ThemeSetting>('theme', 'auto');
   const [lang, setLang] = useSetting<LangSetting>('language', 'auto');
   const [palette, setPalette] = useSetting<PaletteId>('palette', 'library');
+  const [haptics] = useSetting('haptics', true);
+  useEffect(() => setHapticsEnabled(haptics), [haptics]);
   const { dark, system } = useTheme(theme, palette);
   return (
     <I18nProvider lang={lang === 'auto' ? systemLang() : lang}>
@@ -113,6 +118,7 @@ function Shell({
   const [query, setQuery] = useState('');
   const [nextOpen, setNextOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
+  const [news, setNews] = useState<ChangelogSection[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -171,6 +177,20 @@ function Shell({
           run: () => setTab('settings'),
         });
       }
+    })();
+  }, [books]);
+
+  // Novedades: una vez por versión. En una instalación nueva (sin libros) no hay nada que contar.
+  const newsChecked = useRef(false);
+  useEffect(() => {
+    if (!books || newsChecked.current) return;
+    newsChecked.current = true;
+    void (async () => {
+      const seen = await lib.getSetting<string | null>('last_seen_version', null);
+      if (seen === __APP_VERSION__) return;
+      const sections = books.length ? changesSince(changelog, seen, __APP_VERSION__) : [];
+      if (sections.length) setNews(sections);
+      else await lib.setSetting('last_seen_version', __APP_VERSION__);
     })();
   }, [books]);
 
@@ -466,6 +486,18 @@ function Shell({
                   toast={showToast}
                 />
               ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {news && (
+              <WhatsNew
+                sections={news}
+                onClose={() => {
+                  setNews(null);
+                  void lib.setSetting('last_seen_version', __APP_VERSION__);
+                }}
+              />
+            )}
           </AnimatePresence>
 
           <AnimatePresence>

@@ -6,11 +6,18 @@ import { useEffect, useRef } from 'react';
 
 const native = Capacitor.isNativePlatform();
 
+// Se puede apagar en Ajustes; App la mantiene al día con el ajuste guardado
+let hapticsOn = true;
+export const setHapticsEnabled = (on: boolean) => {
+  hapticsOn = on;
+};
+
 export const haptic = {
   /** Un toque suave al confirmar algo (cambiar de estado, calificar) */
-  tap: () => void (native && Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})),
+  tap: () =>
+    void (native && hapticsOn && Haptics.impact({ style: ImpactStyle.Light }).catch(() => {})),
   /** Un clic al pasar por opciones (cambiar de estante deslizando) */
-  tick: () => void (native && Haptics.selectionChanged().catch(() => {})),
+  tick: () => void (native && hapticsOn && Haptics.selectionChanged().catch(() => {})),
 };
 
 export async function setSystemBars(dark: boolean) {
