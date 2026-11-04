@@ -4,6 +4,7 @@
 // Páginas: Open Library (la mediana de sus ediciones); Apple Books no las da para ebooks.
 import type { Book, BookInfo, Library } from '../data';
 import { completeBook } from './covers';
+import { googleLookup } from './googlebooks';
 import { similarTitle } from './text';
 
 const MAX = 1200;
@@ -167,12 +168,24 @@ export async function ensureDetails(lib: Library, book: Book) {
     ]);
     const appleText = apple.status === 'fulfilled' ? apple.value : null;
     const olDetails = ol.status === 'fulfilled' ? ol.value : null;
-    const found = appleText || olDetails?.description;
+    // Google Books, para lo que no está en las otras dos (autopublicados, libros recientes)
+    const needGoogle = book.description === null && !appleText && !olDetails?.description;
+    const google =
+      needGoogle || (!book.pages && !olDetails?.pages)
+        ? await googleLookup(book.title, book.authors[0]).catch(() => null)
+        : null;
+    const googleText = google?.description ? plainText(google.description) : null;
+    const found = appleText || olDetails?.description || googleText;
     // "No hay reseña" solo se guarda si las dos fuentes respondieron; si una falló, se reintenta
     const sure = apple.status === 'fulfilled' && ol.status === 'fulfilled';
     const patch: Partial<Book> = {};
     if (book.description === null && (found || sure)) patch.description = clip(found || '');
-    if (!book.pages && olDetails?.pages) patch.pages = olDetails.pages;
+    const pages = olDetails?.pages ?? google?.candidate.pages;
+    if (!book.pages && pages) patch.pages = pages;
+    // Sin datos de Open Library, los géneros de Google sirven para la pestaña Información
+    if (!book.info && !book.ol_key && google?.categories.length) {
+      patch.info = { subjects: cleanSubjects(google.categories.flatMap((c) => c.split(' / '))) };
+    }
     // {} = se buscó y Open Library no tiene más: no se vuelve a preguntar
     if (!book.info && info.status === 'fulfilled' && (info.value || book.ol_key)) {
       patch.info = info.value ?? {};

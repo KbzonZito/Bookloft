@@ -33,6 +33,9 @@ jobs:
           npm run check
 
       - name: Build web app
+        env:
+          # Key de Google Books restringida a la app firmada (paquete + SHA-1); si falta, cuota compartida
+          GOOGLE_BOOKS_KEY: ${{ secrets.GOOGLE_BOOKS_KEY }}
         run: |
           npm run build
           npx cap sync android

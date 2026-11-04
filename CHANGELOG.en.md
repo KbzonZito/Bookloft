@@ -4,6 +4,8 @@ English version of [CHANGELOG.md](CHANGELOG.md). The app shows this one in What'
 
 ## [Unreleased]
 
+- Google Books as a third source: books missing from Open Library and Apple Books (self-published, recent) now show up when searching, by ISBN, with the AI and when importing, with cover, pages and what they’re about.
+
 ## [0.9.0] - 2026-11-04
 
 - Welcome the first time you open the app: what Bookloft is, how to add books, bringing your library (Goodreads, StoryGraph, Obsidian or a backup) and choosing language, appearance and colors. You can see it again from Settings.

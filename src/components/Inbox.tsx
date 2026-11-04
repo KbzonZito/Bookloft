@@ -9,7 +9,7 @@ import { STATUS_ORDER } from '../app/shelves';
 import type { Book, Candidate, InboxItem, Status } from '../data';
 import { useI18n, type MessageKey } from '../i18n';
 import { useInboxImage } from '../sources/images';
-import { search } from '../sources/openlibrary';
+import { searchBooks } from '../sources/books';
 import { findUrls } from '../sources/text';
 import { spring } from '../ui/motion';
 import { Candidates } from './Candidates';
@@ -95,7 +95,7 @@ function InboxCard({
     if (q.length < 3) return setRefined(null);
     const ctrl = new AbortController();
     const id = setTimeout(() => {
-      void search(q, 8, ctrl.signal)
+      void searchBooks(q, 8, ctrl.signal)
         .then(setRefined)
         .catch(() => {});
     }, 380);

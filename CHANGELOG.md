@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Google Books como tercera fuente: los libros que no están en Open Library ni en Apple Books (autopublicados, recientes) ahora aparecen al buscar, por ISBN, con la IA y al importar, con portada, páginas y de qué trata.
+
 ## [0.9.0] - 2026-11-04
 
 - Bienvenida la primera vez que se abre la app: qué es Bookloft, cómo agregar libros, traer tu biblioteca (Goodreads, StoryGraph, Obsidian o un respaldo) y elegir idioma, apariencia y colores. Se puede volver a ver desde Ajustes.

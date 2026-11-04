@@ -3,12 +3,14 @@
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import type { Book, Library } from '../data';
-import { coverUrl, lookup } from './openlibrary';
+import { findBook } from './books';
+import { googleSearch } from './googlebooks';
+import { coverUrl } from './openlibrary';
 import { similarTitle } from './text';
 
 export interface CoverOption {
   url: string;
-  source: 'openlibrary' | 'apple';
+  source: 'openlibrary' | 'apple' | 'google';
 }
 
 const native = Capacitor.isNativePlatform();
@@ -52,18 +54,32 @@ async function editionCovers(olKey: string | null, limit = 60): Promise<CoverOpt
 
 /** Todas las opciones para elegir: primero Open Library, después Apple Books */
 export async function coverOptions(book: Book): Promise<CoverOption[]> {
-  const [ol, apple] = await Promise.all([
+  const [ol, apple, google] = await Promise.all([
     editionCovers(book.ol_key).catch(() => []),
     appleCovers(book.title, book.authors[0]).catch(() => []),
+    googleCovers(book.title, book.authors[0]).catch(() => []),
   ]);
-  return [...ol, ...apple];
+  return [...ol, ...apple, ...google];
 }
 
-/** Si el libro no tiene portada, busca una en Apple Books y la guarda */
+/** Portadas de Google Books de las ediciones con ese título (y autor) */
+async function googleCovers(title: string, author?: string): Promise<CoverOption[]> {
+  const found = await googleSearch(
+    author ? `intitle:${title} inauthor:${author.split(' ').at(-1)}` : `intitle:${title}`,
+    10,
+  );
+  return found
+    .filter((c) => c.cover_url && similarTitle(c.title, title))
+    .map((c) => ({ url: c.cover_url!, source: 'google' as const }));
+}
+
+/** Si el libro no tiene portada, busca una en Apple Books y, si no hay, en Google Books */
 export async function ensureCover(lib: Library, book: Book) {
   if (book.cover_url || book.cover_path) return;
   const [first] = await appleCovers(book.title, book.authors[0], 5).catch(() => []);
-  if (first) await lib.updateBook(book.id, { cover_url: first.url });
+  const url =
+    first?.url ?? (await googleCovers(book.title, book.authors[0]).catch(() => []))[0]?.url;
+  if (url) await lib.updateBook(book.id, { cover_url: url });
 }
 
 /**
@@ -71,7 +87,7 @@ export async function ensureCover(lib: Library, book: Book) {
  * portada, Apple Books. Nunca pisa lo que ya tiene. Devuelve cuántos datos agregó.
  */
 export async function completeBook(lib: Library, book: Book): Promise<number> {
-  const found = await lookup(book.title, book.authors[0]).catch(() => null);
+  const found = await findBook(book.title, book.authors[0]).catch(() => null);
   const patch: Partial<Book> = {};
   if (found) {
     if (!book.authors.length && found.authors.length) patch.authors = found.authors;

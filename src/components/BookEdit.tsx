@@ -93,11 +93,17 @@ export function CoverPicker({ book, onClose }: { book: Book; onClose: () => void
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ ...spring.sheet, delay: Math.min(i, 12) * 0.02 }}
-              aria-label={t(o.source === 'apple' ? 'cover.fromApple' : 'cover.fromOl')}
+              aria-label={t(
+                o.source === 'apple'
+                  ? 'cover.fromApple'
+                  : o.source === 'google'
+                    ? 'cover.fromGoogle'
+                    : 'cover.fromOl',
+              )}
             >
               <Cover book={{ ...book, cover_url: o.url, cover_path: null }} />
               <span className="cover-source">
-                {o.source === 'apple' ? 'Apple' : 'Open Library'}
+                {o.source === 'apple' ? 'Apple' : o.source === 'google' ? 'Google' : 'Open Library'}
               </span>
             </motion.button>
           ))}

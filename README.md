@@ -40,7 +40,7 @@ La app es gratis, sin anuncios y sin cuentas. Si te sirve, puedes invitarme un c
 
 No hay servidor propio ni cuentas. La app solo se conecta a:
 
-- **Open Library** y **Apple Books**, para buscar libros y portadas.
+- **Open Library**, **Apple Books** y **Google Books**, para buscar libros, portadas y reseñas.
 - **Anthropic**, solo si conectas tu API key (que se guarda cifrada en el Keystore del teléfono, nunca en los respaldos).
 - Donde **tú** compartas un respaldo (Drive, correo, archivos).
 
@@ -80,7 +80,7 @@ npm run apk                # APK firmado de prueba en builds/ (lo instala si hay
 npm run release -- 0.4.0   # pasa [Unreleased] del CHANGELOG a la versión, crea la etiqueta y la sube
 ```
 
-GitHub Actions compila el APK de cada etiqueta `v*` y lo publica en Releases. La firma se configura una vez con `scripts/setup-signing.sh` (la llave queda en `~/.config/biblioteca`, fuera del repo; respáldala).
+GitHub Actions compila el APK de cada etiqueta `v*` y lo publica en Releases. La key de Google Books (restringida en Google Cloud al paquete `dev.martinvergara.biblioteca` y a la huella SHA-1 de la firma) va en `GOOGLE_BOOKS_KEY`: en `~/.config/biblioteca/signing.env` para el APK local y como secreto del repositorio para GitHub. La firma se configura una vez con `scripts/setup-signing.sh` (la llave queda en `~/.config/biblioteca`, fuera del repo; respáldala).
 
 ### Ícono
 

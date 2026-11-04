@@ -21,6 +21,13 @@ const ai = vi.hoisted(() => ({ extractBooks: vi.fn() }));
 
 vi.mock('./openlibrary', async (orig) => ({ ...(await orig<object>()), ...ol }));
 vi.mock('./ai', async (orig) => ({ ...(await orig<object>()), ...ai }));
+// Google Books no se consulta en los tests: lo que Open Library no tiene, no aparece
+vi.mock('./googlebooks', () => ({
+  googleSearch: vi.fn(async () => []),
+  googleByIsbn: vi.fn(async () => null),
+  googleLookup: vi.fn(async () => null),
+}));
+vi.mock('./covers', () => ({ appleCovers: vi.fn(async () => []) }));
 vi.mock('./images', () => ({
   readInboxImage: vi.fn(async () => 'BASE64'),
   inboxImageUri: vi.fn(),

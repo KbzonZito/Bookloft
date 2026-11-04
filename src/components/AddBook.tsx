@@ -8,7 +8,7 @@ import { useAllBooks, useLibrary } from '../app/library';
 import { STATUS_ORDER } from '../app/shelves';
 import type { Candidate, Status } from '../data';
 import { useI18n } from '../i18n';
-import { byIsbn, search } from '../sources/openlibrary';
+import { findByIsbn, searchBooks } from '../sources/books';
 import { ensureCover } from '../sources/covers';
 import { canScan, scanIsbn } from '../sources/scan';
 import { findIsbns, findUrls } from '../sources/text';
@@ -58,8 +58,8 @@ export function AddBook({
       try {
         const isbn = findIsbns(q)[0];
         const candidates = isbn
-          ? [await byIsbn(isbn, ctrl.signal)].filter((c): c is Candidate => c !== null)
-          : await search(q, 12, ctrl.signal);
+          ? [await findByIsbn(isbn, ctrl.signal)].filter((c): c is Candidate => c !== null)
+          : await searchBooks(q, 12, ctrl.signal);
         setResults({ state: 'done', candidates });
       } catch {
         if (!ctrl.signal.aborted) setResults({ state: 'error' });

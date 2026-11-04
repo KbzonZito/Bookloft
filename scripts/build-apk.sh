@@ -14,6 +14,9 @@ KEYDIR="$HOME/.config/biblioteca"
 if [ -f "$KEYDIR/release.p12" ]; then
   source "$KEYDIR/signing.env"
   export KEYSTORE_PATH="$KEYDIR/release.p12" KEYSTORE_PASSWORD KEY_ALIAS
+  # Opcional en el mismo archivo: GOOGLE_BOOKS_KEY=… (la key restringida a la app)
+  export GOOGLE_BOOKS_KEY="${GOOGLE_BOOKS_KEY:-}"
+  [ -n "$GOOGLE_BOOKS_KEY" ] || echo "Aviso: sin GOOGLE_BOOKS_KEY en signing.env; Google Books usará la cuota compartida." >&2
 else
   echo "Aviso: falta la clave en $KEYDIR (scripts/setup-signing.sh); el APK no se instalará encima de la app." >&2
 fi

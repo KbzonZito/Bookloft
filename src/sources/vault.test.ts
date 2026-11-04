@@ -22,7 +22,7 @@ vi.mock('@capacitor/filesystem', () => ({
 }));
 vi.mock('@capacitor/file-viewer', () => ({ FileViewer: {} }));
 vi.mock('@capacitor/share', () => ({ Share: {} }));
-vi.mock('./openlibrary', () => ({ lookup: vi.fn(async () => null) }));
+vi.mock('./books', () => ({ findBook: vi.fn(async () => null) }));
 vi.mock('./covers', () => ({ ensureCover: vi.fn(async () => {}) }));
 
 const { importToVault, matchBook, createBookFromFile, openFile } = await import('./vault');

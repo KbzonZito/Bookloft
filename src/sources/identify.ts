@@ -6,7 +6,8 @@ import type { Candidate, IdentifyMethod } from '../data';
 import { AiError, extractBooks } from './ai';
 import { appleCovers } from './covers';
 import { inboxImageUri, readInboxImage } from './images';
-import { byIsbn, lookup, mergeCandidates, search } from './openlibrary';
+import { findBook, findByIsbn } from './books';
+import { mergeCandidates, search } from './openlibrary';
 import { findIsbns, findUrls, guessQueries, titleLines, type OcrLine } from './text';
 
 export interface IdentifyInput {
@@ -76,7 +77,7 @@ async function searchAll(queries: string[]): Promise<Candidate[]> {
 }
 
 async function fromIsbns(isbns: string[]): Promise<Candidate[]> {
-  const found = await Promise.all(isbns.slice(0, 3).map((i) => byIsbn(i).catch(() => null)));
+  const found = await Promise.all(isbns.slice(0, 3).map((i) => findByIsbn(i).catch(() => null)));
   return found.filter((c): c is Candidate => c !== null);
 }
 
@@ -126,7 +127,7 @@ export async function identify({
       // Una foto de una repisa puede traer muchos libros: se resuelven de a tres para que
       // Open Library no corte, y lo que no conozca se propone igual con lo que leyó la IA
       const resolved = await mapLimit(books.slice(0, 24), 3, async (b) => {
-        const found = await lookup(b.title, b.author).catch(() => null);
+        const found = await findBook(b.title, b.author).catch(() => null);
         if (found) return found;
         const fallback: Candidate = {
           title: b.title,

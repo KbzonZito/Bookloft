@@ -8,7 +8,7 @@ import type { Book, Library, VaultFile } from '../data';
 import { normalize } from '../data/text';
 import { formatOf, readEpubMeta, sha256, titleFromFilename, type FileMeta } from './epub';
 import { ensureCover } from './covers';
-import { lookup } from './openlibrary';
+import { findBook } from './books';
 import { fromBase64, toBase64 } from './bytes';
 
 const native = Capacitor.isNativePlatform();
@@ -111,7 +111,7 @@ export async function importToVault(
 /** Crea la ficha del libro a partir del archivo (Open Library si lo conoce) y los vincula */
 export async function createBookFromFile(lib: Library, file: VaultFile): Promise<Book> {
   const title = file.meta_title ?? titleFromFilename(file.filename);
-  const found = await lookup(title, file.meta_author).catch(() => null);
+  const found = await findBook(title, file.meta_author).catch(() => null);
   const { book } = await lib.addBook(
     found ?? {
       title,
