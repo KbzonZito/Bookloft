@@ -117,4 +117,3 @@ export async function googleLookup(
   };
 }
 
-export const googleConfigured = () => native && !!KEY;
