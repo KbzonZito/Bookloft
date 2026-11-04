@@ -100,3 +100,32 @@ describe('saga en el título', () => {
     expect(splitSeries('Sapiens (edición ilustrada)').series).toBeNull();
   });
 });
+
+describe('géneros de Open Library', () => {
+  it('quita temas de biblioteca, traducciones y repetidos', async () => {
+    const { cleanSubjects } = await import('./details');
+    expect(
+      cleanSubjects([
+        'American Science fiction',
+        'Imaginary places',
+        'Science Fiction',
+        'science fiction',
+        'Translations into Russian',
+        'Lectures et morceaux choisis',
+        'Roman ame ricain',
+        'Fiction, science fiction, general',
+        'nyt:hardcover-fiction=2015-01-01',
+        'Dune (Imaginary place)',
+        'Desert',
+        'Ecology',
+        'Messiahs',
+      ]),
+    ).toEqual([
+      'American Science fiction',
+      'Imaginary places',
+      'Science Fiction',
+      'Desert',
+      'Ecology',
+    ]);
+  });
+});

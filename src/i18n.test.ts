@@ -16,6 +16,7 @@ const DYNAMIC = [
   'vault.',
   'lang.',
   'palette.',
+  'detail.',
   'next.',
   'year.',
 ];

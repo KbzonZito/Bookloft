@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { dismissInbox, finishInbox, processInbox, usePendingInbox } from '../app/inbox';
 import { useAllBooks, useLibrary } from '../app/library';
-import { SHELVES } from '../app/shelves';
+import { STATUS_ORDER } from '../app/shelves';
 import type { Book, Candidate, InboxItem, Status } from '../data';
 import { useI18n, type MessageKey } from '../i18n';
 import { useInboxImage } from '../sources/images';
@@ -17,7 +17,7 @@ import { Segmented } from './Controls';
 import { Sheet } from './Sheet';
 
 export function Inbox({ onClose, onOpenAi }: { onClose: () => void; onOpenAi: () => void }) {
-  const { t, shelf } = useI18n();
+  const { t, status: statusLabel } = useI18n();
   const items = usePendingInbox();
   const books = useAllBooks() ?? [];
   // Lo que llega desde Instagram suele ser algo que todavía no tengo
@@ -34,7 +34,7 @@ export function Inbox({ onClose, onOpenAi }: { onClose: () => void; onOpenAi: ()
               wrap
               label={t('inbox.addTo')}
               value={status}
-              options={SHELVES.map((s) => ({ value: s, label: shelf(s) }))}
+              options={STATUS_ORDER.map((s) => ({ value: s, label: statusLabel(s) }))}
               onChange={setStatus}
             />
           </section>

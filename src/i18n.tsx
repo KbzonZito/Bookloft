@@ -1,5 +1,6 @@
 // Textos en español e inglés. Cada clave existe en ambos; {n} se reemplaza con t(key, { n }).
 import { createContext, useContext, type ReactNode } from 'react';
+import type { ShelfId } from './app/shelves';
 import type { Status } from './data';
 
 export const LANGS = ['es', 'en'] as const;
@@ -7,13 +8,22 @@ export type Lang = (typeof LANGS)[number];
 
 const es = {
   'shelf.reading': 'Leyendo',
-  'shelf.to_read': 'Por leer',
-  'shelf.wishlist': 'Deseos',
+  'shelf.shelf': 'Estantería',
+  'shelf.filter': 'Filtrar por estado',
+  'shelf.all': 'Todos',
+  'upnext.title': 'Próximos',
+  'upnext.empty':
+    'Agrega aquí lo que quieres leer después: desde la ficha de un libro, manteniéndolo presionado o con «¿Qué leo ahora?».',
+  'upnext.up': 'Subir',
+  'upnext.down': 'Bajar',
+  'upnext.remove': 'Quitar «{title}» de Próximos',
+  'upnext.add': 'Agregar a Próximos',
+  'upnext.inList': 'En Próximos',
+  'upnext.added': '«{title}» está en Próximos',
   'shelf.read': 'Leídos',
   'shelf.abandoned': 'Sin terminar',
   'status.reading': 'Leyendo',
   'status.to_read': 'Por leer',
-  'status.wishlist': 'Lo quiero',
   'status.read': 'Leído',
   'status.abandoned': 'Sin terminar',
 
@@ -42,9 +52,9 @@ const es = {
   'sort.title': 'Título',
   'sort.author': 'Autor',
 
-  'empty.reading': 'No estás leyendo nada. Abre un libro de «Por leer» y márcalo como «Leyendo».',
-  'empty.to_read': 'Tu pila está vacía. Agrega el próximo libro que quieras leer.',
-  'empty.wishlist': 'Guarda aquí los libros que todavía no tienes.',
+  'empty.reading':
+    'No estás leyendo nada. Abre un libro de tu estantería y márcalo como «Leyendo».',
+  'empty.shelf': 'No hay libros con este filtro.',
   'empty.read': 'Los libros que termines aparecerán aquí.',
   'empty.abandoned': 'Nada sin terminar. Bien.',
   'empty.library': 'Tu biblioteca está vacía.',
@@ -64,12 +74,27 @@ const es = {
   'book.tags': 'Etiquetas',
   'book.addTag': 'Nueva etiqueta',
   'book.removeTag': 'Quitar {tag}',
+  'detail.notes': 'Mis notas',
+  'detail.info': 'Información',
+  'book.pagesRead': 'Páginas leídas',
+  'book.currentPage': 'Página actual',
+  'book.totalPages': 'Total de páginas',
+  'book.percent': '{n} % leído',
+  'book.addedOn': 'Agregado el {date}',
+  'info.firstPublished': 'Primera edición',
+  'info.pages': 'Páginas',
+  'info.editions': 'Ediciones',
+  'info.publisher': 'Editorial',
+  'info.languages': 'Idiomas',
+  'info.votes': '{n} votos en Open Library',
+  'info.loading': 'Buscando información del libro…',
+  'info.none': 'Open Library no tiene más información de este libro.',
+  'info.source': 'Datos de Open Library y Apple Books.',
   'book.note': 'Nota',
   'book.description': 'De qué trata',
   'book.more': 'Leer más',
   'book.less': 'Mostrar menos',
   'book.notePlaceholder': 'Lo que quieras recordar de este libro',
-  'book.added': 'Agregado',
   'book.started': 'Empezado',
   'book.finished': 'Terminado',
   'book.pages': '{n} páginas',
@@ -312,13 +337,22 @@ export type MessageKey = keyof typeof es;
 
 const en: Record<MessageKey, string> = {
   'shelf.reading': 'Reading',
-  'shelf.to_read': 'To read',
-  'shelf.wishlist': 'Wishlist',
+  'shelf.shelf': 'Shelf',
+  'shelf.filter': 'Filter by status',
+  'shelf.all': 'All',
+  'upnext.title': 'Up next',
+  'upnext.empty':
+    'Add what you want to read next: from a book’s page, by long-pressing it, or with “What should I read next?”.',
+  'upnext.up': 'Move up',
+  'upnext.down': 'Move down',
+  'upnext.remove': 'Remove “{title}” from Up next',
+  'upnext.add': 'Add to Up next',
+  'upnext.inList': 'In Up next',
+  'upnext.added': '“{title}” is in Up next',
   'shelf.read': 'Read',
   'shelf.abandoned': 'DNF',
   'status.reading': 'Reading',
   'status.to_read': 'To read',
-  'status.wishlist': 'Want it',
   'status.read': 'Read',
   'status.abandoned': 'DNF',
 
@@ -348,9 +382,8 @@ const en: Record<MessageKey, string> = {
   'sort.author': 'Author',
 
   'empty.reading':
-    'You are not reading anything. Open a book from “To read” and mark it as “Reading”.',
-  'empty.to_read': 'Your pile is empty. Add the next book you want to read.',
-  'empty.wishlist': 'Keep the books you don’t own yet here.',
+    'You are not reading anything. Open a book from your shelf and mark it as “Reading”.',
+  'empty.shelf': 'No books match this filter.',
   'empty.read': 'Books you finish will show up here.',
   'empty.abandoned': 'No DNFs. Good.',
   'empty.library': 'Your library is empty.',
@@ -370,12 +403,27 @@ const en: Record<MessageKey, string> = {
   'book.tags': 'Tags',
   'book.addTag': 'New tag',
   'book.removeTag': 'Remove {tag}',
+  'detail.notes': 'My notes',
+  'detail.info': 'Info',
+  'book.pagesRead': 'Pages read',
+  'book.currentPage': 'Current page',
+  'book.totalPages': 'Total pages',
+  'book.percent': '{n}% read',
+  'book.addedOn': 'Added on {date}',
+  'info.firstPublished': 'First published',
+  'info.pages': 'Pages',
+  'info.editions': 'Editions',
+  'info.publisher': 'Publisher',
+  'info.languages': 'Languages',
+  'info.votes': '{n} ratings on Open Library',
+  'info.loading': 'Looking up the book…',
+  'info.none': 'Open Library has no more information about this book.',
+  'info.source': 'Data from Open Library and Apple Books.',
   'book.note': 'Note',
   'book.description': 'About this book',
   'book.more': 'Read more',
   'book.less': 'Show less',
   'book.notePlaceholder': 'Anything you want to remember about this book',
-  'book.added': 'Added',
   'book.started': 'Started',
   'book.finished': 'Finished',
   'book.pages': '{n} pages',
@@ -626,7 +674,7 @@ export function translate(lang: Lang, key: MessageKey, vars?: Vars) {
 interface I18n {
   lang: Lang;
   t: (key: MessageKey, vars?: Vars) => string;
-  shelf: (s: Status) => string;
+  shelf: (s: ShelfId) => string;
   status: (s: Status) => string;
   date: (iso: string) => string;
 }

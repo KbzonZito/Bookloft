@@ -245,12 +245,55 @@ export class Library {
         next.position = await this.endPosition(tx, patch.status);
         if (patch.status === 'reading' && !next.started_at) next.started_at = t;
         if (patch.status === 'read' && !next.finished_at) next.finished_at = t;
+        // Próximos es solo para lo que falta leer: al empezarlo (o terminarlo) sale de la lista
+        if (patch.status !== 'to_read') next.up_next = null;
       }
       await this.writeBook(tx, next);
       return next;
     });
     this.changed();
     return book;
+  }
+
+  // ---------- Próximos ----------
+
+  /** Lo que quiero leer después, en el orden que elegí */
+  async listUpNext(): Promise<Book[]> {
+    const rows = await this.db.all(
+      `SELECT * FROM books WHERE ${LIVE} AND up_next IS NOT NULL ORDER BY up_next`,
+    );
+    return rows.map(toBook);
+  }
+
+  /** Agrega al final de Próximos (y lo deja "por leer") o lo saca */
+  async setUpNext(id: string, on: boolean): Promise<Book> {
+    if (!on) return this.updateBook(id, { up_next: null });
+    const row = await this.db.get<{ max: number | null }>(
+      `SELECT MAX(up_next) AS max FROM books WHERE ${LIVE}`,
+    );
+    const book = await this.getBook(id);
+    return this.updateBook(id, {
+      up_next: (row?.max ?? 0) + 1,
+      ...(book && book.status !== 'to_read' && { status: 'to_read' as const }),
+    });
+  }
+
+  /** Sube o baja un puesto en Próximos (intercambia con el vecino) */
+  async moveUpNext(id: string, direction: -1 | 1) {
+    const list = await this.listUpNext();
+    const i = list.findIndex((b) => b.id === id);
+    const j = i + direction;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    await this.db.transaction(async (tx) => {
+      const t = now();
+      for (const [book, value] of [
+        [list[i], list[j].up_next],
+        [list[j], list[i].up_next],
+      ] as const) {
+        await this.writeBook(tx, { ...book, up_next: value, updated_at: t });
+      }
+    });
+    this.changed();
   }
 
   /** Borrado suave: se puede deshacer y viaja en los respaldos */

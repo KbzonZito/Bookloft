@@ -2,7 +2,7 @@
 // Reseña: Apple Books primero, porque la tiene en el idioma del título ("El imperio final" en
 // español); si no, la de la obra en Open Library (casi siempre en inglés).
 // Páginas: Open Library (la mediana de sus ediciones); Apple Books no las da para ebooks.
-import type { Book, Library } from '../data';
+import type { Book, BookInfo, Library } from '../data';
 import { completeBook } from './covers';
 import { similarTitle } from './text';
 
@@ -93,11 +93,65 @@ async function openLibraryDetails(book: Book) {
   };
 }
 
+interface InfoDoc {
+  ratings_average?: number;
+  ratings_count?: number;
+  subject?: string[];
+  publisher?: string[];
+  language?: string[];
+  edition_count?: number;
+  first_publish_year?: number;
+}
+
+/** Los temas de Open Library vienen mezclados ("nyt:…", "Fiction, general", en minúscula) */
+export function cleanSubjects(subjects: string[] = [], max = 5) {
+  const noise =
+    /[:=(]|general|^fiction$|^novela$|accessible book|protected daisy|in library|large type|ficción|translation|criticism|interpretation|reader|lecture|morceaux|roman |juvenile|textbook|study and teaching|open library|staff picks|award|nyt|new york times|^\d|readers/i;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of subjects) {
+    const s = raw.trim();
+    // Temas cortos, sin códigos ni etiquetas de bibliotecas
+    if (!s || s.length > 24 || s.split(/\s+/).length > 3 || noise.test(s)) continue;
+    const nice = s.charAt(0).toUpperCase() + s.slice(1);
+    const key = nice.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(nice);
+    if (out.length === max) break;
+  }
+  return out;
+}
+
+/** Nota promedio, géneros, editoriales, idiomas y ediciones: una sola consulta por la obra */
+async function openLibraryInfo(book: Book): Promise<BookInfo | null> {
+  if (!book.ol_key?.startsWith('/works/')) return null;
+  const url = new URL('https://openlibrary.org/search.json');
+  url.searchParams.set('q', `key:${book.ol_key}`);
+  url.searchParams.set(
+    'fields',
+    'ratings_average,ratings_count,subject,publisher,language,edition_count,first_publish_year',
+  );
+  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+  if (!res.ok) throw new Error(`Open Library ${res.status}`);
+  const doc = ((await res.json()) as { docs: InfoDoc[] }).docs[0];
+  if (!doc) return {};
+  return {
+    ratings_average: doc.ratings_average ? Math.round(doc.ratings_average * 100) / 100 : undefined,
+    ratings_count: doc.ratings_count,
+    subjects: cleanSubjects(doc.subject),
+    publishers: doc.publisher?.slice(0, 4),
+    languages: doc.language?.slice(0, 8),
+    editions: doc.edition_count,
+    first_publish_year: doc.first_publish_year,
+  };
+}
+
 const inflight = new Set<string>();
 
 /** Completa reseña y páginas si faltan. Sin internet no hace nada (se reintenta la próxima vez). */
 export async function ensureDetails(lib: Library, book: Book) {
-  if (book.description !== null && book.pages) return;
+  if (book.description !== null && book.pages && book.info) return;
   if (!navigator.onLine || inflight.has(book.id)) return;
   inflight.add(book.id);
   try {
@@ -106,9 +160,10 @@ export async function ensureDetails(lib: Library, book: Book) {
       await completeBook(lib, book).catch(() => 0);
       book = (await lib.getBook(book.id)) ?? book;
     }
-    const [apple, ol] = await Promise.allSettled([
+    const [apple, ol, info] = await Promise.allSettled([
       book.description === null ? appleDescription(book) : Promise.resolve(null),
       openLibraryDetails(book),
+      book.info ? Promise.resolve(null) : openLibraryInfo(book),
     ]);
     const appleText = apple.status === 'fulfilled' ? apple.value : null;
     const olDetails = ol.status === 'fulfilled' ? ol.value : null;
@@ -118,6 +173,10 @@ export async function ensureDetails(lib: Library, book: Book) {
     const patch: Partial<Book> = {};
     if (book.description === null && (found || sure)) patch.description = clip(found || '');
     if (!book.pages && olDetails?.pages) patch.pages = olDetails.pages;
+    // {} = se buscó y Open Library no tiene más: no se vuelve a preguntar
+    if (!book.info && info.status === 'fulfilled' && (info.value || book.ol_key)) {
+      patch.info = info.value ?? {};
+    }
     if (Object.keys(patch).length) await lib.updateBook(book.id, patch);
   } finally {
     inflight.delete(book.id);

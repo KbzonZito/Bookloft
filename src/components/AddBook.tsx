@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { addToInbox } from '../app/inbox';
 import { useAllBooks, useLibrary } from '../app/library';
-import { SHELVES } from '../app/shelves';
+import { STATUS_ORDER } from '../app/shelves';
 import type { Candidate, Status } from '../data';
 import { useI18n } from '../i18n';
 import { byIsbn, search } from '../sources/openlibrary';
@@ -41,7 +41,7 @@ export function AddBook({
 }) {
   const lib = useLibrary();
   const books = useAllBooks() ?? [];
-  const { t, shelf } = useI18n();
+  const { t, status: shelf } = useI18n();
   const [status, setStatus] = useState<Status>(initialShelf);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Results>({ state: 'idle' });
@@ -116,7 +116,7 @@ export function AddBook({
           wrap
           label={t('add.shelf')}
           value={status}
-          options={SHELVES.map((s) => ({ value: s, label: shelf(s) }))}
+          options={STATUS_ORDER.map((s) => ({ value: s, label: shelf(s) }))}
           onChange={setStatus}
         />
 

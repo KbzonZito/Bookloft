@@ -1,6 +1,6 @@
 // "¿Qué leo ahora?": tres propuestas al tiro (reglas simples: sagas en curso, prioridad, autores
 // que te gustaron) y, si conectaste la IA, la opción de pedirle a Claude que elija.
-import { BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Check, ListPlus, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLibrary } from '../app/library';
@@ -29,6 +29,7 @@ export function NextRead({
   const { t, lang } = useI18n();
   const [hasKey, setHasKey] = useState(false);
   const [ai, setAi] = useState<'idle' | 'thinking' | Pick[]>('idle');
+  const [queued, setQueued] = useState<Set<string>>(new Set());
   useEffect(() => void getApiKey().then((k) => setHasKey(!!k)), []);
 
   // Las propuestas se calculan una vez al abrir: si empiezas uno, la lista no salta
@@ -125,10 +126,29 @@ export function NextRead({
                     {reason && <span className="next-reason">{reason}</span>}
                   </span>
                 </button>
-                <button className="button quiet next-start" onClick={() => void start(book)}>
-                  <BookOpen size={16} strokeWidth={1.6} aria-hidden />
-                  {t('next.start')}
-                </button>
+                <span className="next-buttons">
+                  <button className="button quiet next-start" onClick={() => void start(book)}>
+                    <BookOpen size={16} strokeWidth={1.6} aria-hidden />
+                    {t('next.start')}
+                  </button>
+                  <button
+                    className="button quiet next-start"
+                    disabled={queued.has(book.id) || book.up_next != null}
+                    onClick={async () => {
+                      await lib.setUpNext(book.id, true);
+                      setQueued((q) => new Set(q).add(book.id));
+                    }}
+                  >
+                    {queued.has(book.id) || book.up_next != null ? (
+                      <Check size={16} strokeWidth={2} aria-hidden />
+                    ) : (
+                      <ListPlus size={16} strokeWidth={1.6} aria-hidden />
+                    )}
+                    {queued.has(book.id) || book.up_next != null
+                      ? t('upnext.inList')
+                      : t('upnext.add')}
+                  </button>
+                </span>
               </li>
             ))}
           </motion.ol>

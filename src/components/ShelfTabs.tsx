@@ -1,9 +1,8 @@
 // Los estantes como tipografía: el activo queda marcado por una cinta de marcapáginas que se desliza
 import { motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
-import type { Status } from '../data';
 import { useI18n } from '../i18n';
-import { SHELVES } from '../app/shelves';
+import { SHELVES, type ShelfId } from '../app/shelves';
 import { spring } from '../ui/motion';
 
 export function ShelfTabs({
@@ -12,14 +11,14 @@ export function ShelfTabs({
   onSelect,
   orientation = 'horizontal',
 }: {
-  active: Status | null;
-  counts: Record<Status, number>;
-  onSelect: (s: Status) => void;
+  active: ShelfId | null;
+  counts: Record<ShelfId, number>;
+  onSelect: (s: ShelfId) => void;
   orientation?: 'horizontal' | 'vertical';
 }) {
   const { shelf, t } = useI18n();
   const nav = useRef<HTMLElement>(null);
-  const refs = useRef(new Map<Status, HTMLButtonElement>());
+  const refs = useRef(new Map<ShelfId, HTMLButtonElement>());
 
   // Al deslizar entre estantes, el activo queda alineado al margen izquierdo
   useEffect(() => {

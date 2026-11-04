@@ -2,7 +2,18 @@
 import type { Book, Status } from '../data';
 import { normalize } from '../data/text';
 
-export const SHELVES: Status[] = ['reading', 'to_read', 'read', 'abandoned'];
+/**
+ * Las pestañas de la biblioteca. "shelf" (Estantería) no es un estado: muestra todos los libros,
+ * con un filtro por estado. Leyendo incluye la lista de Próximos.
+ */
+export type ShelfId = 'reading' | 'shelf' | 'read' | 'abandoned';
+export const SHELVES: ShelfId[] = ['reading', 'shelf', 'read', 'abandoned'];
+
+/** Los estados en el orden en que se muestran para elegir */
+export const STATUS_ORDER: Status[] = ['reading', 'to_read', 'read', 'abandoned'];
+
+/** En qué pestaña cae un libro según su estado */
+export const shelfFor = (s: Status): ShelfId => (s === 'to_read' ? 'shelf' : s);
 
 export const SORTS = ['mine', 'recent', 'title', 'author'] as const;
 export type Sort = (typeof SORTS)[number];

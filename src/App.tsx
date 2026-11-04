@@ -10,7 +10,6 @@ import {
   Rows3,
   Search,
   Settings2,
-  Sparkles,
   X,
 } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from 'motion/react';
@@ -18,10 +17,20 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useAllBooks, useLibrary, useSetting } from './app/library';
 import { useWindowSize } from './app/layout';
 import { haptic, setHapticsEnabled, setSystemBars, useBack } from './app/native';
-import { searchBooks, SHELVES, sortBooks, SORTS, type Sort } from './app/shelves';
+import {
+  searchBooks,
+  shelfFor,
+  SHELVES,
+  sortBooks,
+  SORTS,
+  STATUS_ORDER,
+  type ShelfId,
+  type Sort,
+} from './app/shelves';
 import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
 import { NextRead } from './components/NextRead';
+import { UpNext } from './components/UpNext';
 import { YearReview } from './components/YearReview';
 import { WhatsNew } from './components/WhatsNew';
 import { changesSince, type ChangelogSection } from './app/whats-new';
@@ -90,7 +99,7 @@ export function App() {
 }
 
 // Los leídos y abandonados se miran por fecha; las pilas, en el orden que uno decide
-const defaultSort = (s: Status): Sort => (s === 'read' || s === 'abandoned' ? 'recent' : 'mine');
+const defaultSort = (s: ShelfId): Sort => (s === 'read' || s === 'abandoned' ? 'recent' : 'mine');
 
 function Shell({
   theme,
@@ -106,14 +115,16 @@ function Shell({
   palette: PaletteControl;
 }) {
   const lib = useLibrary();
-  const { t } = useI18n();
+  const { t, status: statusLabel } = useI18n();
   const books = useAllBooks();
   const size = useWindowSize();
 
-  const [shelf, setShelf] = useState<Status>('to_read');
+  const [shelf, setShelf] = useState<ShelfId>('shelf');
+  // Filtro de la Estantería (que muestra todos los libros)
+  const [filter, setFilter] = useState<Status | 'all'>('all');
   const [direction, setDirection] = useState(0);
   const [view, setView] = useState<View>('covers');
-  const [sorts, setSorts] = useState<Partial<Record<Status, Sort>>>({});
+  const [sorts, setSorts] = useState<Partial<Record<ShelfId, Sort>>>({});
   const [tab, setTab] = useState<Tab>('library');
   const [query, setQuery] = useState('');
   const [nextOpen, setNextOpen] = useState(false);
@@ -203,8 +214,11 @@ function Shell({
   }, [books]);
 
   const counts = useMemo(() => {
-    const c = Object.fromEntries(SHELVES.map((s) => [s, 0])) as Record<Status, number>;
-    for (const b of books ?? []) c[b.status]++;
+    const c = Object.fromEntries(SHELVES.map((s) => [s, 0])) as Record<ShelfId, number>;
+    for (const b of books ?? []) {
+      c.shelf++;
+      if (b.status !== 'to_read') c[b.status]++;
+    }
     return c;
   }, [books]);
 
@@ -212,10 +226,16 @@ function Shell({
   const shown = useMemo(
     () =>
       sortBooks(
-        (books ?? []).filter((b) => b.status === shelf),
+        (books ?? []).filter((b) =>
+          shelf === 'shelf' ? filter === 'all' || b.status === filter : b.status === shelf,
+        ),
         sort,
       ),
-    [books, shelf, sort],
+    [books, shelf, sort, filter],
+  );
+  const upNext = useMemo(
+    () => (books ?? []).filter((b) => b.up_next != null).sort((a, b) => a.up_next! - b.up_next!),
+    [books],
   );
   const found = useMemo(
     () => (books && query.trim() ? sortBooks(searchBooks(books, query), 'title') : []),
@@ -253,7 +273,7 @@ function Shell({
     [progress],
   );
 
-  const goTo = (next: Status) => {
+  const goTo = (next: ShelfId) => {
     if (next === shelf) return;
     setDirection(SHELVES.indexOf(next) > SHELVES.indexOf(shelf) ? 1 : -1);
     setShelf(next);
@@ -307,10 +327,8 @@ function Shell({
   if (!books) return <div className="loading">{t('app.loading')}</div>;
 
   const expanded = size === 'expanded';
-  const libraryContent =
-    books.length === 0 ? (
-      <EmptyLibrary onAdd={() => setAdding(true)} onSample={loadSample} />
-    ) : shown.length === 0 ? (
+  const shelfBody =
+    shown.length === 0 ? (
       <p className="empty-shelf">{t(`empty.${shelf}`)}</p>
     ) : view === 'authors' ? (
       <AuthorList
@@ -330,6 +348,22 @@ function Shell({
         onOpen={onOpen}
       />
     );
+  const libraryContent =
+    books.length === 0 ? (
+      <EmptyLibrary onAdd={() => setAdding(true)} onSample={loadSample} />
+    ) : (
+      <>
+        {shelfBody}
+        {shelf === 'reading' && (
+          <UpNext
+            books={upNext}
+            onOpen={(b) => onOpen(b)}
+            onSuggest={() => setNextOpen(true)}
+            canSuggest={books.some((b) => b.status === 'to_read')}
+          />
+        )}
+      </>
+    );
 
   const screens: Record<Tab, ReactNode> = {
     library: (
@@ -340,11 +374,23 @@ function Shell({
             <span>{t('inbox.banner', { n: pending.length })}</span>
           </button>
         )}
-        {(shelf === 'reading' || shelf === 'to_read') && counts.to_read > 0 && (
-          <button className="next-banner" onClick={() => setNextOpen(true)}>
-            <Sparkles size={16} strokeWidth={1.6} aria-hidden />
-            <span>{t('next.title')}</span>
-          </button>
+        {shelf === 'shelf' && books.length > 0 && (
+          <div className="filter-chips" role="radiogroup" aria-label={t('shelf.filter')}>
+            {(['all', ...STATUS_ORDER] as const).map((f) => (
+              <button
+                key={f}
+                role="radio"
+                aria-checked={filter === f}
+                className={`chip ${filter === f ? 'active' : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {f === 'all' ? t('shelf.all') : statusLabel(f)}
+                <span className="chip-count">
+                  {f === 'all' ? books.length : books.filter((b) => b.status === f).length}
+                </span>
+              </button>
+            ))}
+          </div>
         )}
         {shelf === 'read' && counts.read > 0 && (
           <button className="next-banner" onClick={() => setYearOpen(true)}>
@@ -525,7 +571,7 @@ function Shell({
           <AnimatePresence>
             {adding && (
               <AddBook
-                initialShelf={shelf}
+                initialShelf={shelf === 'shelf' ? (filter === 'all' ? 'to_read' : filter) : shelf}
                 onClose={() => setAdding(false)}
                 toast={showToast}
                 onToInbox={() => {
@@ -536,7 +582,7 @@ function Shell({
                   setAdding(false);
                   showToast(message);
                   setTab('library');
-                  goTo(addedTo);
+                  goTo(shelfFor(addedTo));
                 }}
               />
             )}

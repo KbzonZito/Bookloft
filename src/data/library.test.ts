@@ -196,3 +196,26 @@ describe('updateBook con datos inesperados', () => {
     expect(await lib.listBooks({ query: '_ien' })).toHaveLength(0);
   });
 });
+
+describe('próximos', () => {
+  it('agrega al final, reordena, y sale al empezar a leer', async () => {
+    const lib = await openTestLibrary();
+    const a = (await lib.addBook(candidate('Uno', 'A'))).book;
+    const b = (await lib.addBook(candidate('Dos', 'B'), { status: 'read' })).book;
+    const c = (await lib.addBook(candidate('Tres', 'C'))).book;
+    await lib.setUpNext(a.id, true);
+    await lib.setUpNext(b.id, true); // un leído que vuelvo a querer leer pasa a "por leer"
+    await lib.setUpNext(c.id, true);
+    expect((await lib.listUpNext()).map((x) => x.title)).toEqual(['Uno', 'Dos', 'Tres']);
+    expect((await lib.getBook(b.id))?.status).toBe('to_read');
+
+    await lib.moveUpNext(c.id, -1);
+    expect((await lib.listUpNext()).map((x) => x.title)).toEqual(['Uno', 'Tres', 'Dos']);
+    await lib.moveUpNext(a.id, -1); // el primero no sube más
+    expect((await lib.listUpNext())[0].title).toBe('Uno');
+
+    await lib.updateBook(a.id, { status: 'reading' });
+    await lib.setUpNext(c.id, false);
+    expect((await lib.listUpNext()).map((x) => x.title)).toEqual(['Dos']);
+  });
+});
