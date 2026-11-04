@@ -315,6 +315,9 @@
 }
 
 .series-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 4px 0 10px;
   font-size: var(--t-sm);
   font-weight: 550;
@@ -1815,4 +1818,160 @@ body {
 .palette.active .palette-name {
   color: var(--ink);
   font-weight: 600;
+}
+
+/* ---------- Progreso de sagas ---------- */
+
+.series-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.series-meter.done {
+  color: var(--accent);
+}
+
+.meter {
+  display: flex;
+  width: 44px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.meter > span {
+  background: var(--accent);
+  transition: width 0.4s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.meter > .reading {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.cover-tag {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 2;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.detail-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.detail-progress .series-meter {
+  margin-left: 0;
+}
+
+.detail-progress .meter {
+  width: 72px;
+}
+
+.detail-progress .link-button {
+  align-self: center;
+  margin-top: 0;
+}
+
+/* ---------- ¿Qué leo ahora? ---------- */
+
+.next-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 6px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  transition: transform 0.15s;
+}
+
+.next-banner:active {
+  transform: scale(0.97);
+}
+
+.next-read {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.next-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.next-book {
+  display: flex;
+  gap: 14px;
+  text-align: left;
+}
+
+.next-cover {
+  flex: none;
+  width: 76px;
+}
+
+.next-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.next-title {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
+  line-height: 1.25;
+}
+
+.next-author {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+
+.next-reason {
+  margin-top: 6px;
+  font-size: var(--t-sm);
+  color: var(--accent);
+  line-height: 1.4;
+}
+
+.next-start {
+  align-self: flex-start;
+  margin-left: 90px;
+  gap: 6px;
+  font-size: var(--t-sm);
 }

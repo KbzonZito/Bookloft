@@ -9,6 +9,7 @@ import {
   Rows3,
   Search,
   Settings2,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { AnimatePresence, LayoutGroup, motion, MotionConfig, type PanInfo } from 'motion/react';
@@ -19,8 +20,10 @@ import { haptic, setSystemBars, useBack } from './app/native';
 import { searchBooks, SHELVES, sortBooks, SORTS, type Sort } from './app/shelves';
 import { onShare, usePendingInbox } from './app/inbox';
 import { AddBook } from './components/AddBook';
+import { NextRead } from './components/NextRead';
 import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
+import { ReadingContext, seriesProgress } from './app/reading';
 import { BookGrid } from './components/BookGrid';
 import { Inbox } from './components/Inbox';
 import { NavBar } from './components/NavBar';
@@ -106,6 +109,7 @@ function Shell({
   const [sorts, setSorts] = useState<Partial<Record<Status, Sort>>>({});
   const [tab, setTab] = useState<Tab>('library');
   const [query, setQuery] = useState('');
+  const [nextOpen, setNextOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -196,6 +200,7 @@ function Shell({
   );
 
   const openBook = books?.find((b) => b.id === openId) ?? null;
+  const progress = useMemo(() => seriesProgress(books ?? []), [books]);
   // La portada recibe su layoutId al apoyar el dedo; Motion la mide mientras tanto y al soltar
   // ya puede volar a la ficha. Con teclado no hay "apoyar": se espera a que Motion mida.
   const activeRef = useRef<string | null>(null);
@@ -212,6 +217,18 @@ function Shell({
     [onPrepare],
   );
   const close = useCallback(() => setOpenId(null), []);
+  // Desde la ficha, abrir otro libro (el siguiente de la saga): cambia la ficha sin cerrarla
+  const reading = useMemo(
+    () => ({
+      progress,
+      openBook: (b: Book) => {
+        activeRef.current = b.id;
+        setActiveId(b.id);
+        setOpenId(b.id);
+      },
+    }),
+    [progress],
+  );
 
   const goTo = (next: Status) => {
     if (next === shelf) return;
@@ -275,6 +292,7 @@ function Shell({
     ) : view === 'authors' ? (
       <AuthorList
         books={shown}
+        progress={progress}
         activeId={activeId}
         openId={openId}
         onPrepare={onPrepare}
@@ -297,6 +315,12 @@ function Shell({
           <button className="inbox-banner" onClick={() => setInbox(true)}>
             <InboxIcon size={18} strokeWidth={1.6} aria-hidden />
             <span>{t('inbox.banner', { n: pending.length })}</span>
+          </button>
+        )}
+        {(shelf === 'reading' || shelf === 'to_read') && counts.to_read > 0 && (
+          <button className="next-banner" onClick={() => setNextOpen(true)}>
+            <Sparkles size={16} strokeWidth={1.6} aria-hidden />
+            <span>{t('next.title')}</span>
           </button>
         )}
         {books.length > 0 && (
@@ -374,99 +398,112 @@ function Shell({
   };
 
   return (
-    <LayoutGroup>
-      <div className={`app ${size} ${openBook && expanded ? 'with-detail' : ''}`}>
-        <NavBar
-          tabs={[
-            { id: 'library', icon: LibraryBig, badge: pending.length },
-            { id: 'vault', icon: Archive },
-            { id: 'settings', icon: Settings2 },
-            { id: 'search', icon: Search, featured: true },
-          ]}
-          active={tab}
-          onSelect={go}
-          label={(id) => t(`tab.${id}`)}
-          onAdd={() => setAdding(true)}
-          addLabel={t('app.add')}
-        />
+    <ReadingContext.Provider value={reading}>
+      <LayoutGroup>
+        <div className={`app ${size} ${openBook && expanded ? 'with-detail' : ''}`}>
+          <NavBar
+            tabs={[
+              { id: 'library', icon: LibraryBig, badge: pending.length },
+              { id: 'vault', icon: Archive },
+              { id: 'settings', icon: Settings2 },
+              { id: 'search', icon: Search, featured: true },
+            ]}
+            active={tab}
+            onSelect={go}
+            label={(id) => t(`tab.${id}`)}
+            onAdd={() => setAdding(true)}
+            addLabel={t('app.add')}
+          />
 
-        <div className="screen">
-          <header className="topbar">
-            {tab === 'library' ? (
-              <ShelfTabs active={shelf} counts={counts} onSelect={goTo} />
-            ) : (
-              <h1 className="screen-title">{t(`tab.${tab}`)}</h1>
+          <div className="screen">
+            <header className="topbar">
+              {tab === 'library' ? (
+                <ShelfTabs active={shelf} counts={counts} onSelect={goTo} />
+              ) : (
+                <h1 className="screen-title">{t(`tab.${tab}`)}</h1>
+              )}
+            </header>
+            <main className="main">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={tab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                  transition={spring.sheet}
+                >
+                  {screens[tab]}
+                </motion.div>
+              </AnimatePresence>
+            </main>
+          </div>
+
+          <AnimatePresence>
+            {openBook &&
+              (expanded ? (
+                <BookPanel
+                  key={openBook.id}
+                  book={openBook}
+                  onClose={close}
+                  onDelete={remove}
+                  toast={showToast}
+                />
+              ) : (
+                <BookSheet
+                  key="sheet"
+                  book={openBook}
+                  onClose={close}
+                  onDelete={remove}
+                  toast={showToast}
+                />
+              ))}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {nextOpen && (
+              <NextRead
+                books={books}
+                onClose={() => setNextOpen(false)}
+                onOpenBook={reading.openBook}
+                toast={showToast}
+              />
             )}
-          </header>
-          <main className="main">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={tab}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                transition={spring.sheet}
-              >
-                {screens[tab]}
-              </motion.div>
-            </AnimatePresence>
-          </main>
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {adding && (
+              <AddBook
+                initialShelf={shelf}
+                onClose={() => setAdding(false)}
+                toast={showToast}
+                onToInbox={() => {
+                  setAdding(false);
+                  setInbox(true);
+                }}
+                onAdded={(message, addedTo) => {
+                  setAdding(false);
+                  showToast(message);
+                  setTab('library');
+                  goTo(addedTo);
+                }}
+              />
+            )}
+            {inbox && (
+              <Inbox
+                onClose={() => setInbox(false)}
+                onOpenAi={() => {
+                  setInbox(false);
+                  setAiFocus(true);
+                  setTab('settings');
+                }}
+              />
+            )}
+          </AnimatePresence>
+
+          <Toast toast={toast} onDone={() => setToastState(null)} />
         </div>
-
-        <AnimatePresence>
-          {openBook &&
-            (expanded ? (
-              <BookPanel
-                key={openBook.id}
-                book={openBook}
-                onClose={close}
-                onDelete={remove}
-                toast={showToast}
-              />
-            ) : (
-              <BookSheet
-                key="sheet"
-                book={openBook}
-                onClose={close}
-                onDelete={remove}
-                toast={showToast}
-              />
-            ))}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {adding && (
-            <AddBook
-              initialShelf={shelf}
-              onClose={() => setAdding(false)}
-              toast={showToast}
-              onToInbox={() => {
-                setAdding(false);
-                setInbox(true);
-              }}
-              onAdded={(message, addedTo) => {
-                setAdding(false);
-                showToast(message);
-                setTab('library');
-                goTo(addedTo);
-              }}
-            />
-          )}
-          {inbox && (
-            <Inbox
-              onClose={() => setInbox(false)}
-              onOpenAi={() => {
-                setInbox(false);
-                setAiFocus(true);
-                setTab('settings');
-              }}
-            />
-          )}
-        </AnimatePresence>
-
-        <Toast toast={toast} onDone={() => setToastState(null)} />
-      </div>
-    </LayoutGroup>
+      </LayoutGroup>
+    </ReadingContext.Provider>
   );
 }
 

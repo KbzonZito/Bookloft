@@ -215,3 +215,70 @@ export async function inferSeries(
   }
   return out;
 }
+
+// ---------- ¿Qué leo ahora? ----------
+
+export interface NextPick {
+  id: string;
+  reason: string;
+}
+
+const NEXT_SCHEMA = {
+  type: 'object',
+  properties: {
+    picks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'string' }, reason: { type: 'string' } },
+        required: ['id', 'reason'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['picks'],
+  additionalProperties: false,
+};
+
+/**
+ * Pide a Claude 3 libros para leer ahora, entre los candidatos que ya ordenó la app, mirando lo
+ * que la persona leyó hace poco (y cómo lo calificó) y lo que está leyendo.
+ */
+export async function suggestWithAi(
+  apiKey: string,
+  input: {
+    lang: 'es' | 'en';
+    candidates: { id: string; line: string }[];
+    recent: string[];
+    reading: string[];
+  },
+): Promise<NextPick[]> {
+  const system = `Eres un librero que conoce a esta persona por lo que ha leído. Elige exactamente 3 libros de la lista de candidatos para que lea ahora.
+- Considera lo que leyó hace poco y su calificación (1–5), lo que está leyendo, y las pistas de cada candidato (saga en curso, prioridad, páginas).
+- Varía: no elijas 3 del mismo autor ni del mismo género si hay alternativas razonables.
+- Para cada uno, una razón breve y personal (máximo 20 palabras), en ${input.lang === 'es' ? 'español' : 'English'}, sin repetir el título.
+- Usa solo ids de la lista de candidatos.`;
+  const content = [
+    `Leídos hace poco (más reciente primero):\n${input.recent.join('\n') || '(nada todavía)'}`,
+    `Leyendo ahora:\n${input.reading.join('\n') || '(nada)'}`,
+    `Candidatos (id | libro | pistas):\n${input.candidates.map((c) => `${c.id} | ${c.line}`).join('\n')}`,
+  ].join('\n\n');
+  try {
+    const response = await (
+      await client(apiKey)
+    ).messages.create({
+      model: AI_MODEL,
+      max_tokens: 1500,
+      system,
+      messages: [{ role: 'user', content }],
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: NEXT_SCHEMA } },
+    });
+    const text = response.content.find((b) => b.type === 'text');
+    if (!text || text.type !== 'text') return [];
+    const ids = new Set(input.candidates.map((c) => c.id));
+    const { picks } = JSON.parse(text.text) as { picks: NextPick[] };
+    return picks.filter((p) => ids.has(p.id)).slice(0, 3);
+  } catch (error) {
+    throw toAiError(error);
+  }
+}

@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- ¿Qué leo ahora?: tres propuestas al tiro (el siguiente de tus sagas empezadas, lo imprescindible, autores que te gustaron, lecturas cortas), cada una con su razón y un botón para empezarla. Con la IA conectada, Claude puede elegir según lo que has leído y cómo lo calificaste.
+- Progreso de sagas: en la vista por autor cada saga muestra cuántos llevas leídos y marca el libro que sigue; en la ficha, el progreso y un atajo al siguiente.
+
 ## [0.5.0] - 2026-11-04
 
 - Colores: cinco paletas (Biblioteca, Té con leche, Bosque, Crepúsculo, Niebla) y "Dispositivo", que toma los colores de tu fondo de pantalla (Android 12+). Todas con versión de día y de noche; las barras del sistema siguen a la paleta.

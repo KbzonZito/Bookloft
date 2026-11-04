@@ -10,7 +10,9 @@ import { STATUSES, type Book, type BookPatch } from '../data';
 import { useI18n } from '../i18n';
 import { fade, spring } from '../ui/motion';
 import { Rating, Segmented } from './Controls';
+import { progressFor, useReading } from '../app/reading';
 import { ensureDetails } from '../sources/details';
+import { SeriesMeter } from './AuthorList';
 import { CoverPicker, EditBook } from './BookEdit';
 import { Cover, useCoverColor } from './Cover';
 import { Sheet } from './Sheet';
@@ -59,6 +61,8 @@ function useTint(book: Book): CSSProperties {
 
 function Head({ book }: { book: Book }) {
   const { t } = useI18n();
+  const { progress: all, openBook } = useReading();
+  const progress = progressFor(all, book);
   return (
     <div className="detail-head">
       {/* Si el libro ya no está en la pantalla de atrás (cambió de estante), la portada no tiene a
@@ -86,6 +90,16 @@ function Head({ book }: { book: Book }) {
               ? t('book.series', { n: book.series_index, series: book.series })
               : t('book.seriesNoIndex', { series: book.series })}
           </p>
+        )}
+        {progress && progress.total > 1 && (
+          <div className="detail-progress">
+            <SeriesMeter progress={progress} />
+            {progress.next && progress.next.id !== book.id && (
+              <button className="link-button" onClick={() => openBook(progress.next!)}>
+                {t('series.next', { title: progress.next.title })}
+              </button>
+            )}
+          </div>
         )}
       </motion.div>
     </div>

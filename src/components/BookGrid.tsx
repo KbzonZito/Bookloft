@@ -42,12 +42,15 @@ export const BookCell = memo(function BookCell({
   book,
   flight,
   showStatus,
+  tag,
   onPrepare,
   onOpen,
 }: {
   book: Book;
   flight: CoverFlight;
   showStatus: boolean;
+  /** Etiqueta chica sobre la portada (por ejemplo, "Sigue" en una saga) */
+  tag?: string;
   onPrepare: (b: Book) => void;
   onOpen: (b: Book) => void;
 }) {
@@ -70,6 +73,7 @@ export const BookCell = memo(function BookCell({
         ) : (
           <Cover book={book} />
         )}
+        {tag && <span className="cover-tag">{tag}</span>}
         {book.priority > 0 && (
           <span className="priority-mark" aria-hidden>
             {book.priority === 2 ? '••' : '•'}

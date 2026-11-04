@@ -16,6 +16,7 @@ const DYNAMIC = [
   'vault.',
   'lang.',
   'palette.',
+  'next.',
 ];
 
 function sources(dir: string): string[] {
