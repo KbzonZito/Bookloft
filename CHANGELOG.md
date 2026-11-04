@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Las novedades después de actualizar aparecen en el idioma de la app (antes salían siempre en español).
+
 ## [0.8.0] - 2026-11-04
 
 - Estantes nuevos: Leyendo · Estantería · Leídos · Sin terminar. La Estantería tiene todos tus libros, con filtro por estado.
@@ -9,7 +11,6 @@
 - La ficha tiene dos pestañas: Mis notas (estado, calificación, páginas leídas, fechas de inicio y término, nota, prioridad, etiquetas) e Información (lo que dice Open Library: nota promedio y votos, géneros, editorial, idiomas, ediciones y de qué trata).
 - Mantén presionado un libro para las acciones rápidas: empezar, marcar leído, Próximos, cambiar portada, compartir, calificar, mover o quitar.
 - Descubrir (nueva pestaña): más libros de tus autores favoritos y de los géneros que lees, los más vendidos de Apple Books en tu país (por categoría) y las tendencias de la semana. Toca uno para ver de qué trata y agregarlo.
-
 - Al cerrar la ficha de un libro arrastrándola, ahora sigue hacia abajo (antes rebotaba hacia arriba mientras desaparecía), y el libro que tocas justo después siempre se abre (antes a veces el toque se perdía).
 - La ficha se cierra con una flecha atrás, arriba a la izquierda.
 - Vibración: se puede apagar en Ajustes.
@@ -20,11 +21,9 @@
 ## [0.7.0] - 2026-11-04
 
 - Importar desde CSV: las exportaciones de Goodreads y StoryGraph (con saga, calificación, nota, páginas y fecha en que lo terminaste) o cualquier planilla con una columna de título. Sin duplicar.
-
 - Exportar a Obsidian (Ajustes → Organizar): una nota .md con tus libros por autor y saga, con estado, calificación, prioridad, notas y etiquetas como #tags. Se puede volver a importar sin perder nada ni duplicar.
 - Tu año en libros (en Leídos): libros terminados, páginas, nota promedio, mes a mes, autores, los mejor calificados y sagas terminadas. Se comparte como imagen tipo historia.
 - En "Editar datos" de un libro leído se puede poner la fecha en que lo terminaste (útil para los importados, que no la traen).
-
 - Ajustes → Apoyar la app: link para invitar un café en Ko-fi (solo en la versión de GitHub; Google Play no permite links de donación).
 - La barra de títulos de arriba ahora es opaca: el texto ya no se ve detrás del título al desplazarse.
 

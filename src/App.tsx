@@ -36,8 +36,9 @@ import { Discover } from './components/Discover';
 import { QuickActions } from './components/QuickActions';
 import { YearReview } from './components/YearReview';
 import { WhatsNew } from './components/WhatsNew';
-import { changesSince, type ChangelogSection } from './app/whats-new';
-import changelog from '../CHANGELOG.md?raw';
+import { changesSince } from './app/whats-new';
+import changelogEs from '../CHANGELOG.md?raw';
+import changelogEn from '../CHANGELOG.en.md?raw';
 import { AuthorList } from './components/AuthorList';
 import { BookPanel, BookSheet } from './components/BookDetail';
 import { ReadingContext, seriesProgress } from './app/reading';
@@ -118,7 +119,7 @@ function Shell({
   palette: PaletteControl;
 }) {
   const lib = useLibrary();
-  const { t, status: statusLabel } = useI18n();
+  const { t, lang: appLang, status: statusLabel } = useI18n();
   const books = useAllBooks();
   const size = useWindowSize();
 
@@ -133,7 +134,8 @@ function Shell({
   const [nextOpen, setNextOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
   const [quickId, setQuickId] = useState<string | null>(null);
-  const [news, setNews] = useState<ChangelogSection[] | null>(null);
+  // Desde qué versión mostrar novedades (undefined: no hay nada que mostrar)
+  const [newsSince, setNewsSince] = useState<string | null | undefined>(undefined);
   const [openId, setOpenId] = useState<string | null>(null);
   // La última portada abierta: la única con layoutId en la cuadrícula
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -203,8 +205,9 @@ function Shell({
     void (async () => {
       const seen = await lib.getSetting<string | null>('last_seen_version', null);
       if (seen === __APP_VERSION__) return;
-      const sections = books.length ? changesSince(changelog, seen, __APP_VERSION__) : [];
-      if (sections.length) setNews(sections);
+      // Las dos versiones del CHANGELOG tienen las mismas secciones: basta con mirar una
+      const sections = books.length ? changesSince(changelogEs, seen, __APP_VERSION__) : [];
+      if (sections.length) setNewsSince(seen);
       else await lib.setSetting('last_seen_version', __APP_VERSION__);
     })();
   }, [books]);
@@ -554,11 +557,16 @@ function Shell({
           </AnimatePresence>
 
           <AnimatePresence>
-            {news && (
+            {newsSince !== undefined && (
               <WhatsNew
-                sections={news}
+                // En el idioma de la app (y si se cambia con la hoja abierta, cambia con ella)
+                sections={changesSince(
+                  appLang === 'en' ? changelogEn : changelogEs,
+                  newsSince,
+                  __APP_VERSION__,
+                )}
                 onClose={() => {
-                  setNews(null);
+                  setNewsSince(undefined);
                   void lib.setSetting('last_seen_version', __APP_VERSION__);
                 }}
               />

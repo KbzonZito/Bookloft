@@ -36,3 +36,13 @@ describe('novedades', () => {
     expect(compareVersions('0.10.0', '0.9.1')).toBeGreaterThan(0);
   });
 });
+
+describe('novedades en dos idiomas', () => {
+  it('el CHANGELOG en español y en inglés tienen las mismas versiones y viñetas', async () => {
+    const { readFileSync } = await import('node:fs');
+    const es = parseChangelog(readFileSync('CHANGELOG.md', 'utf8'));
+    const en = parseChangelog(readFileSync('CHANGELOG.en.md', 'utf8'));
+    expect(en.map((s) => s.version)).toEqual(es.map((s) => s.version));
+    expect(en.map((s) => s.items.length)).toEqual(es.map((s) => s.items.length));
+  });
+});

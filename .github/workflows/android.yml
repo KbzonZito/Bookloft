@@ -93,9 +93,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          awk -v v="$VERSION" '
-            /^## / { p = index($0, "[" v "]") > 0; next }
-            p
-          ' CHANGELOG.md > notes.md
+          section() {
+            awk -v v="$VERSION" '
+              /^## / { p = index($0, "[" v "]") > 0; next }
+              p
+            ' "$1"
+          }
+          # Español primero y después inglés, como en la app
+          { section CHANGELOG.md; printf '\n---\n\n**English**\n'; section CHANGELOG.en.md; } > notes.md
           gh release create "$GITHUB_REF_NAME" "biblioteca-$VERSION.apk" \
             --title "Biblioteca $VERSION" --notes-file notes.md --latest

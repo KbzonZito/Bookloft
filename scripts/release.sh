@@ -15,15 +15,23 @@ git rev-parse "v$VERSION" >/dev/null 2>&1 && { echo "La versión v$VERSION ya ex
 # La sección [Unreleased] pasa a ser la nota de esta versión
 NOTES=$(awk '/^## \[Unreleased\]/{p=1; next} /^## /{p=0} p' CHANGELOG.md | grep -v '^\s*$' || true)
 [ -n "$NOTES" ] || { echo "CHANGELOG.md no tiene nada en [Unreleased]" >&2; exit 1; }
+# La app muestra las novedades en su idioma: el CHANGELOG en inglés tiene que ir a la par
+NOTES_EN=$(awk '/^## \[Unreleased\]/{p=1; next} /^## /{p=0} p' CHANGELOG.en.md | grep -v '^\s*$' || true)
+[ "$(printf '%s\n' "$NOTES" | grep -c '^- ')" = "$(printf '%s\n' "$NOTES_EN" | grep -c '^- ')" ] || {
+  echo "CHANGELOG.en.md no tiene las mismas novedades que CHANGELOG.md en [Unreleased]" >&2
+  exit 1
+}
 
 npm version "$VERSION" --no-git-tag-version --allow-same-version >/dev/null
 TODAY=$(date +%Y-%m-%d)
-awk -v v="$VERSION" -v d="$TODAY" '
-  /^## \[Unreleased\]/ { print; print ""; print "## [" v "] - " d; next }
-  { print }
-' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+for f in CHANGELOG.md CHANGELOG.en.md; do
+  awk -v v="$VERSION" -v d="$TODAY" '
+    /^## \[Unreleased\]/ { print; print ""; print "## [" v "] - " d; next }
+    { print }
+  ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+done
 
-git add package.json package-lock.json CHANGELOG.md
+git add package.json package-lock.json CHANGELOG.md CHANGELOG.en.md
 git commit -m "Release v$VERSION"
 git tag -a "v$VERSION" -m "Biblioteca $VERSION"
 git push origin main "v$VERSION"
